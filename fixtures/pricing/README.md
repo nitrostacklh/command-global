@@ -1,12 +1,32 @@
 # Project 01 — Pricing
 
-> **This is the one project the submission executes completely** (`../../MENTOR-CONCEPT.md` §8).
-> All four layers run against these files. If something in the loop doesn't work
+> **This is the project the submission executes completely** (`../../MENTOR-CONCEPT.md` §8).
+> Every stage of the loop runs against these files. If something in the loop doesn't work
 > here, it doesn't work.
+>
+> [`../safety-gear/`](../safety-gear/README.md) is the second instance, and it exists to
+> prove the loop is not *about pricing* — different component count, different bug shape,
+> better provenance.
 
 ---
 
-## Layer 1 — Your role
+## Stage ① + ② — Your role → [`brief.backend.json`](brief.backend.json)
+
+> **This section used to be the gap.** Everything below was prose a human read, and no
+> code could act on it — so nothing could check whether what a student drew was actually
+> their job. It is now backed by `mentor.brief/v1`, which `check_scope` compares against
+> the Lumina canvas. See `../../GAPS.md` Gap 12.
+
+| | components |
+|---|---|
+| **You own** | `validate`, `discount`, `tax`, `total` |
+| **Given to you** | `cart API` (frontend), `payment gateway` (payments) |
+| **Not yours** | `receipt` |
+
+Draw the receipt and `check_scope` reports it `out_of_scope` — in a company you would not
+have built it. The other demo project, [`../safety-gear/`](../safety-gear/README.md), runs
+the same loop with three owned components and a different bug, which is how we know none of
+this is hardcoded to pricing.
 
 **You are the backend engineer who owns pricing.**
 
@@ -47,15 +67,19 @@ MENTOR exists to close.
 
 ---
 
-## Layer 2 — The lesson
+## Layer 2 — The lesson (stage still unbuilt)
 
-⬜ **Not built.** Panels teaching order-of-operations in money math (why tax on
-the discounted amount, not the sticker price). See `../../GAPS.md` Gap 6 — this is
-roadmap, not submission scope.
+⬜ **Not built, and now the only stage of the loop that isn't** — `../../GAPS.md` Gap 13.
+
+Panels teaching order-of-operations in money math (why tax on the discounted amount, not
+the sticker price). The concept itself *is* authored — question, answer and what it
+transfers to, in [`brief.backend.json`](brief.backend.json) — and it is released as a
+flashcard once the student's tests go green. What's missing is the middle: the part that
+would teach it to a student who doesn't already know it.
 
 ---
 
-## Layer 3 — The plan → [`plan.lumina.json`](plan.lumina.json)
+## Stage ③ — The plan → [`plan.lumina.json`](plan.lumina.json)
 
 What the student drew in Lumina before writing any code:
 
@@ -84,7 +108,7 @@ To regenerate it from a live canvas: open Lumina, draw the four components, clic
 
 ---
 
-## Layer 4 — The build → [`build.history.json`](build.history.json)
+## Stage ④ + ⑤ — The build → [`build.history.json`](build.history.json)
 
 What actually happened, in order:
 
@@ -115,9 +139,15 @@ exactly the numbers above, and `mentor.test.ts` asserts them — `cd ../../senti
 MENTOR run must reproduce. `drift.test.ts` asserts every field of it, so the demo is
 regression-tested rather than eyeballed.
 
-Its `provenance: "authored"` is why confidence is **0.91** and not 0.97: MENTOR discounts a
-hand-written history against a git-derived one. The demo's weakest link is priced into the
-number it shows the student, rather than hidden in a footnote.
+Its `provenance: "authored"` is why confidence is **0.91**: MENTOR discounts a hand-written
+history, because a timeline nobody observed is a claim about the past. The demo's weakest
+link is priced into the number it shows the student, rather than hidden in a footnote.
+
+**A student does not have to author one.** `record_progress` accumulates a checkpoint log as
+the work happens, and that log *is* a `mentor.build/v1` — `provenance: "observed"`, scored
+0.8 instead of 0.4. `../safety-gear/build.history.json` is one, and it scores **0.97**. This
+file stays `authored` because it is the fixture the whole test suite asserts against, and
+because having both on the same formula is the clearest way to show the score is real.
 
 ---
 

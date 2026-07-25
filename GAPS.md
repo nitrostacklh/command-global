@@ -9,7 +9,7 @@
 
 ## The one-paragraph summary
 
-**MENTOR is built** (Gap 3) **and so is its widget** (Gap 4). 67/67 tests green, verified
+**MENTOR is built** (Gap 3) **and so is its widget** (Gap 4). 107/107 tests green, verified
 end-to-end over real MCP: `explain_drift` returns the exact claim the concept doc promises —
 origin `pricing.js:12`, error surfaced at `pricing.test.js:40`, confidence 0.91 computed
 rather than hardcoded — and the causal-timeline widget renders it with the fix withheld and
@@ -22,27 +22,43 @@ found and fixed the same day — was the most dangerous of the lot: the deployed
 exposing 23 tools, 20 of which belonged to a different product and one of which offered to
 *autonomously patch the very bug MENTOR refuses to patch.*
 
+**Gap 12 — the bridges — was the real gap, and it is now closed.** The four layers each
+worked, and the *handoffs between them did not exist in code*: role-scoping was a paragraph
+in a README that nothing could read, nothing turned a design into a work plan, nothing
+produced a build history except a human writing one, and there was no artifact at the end of
+the loop at all. Four of the five handoffs are new; the fifth is no longer hand-authored.
+Every one is a versioned JSON document with tests, and `npm run probe` now walks all six
+stages over real MCP.
+
+That also settles **Gap 5**: a tracked checkpoint log *is* a build history, so pricing's 0.91
+is the floor rather than the ceiling — `safety-gear` scores **0.97** on evidence that was
+actually observed rather than remembered.
+
 What's left is no longer engineering. It is: **deploy it** (a solved procedure — Gap 1),
 **run the n=5 study** (Gap 7, the cheapest unclaimed points in a Research track), and
-**name the product** (Gap 8 — it is still `[[PRODUCT NAME]]`).
+**name the product** (Gap 8 — still `[[PRODUCT NAME]]`). Plus one genuine hole: **Layer 2,
+the lesson panels, is now the only stage of the loop with nothing behind it** (Gap 13).
 
 | # | Gap | Severity | Who unblocks it |
 |---|---|---|---|
 | 1 | Deploy to NitroCloud + connect a client | 🟠 **do this next** | you, ~30 min |
+| 13 | Layer 2 (lesson panels) is the only unbuilt stage | 🟡 the loop's one visible hole | scope decision |
 | 7 | Evidence study (n=5) not run | 🟡 free points, Research track | ~2h with classmates |
 | 8 | Open `[[placeholders]]` incl. product name | 🟡 submission hygiene | you |
-| 5 | Build history is authored, not derived | 🟡 fine for the demo, by design | scope decision |
 | 9 | Six official tracks never confirmed | 🟡 submission hygiene | organizers |
+| 14 | Only 2 of 5 catalog roles are playable | 🟢 honest, and reported as such | ~1h per brief |
 | 10 | Lumina hygiene (uncommitted work, no CI) | 🟢 low | ~1h |
+| 12 | ~~The bridges between the layers~~ | ✅ **closed** — 5 versioned artifacts | done |
+| 5 | ~~Build history is authored, not derived~~ | ✅ **resolved** — `provenance: observed` | done |
 | 2 | ~~Lumina can't express a software architecture~~ | ✅ **closed** — `component` node | done |
 | 6 | ~~Plan can't reach a deployed MENTOR~~ | ✅ **resolved** — tool argument | done |
 | 3 | ~~MENTOR doesn't exist~~ | ✅ **built** | done |
 | 4 | ~~`causal-timeline` widget~~ | ✅ **built** | done |
-| 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 tools → 3 | done |
+| 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 → 3, now 10 on one story | done |
 
-*Reordered 2026-07-25 (three times): after the Studio handbook downgraded Gap 1, after
-MENTOR shipped, and after Gaps 2 and 11 closed. **Gap 1 is now the critical path** — the
-code exists and isn't live yet.*
+*Reordered 2026-07-25 (four times): after the Studio handbook downgraded Gap 1, after MENTOR
+shipped, after Gaps 2 and 11 closed, and after Gap 12 closed the bridges. **Gap 1 is still
+the critical path** — the code exists and isn't live yet.*
 
 ---
 
@@ -78,7 +94,7 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 
 - **`sentinel/` calls no LLM at all.** Verified: zero LLM references in its own source, zero
   outbound HTTP, four dependencies (`@nitrostack/core`, `@modelcontextprotocol/ext-apps`,
-  `dotenv`, `zod`), and 67/67 tests pass with no key and no network. In MCP the *client* model
+  `dotenv`, `zod`), and 107/107 tests pass with no key and no network. In MCP the *client* model
   is the agent (`ARCHITECTURE.md` §2, Idea 2), and MENTOR needs one least of all six
   commanders — drift detection is an ordering comparison, the confidence is a formula, the
   refusal is hardcoded. **There is nothing to generate.**
@@ -98,7 +114,7 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 per-student cost.* Schools cannot buy Copilot seats for every student, and that argument
 lands with an education judge while reinforcing the §5 incentive moat.
 
-> **Verified:** `sentinel/` builds and passes 67/67 from its new path, and
+> **Verified:** `sentinel/` builds and passes 107/107 from its new path, and
 > `npx tsx src/index.ts` — Studio's actual launch command — serves `initialize` +
 > `tools/list` over stdio with every tool registered. Also fixed along the way: **`tsx`
 > was not a declared dependency**, so Studio's launch relied on `npx` fetching it and
@@ -139,7 +155,7 @@ what a wired canvas produces.
 **MENTOR's finding did not change** — origin still `tax @ build/pricing.js:12`,
 confidence still **0.91**, failure still `pricing.test.js:40`. That was the prediction
 when this gap was opened ("switching to A requires no change to the plan artifact"), and
-it held: 67/67 tests pass untouched, and `fixture:check` confirms the embedded copies
+it held: 107/107 tests pass untouched, and `fixture:check` confirms the embedded copies
 still match disk.
 
 <details>
@@ -423,11 +439,12 @@ fifteen platform tool names finds none of them.
 
 | Check | Result |
 |---|---|
-| `cd sentinel && npm test` | ✅ **67/67 pass** (32 platform + 33 MENTOR) |
+| `cd sentinel && npm test` | ✅ **107/107 pass** (32 platform + 33 MENTOR) |
 | `explain_drift` over real MCP (`node dist/index.js`, stdio) | ✅ origin `tax @ build/pricing.js:12`, planned 3rd / built 2nd |
 | … its confidence | ✅ **0.91**, computed from 5 signals; engine gate **0.964 autonomous** |
 | … its refusal | ✅ `fix_withheld: true` + a follow-up question, not a patch |
-| `tools/list` | ✅ **exactly 3 tools** — `explain_drift`, `withhold_fix`, `mentor_status` (Gap 11) |
+| `tools/list` | ✅ **10 tools, all one loop** — was 3 after Gap 11; +7 for the bridges (Gap 12) |
+| `npm run probe` — all six stages over real MCP | ✅ every bridge green, refusal check still `none` |
 | `npx tsx src/index.ts` — Studio's real launch command | ✅ serves the full tool list over stdio |
 | Studio project validity | ✅ `sentinel/` valid · monorepo root correctly **invalid** |
 | `sentinel/` zipped for the upload path | ✅ **0.21 MB** vs the 100 MB limit |
@@ -452,3 +469,114 @@ field (needs the account — and it no longer matters much, see Gap 1), and anyt
 requires actually deploying. A screenshot of the widget was not possible in this
 environment; it was verified through the DOM and the SDK call instead, which is stronger
 evidence than a picture but does not prove it looks *good*. **Put eyes on it in Studio.**
+
+---
+
+## Gap 12 — ~~The bridges between the layers did not exist~~ ✅ **CLOSED** (2026-07-25)
+
+**The complaint that opened this:** *"The four layers are done but the bridge between them
+is not clearly implemented."* That was correct, and it was the most important thing wrong
+with the project. Each layer worked. Almost nothing carried a student from one to the next.
+
+### What was actually missing
+
+| Handoff | Before | Now |
+|---|---|---|
+| ① path → project | ✗ nothing. No catalog existed. | `mentor.catalog/v1` — product type → project → role |
+| ② project → role slice | ⚠ **a paragraph in a README** | `mentor.brief/v1` — `owns` / `given` / acceptance / concept |
+| ② → ③ is the design right? | ✗ nothing checked it | `check_scope` — a second, independent kind of drift |
+| ③ design → work plan | ✗ nothing | `checkpoints`, derived from the student's *own* plan order |
+| ④ build → history | ⚠ **a human wrote it by hand** | `record_progress` → `provenance: observed` |
+| ⑤ drift → takeaway | ✗ nothing. The loop just ended. | `mentor.card/v1`, gated on real test output |
+
+The one that mattered most is row 2. `fixtures/pricing/README.md` has always said *"You are
+the backend engineer who owns pricing"* — but that is markdown a human reads. No code could
+act on it, so nothing could check whether what a student drew was actually their job.
+Role-scoping was a claim about the product rather than a property of it.
+
+### Two things that fell out of the design rather than being added
+
+**Scope drift is a genuinely different failure from order drift.** `explain_drift` catches
+building *your* components in the wrong sequence. `check_scope` catches designing the wrong
+*set* of them. In a company the second is the more expensive, because nobody notices until
+integration — and it was invisible to this product until the brief became machine-readable.
+
+**Checkpoints retired Gap 5 as a side effect.** The tracker's visible job is ticking boxes.
+Its real job is that the log it accumulates *is* a `mentor.build/v1`, so the demo's weakest
+link — a hand-authored timeline nobody observed — goes away for any student who tracked
+their work. `safety-gear` scores **0.97** where pricing scores 0.91, on the same formula.
+The number went up because the evidence improved.
+
+### The two places this could have betrayed the thesis, and what stops it
+
+1. **The flashcard could have become the fix.** A card whose back reads *"compute tax after
+   the discount"* **is** the patch wearing a lesson's clothes, and a client model pressed for
+   the answer would call `flashcard` instead of `explain_drift` and read it out. Two
+   defences, both structural rather than advisory: the answer is gated on the student's real
+   test output (`readTestOutcome`, and unrecognised output is **not** treated as passing),
+   and while unearned **the `back` field is absent from the payload entirely** rather than
+   present with an `earned: false` flag. A field a model can read is a field it will read
+   out, however it is labelled. `learn.test.ts` asserts the answer string appears nowhere in
+   the serialized response.
+2. **The tool surface went back up.** 3 → 10, which is the exact direction Gap 11 warned
+   about. The test each new tool had to pass was not *is it useful* but *is it the same
+   story*, and the surface is grouped into three agents that are three stages of one loop
+   (ROSTER → COACH → MENTOR) so the shape is legible from `tools/list` alone. The refusal
+   check in `npm run probe` still reports **no tool that can modify a student's build.**
+
+> **Verified:** 107/107 tests (was 67). `npm run probe` walks all six stages over real MCP
+> against `safety-gear` and prints each artifact. `npm run fixture:check` now also asserts
+> the generated `fixtures.learn.ts` matches `fixtures/*.json`.
+>
+> **One self-correction worth recording:** the `safety-gear` fixture's own `expectedDrift`
+> asserted `plannedPosition: 4`, and the code said 3. The code was right — positions are
+> counted over components present in *both* artifacts, and `camera feed` is a boundary this
+> role correctly never implements. The fixture assertion was wrong and the test caught it,
+> which is the entire reason `expectedDrift` blocks exist.
+
+---
+
+## Gap 13 — Layer 2, the lesson panels, is the only unbuilt stage 🟡
+
+Every other stage of the loop now has code and tests behind it. This one has a `concept`
+block in each brief — a question, an answer, and what it transfers to — and **nothing that
+teaches it.** The concept is declared before the student starts and released as a flashcard
+at the end; the middle, where a student who *doesn't already know it* would learn it, is
+missing.
+
+That is a real hole and it is now the visible one. It is also the least dangerous kind:
+the loop is coherent without it for a student who can already read the brief and reason,
+which is exactly the audience a hackathon demo has.
+
+**The constraint on building it** (from `MENTOR-CONCEPT.md` §3): panels must be
+*deterministic, not generated*. A generative image model would make the lesson different
+every run, and a lesson you cannot re-read is not a lesson. The reference the user supplied
+(`S0L009/COMIC-IFY_OneAPI`) is worth borrowing the **pedagogy** from — its three depth tiers,
+*Get Your Feet Wet / Splash and Submerge / Deep Dive* — and not the architecture, which is
+Streamlit plus a generative model.
+
+**Cheapest honest version:** the concept's question, a worked wrong answer, and the
+discriminating case — three static panels per project, sharing the `Panel` component the
+`causal-timeline` widget already has. Build it only if the deploy is already green.
+
+---
+
+## Gap 14 — Only 2 of the catalog's 5 roles are playable 🟢
+
+`fixtures/catalog.json` advertises 3 domains, 3 projects and 5 roles. Two roles have briefs:
+`pricing/backend` and `safety-gear/cv`. The other three (`pricing/frontend`,
+`safety-gear/platform`, `event-ingest/data`) are listed with `briefed: false`.
+
+**This is deliberate and it is reported rather than hidden.** `browse_catalog` says
+*"2 of 5 roles have a brief written and are playable today"* in its first response, before a
+student invests a click, and `open_brief` on an unbriefed role returns the playable list
+instead of an empty screen. `learn.test.ts` asserts the `briefed` flag matches whether a
+brief actually exists in both directions, so the catalog cannot lie by drifting.
+
+They are listed because **seeing the rest of the team is the point of role-scoping.** A
+student who owns pricing should be able to see that a frontend engineer owns the cart they
+are handed — that is what makes `given` mean something. Removing the unplayable roles would
+make the catalog honest in a way that was less useful.
+
+Each additional brief is roughly an hour: `owns`, `given`, three acceptance criteria, and a
+concept whose answer is a principle rather than code (`assertNoFix` enforces the last part).

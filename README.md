@@ -5,19 +5,65 @@
 > Copilot finishes your code. This one makes you finish it — it shows you the exact
 > moment your build stopped matching your plan, and then it stops.
 
-**The submission is this whole repository — a four-layer learning loop, not a single tool.**
-A student is given a role, learns the concept, **designs the architecture in Lumina**, builds
-it, and when it breaks **MENTOR shows them the exact decision that broke it — and refuses to
-write the fix.** Take any layer away and the pitch collapses: without the design canvas there
-is no record of what the student *intended*, and without that, MENTOR is just another AI
-explaining a stack trace. The loop is the product.
+**The submission is this whole repository — a learning loop, not a single tool.**
+A student picks a real project and **a role on it**, gets the slice of it they would
+actually own in a company, **designs that slice in Lumina**, builds it against
+checkpoints derived from their own design, and when it breaks **MENTOR shows them the
+exact decision that broke it — and refuses to write the fix.** Take any stage away and
+the pitch collapses: without the brief there is no scope to be held to, without the
+canvas there is no record of what they *intended*, and without that, MENTOR is just
+another AI explaining a stack trace. The loop is the product.
 
-| Layer | Lives in | Does |
+### The loop, and the artifact that carries each step
+
+Every stage hands the next one a **plain-JSON file with a versioned schema**. That is
+the whole architecture — no shared types, no RPC, no database. Each arrow below is a
+file you can print.
+
+```
+①  browse_catalog     pick a product type, then a project
+       │  mentor.catalog/v1
+②  open_brief         your role's slice: what you OWN, what you're GIVEN
+       │  mentor.brief/v1
+③  Lumina ▸ Plan      draw the components you own, in the order you'll build them
+       │  lumina.plan/v1
+④  checkpoints        derived from YOUR design · record_progress · is_it_done
+       │  mentor.build/v1        ← provenance: observed
+⑤  explain_drift      where your build left your plan — then it refuses to fix it
+       │  mentor.card/v1
+⑥  flashcard          the concept, released only once YOU made the tests pass
+```
+
+| Stage | Lives in | Does |
 |---|---|---|
-| 1 · Role | `fixtures/pricing/` | the brief, the deliverables, and a failure planted on purpose |
+| **① Path · ② Role** | **`sentinel/src/modules/learn/`** — ROSTER | a curated catalog of exemplary projects, then the **role-scoped brief**: the components you own, the ones another role hands you, and the ones that are explicitly not your job |
 | 2 · Lesson | *roadmap* | the concept as interactive panels, not documentation |
-| **3 · Design** | **`lumina/`** | the student draws components + data flow, then exports `lumina.plan/v1` — **the machine-readable record of intent, and the thing no comparable tool has** |
-| **4 · Drift** | **`sentinel/`** | MENTOR diffs intent against what was built, names the origin, states its confidence, and stops |
+| **③ Design** | **`lumina/`** | the student draws components + data flow, then exports `lumina.plan/v1` — **the machine-readable record of intent, and the thing no comparable tool has** |
+| **④ Checkpoints** | **`sentinel/src/modules/learn/`** — COACH | checks the design covers your slice, derives checkpoints **from your own plan**, records what you finish, and judges done-ness |
+| **⑤ Drift · ⑥ Card** | **`sentinel/src/modules/mentor/`** — MENTOR | names the origin, states its confidence, stops — then issues the concept as a flashcard, once you fixed it yourself |
+
+**Two kinds of drift, not one.** `check_scope` catches designing the *wrong set* of
+components — someone else's job, or missing your own. `explain_drift` catches building
+*your* components in the wrong order. Independent failures needing different
+conversations, and in a company the first is the more expensive, because nobody
+notices until integration.
+
+**Checkpoints retire the demo's weakest link.** A tracked checkpoint log *is* a
+`mentor.build/v1`, so a student who tracked their work never authors a history. That
+history is `provenance: "observed"` and scores **0.97**, against the hand-authored
+fixture's **0.91**. The confidence rose because the evidence genuinely improved, not
+because a number was tuned.
+
+**The flashcard cannot become the fix.** Its answer is gated on the student's real test
+output, and while the tests are red the answer field is **absent from the response** —
+not present with a flag, because a field a model can read is a field it will read out.
+See [`card.ts`](sentinel/src/modules/learn/card.ts).
+
+```bash
+npm run probe
+```
+
+Walks all six stages over real MCP and prints each one. If that is green, the demo is.
 
 **What deploys to NitroCloud is `sentinel/` — built entirely with the official NitroStack
 TypeScript SDK**, and it runs with no network, no API key and no model. `lumina/` is the
@@ -32,7 +78,7 @@ its own.
 > fixture is green. `npm run fixture:check` asserts the failure is still exactly where it
 > should be (`pricing.test.js:40`, `80 !== 72`) and **fails loudly if someone "fixes" it.**
 >
-> The project's own test suite is **67/67 passing** — `npm test`. Those are separate: run
+> The project's own test suite is **107/107 passing** — `npm test`. Those are separate: run
 > `npm test` to judge the code, `npm run fixture:test` to see the student's bug.
 
 ---
@@ -41,12 +87,13 @@ its own.
 
 | | |
 |---|---|
-| **[`MENTOR-CONCEPT.md`](MENTOR-CONCEPT.md)** | **Start here.** *Why* — the product, the four-layer learning loop, and why it survives "isn't this Copilot?" |
+| **[`MENTOR-CONCEPT.md`](MENTOR-CONCEPT.md)** | **Start here.** *Why* — the product, the learning loop, and why it survives "isn't this Copilot?" |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | *How* — the one engine all six commanders run on (only MENTOR ships registered). Long, and worth it. |
 | **[`GAPS.md`](GAPS.md)** | *What's left* — prioritized, honest, and the file to open if you're picking this up. |
 | [`DEPLOY.md`](DEPLOY.md) | The NitroCloud runbook + the demo-video script. ChatGPT is optional — see below. |
 | **[`TESTING.md`](TESTING.md)** | **Verify it yourself** — a manual checklist with the exact command and exact expected output for every component. |
-| [`fixtures/pricing/README.md`](fixtures/pricing/README.md) | The one demo project, all four layers. |
+| [`fixtures/pricing/README.md`](fixtures/pricing/README.md) | Demo project 1 — every stage, end to end. |
+| [`fixtures/safety-gear/README.md`](fixtures/safety-gear/README.md) | Demo project 2 — the same loop, different shape. Read this to see it generalize. |
 
 **If you have five minutes:** read the pitch above, then `GAPS.md`'s one-paragraph
 summary. That tells you the state of things faster than anything else here.
@@ -57,11 +104,21 @@ summary. That tells you the state of things faster than anything else here.
 
 ```
 command-global/
-├── sentinel/           ⭐ the deliverable — TS NitroStack MCP app, 7 modules, 67/67 tests
-├── lumina/                Layer 3 — the canvas the student designs in (Next.js + FastAPI)
-├── fixtures/pricing/      the one demo project: the plan, the build, the drift
-└── reference/python/      the original Python prototype (frozen, still useful)
+├── sentinel/                  ⭐ the deliverable — TS NitroStack MCP app, 107/107 tests
+│   └── src/modules/learn/        ROSTER + COACH: the catalog, briefs, checkpoints, card
+├── lumina/                    stage ③ — the canvas the student designs in (Next.js + FastAPI)
+├── fixtures/
+│   ├── catalog.json             the curated menu: 3 domains, 3 projects, 5 roles
+│   ├── pricing/                 demo project 1 — web service, backend role
+│   └── safety-gear/             demo project 2 — vision, CV role (proves it generalizes)
+└── reference/python/          the original Python prototype (frozen, still useful)
 ```
+
+**Two demo projects on purpose.** `pricing/` proves the loop runs; `safety-gear/`
+proves the loop is not *about pricing*. It differs in three ways that would each
+have caught a hardcoded assumption: three owned components instead of four, a
+different drift shape (acting on a condition that did not exist yet, rather than
+computing from a stale base), and `provenance: observed` instead of `authored`.
 
 Three previously separate projects, consolidated 2026-07-25. Originals left in place at
 `pranay/sentinel-mcp`, `pranay/agentic_ai_hackton` and `himes/lumina`.
@@ -96,11 +153,11 @@ want the `lumina/` companion tool — the submission itself does not need Python
 git clone https://github.com/nitrostacklh/command-global.git
 cd command-global
 npm run install:all      # deps for sentinel/ and lumina/
-npm run verify           # sentinel build + 67 tests + the fixture guard
+npm run verify           # sentinel build + 107 tests + the fixture guard
 ```
 
 `npm run verify` is the one command that tells you the repo is healthy. It should end with
-`67/67 pass` and four `ok` lines from the fixture guard. **It needs only Node** — no Python,
+`107/107 pass` and four `ok` lines from the fixture guard. **It needs only Node** — no Python,
 no network, no key. Verified from a clean `git clone` on a machine with nothing installed.
 
 `npm run verify:all` additionally re-derives the fixture's plan through Lumina's exporter and
@@ -135,7 +192,7 @@ the Python reference's connectors. `.env` is gitignored and no secrets are commi
 
 ```bash
 npm run sentinel:dev     # then open the sentinel/ folder in NitroStudio
-npm test                 # 67/67, fully offline — no API key, no network, no model
+npm test                 # 107/107, fully offline — no API key, no network, no model
 ```
 
 Point NitroStudio at the **`sentinel/` subfolder**, not the repo root — Studio validates a
@@ -206,13 +263,18 @@ working human-approval UI.
 | | |
 |---|---|
 | Platform (5 commanders + coordinator + trust layer) | ✅ complete, ⚪ **unregistered on purpose** — `GAPS.md` Gap 11 |
-| **MENTOR — the submission** | ✅ **built** — 33 tests, verified over real MCP |
+| **The loop, all six stages** | ✅ **built and bridged** — `npm run probe` walks it over real MCP |
+| ① catalog → ② role-scoped brief | ✅ built + tested — `mentor.catalog/v1`, `mentor.brief/v1` |
+| ② brief → ③ design (scope drift) | ✅ built + tested — `check_scope` |
+| ③ design → ④ checkpoints | ✅ built + tested — derived from the student's own plan |
+| ④ checkpoints → build history | ✅ built + tested — `provenance: observed`, **0.97** vs 0.91 |
+| ⑤ drift → ⑥ flashcard | ✅ built + tested — answer absent from the payload until earned |
 | **`causal-timeline` widget** | ✅ **built** — renders the drift, withholds the fix |
-| Lumina → MENTOR plan contract | ✅ built + tested |
-| The demo fixture, all inputs | ✅ complete, verified, and guarded |
-| Whole suite | ✅ **67/67**, offline, no API key, no model |
+| The two demo projects, all inputs | ✅ complete, verified, and guarded |
+| Whole suite | ✅ **107/107**, offline, no API key, no model |
 | Deployed to NitroCloud | ⬜ **next** — `DEPLOY.md` path A, ~30 min |
 | Can a student really draw this in Lumina? | ✅ **yes** — real `component` node, verified in-browser end to end |
+| Layer 2 · the lesson panels | ⬜ roadmap — the one stage of the loop still missing |
 | Evidence study (n=5) | ⬜ not run — Gap 7 |
 | Product name | ❓ still `[[PRODUCT NAME]]` — Gap 8 |
 
@@ -229,10 +291,14 @@ Two things worth settling while that runs:
   client shows are fixed (server and package are both `mentor` now), but the name in the
   concept doc's own title isn't.
 
-Closed since the last pass: **Gap 2** — Lumina now has a real `design` → `component` node,
-and the fixture's plan is a byte-identical export from the canvas rather than a stand-in.
-**Gap 11** — the tool surface went 23 → 3, so the deployed server no longer offers to
-autonomously patch the bug MENTOR refuses to patch. See `GAPS.md`.
+Closed since the last pass: **the bridges between the stages**, which were the real
+gap — four of the five handoffs did not exist in code, and the fifth was
+hand-authored. Every one is now a versioned JSON artifact with tests.
+Also **Gap 2** — Lumina has a real `design` → `component` node and the fixture's plan
+is a byte-identical export from the canvas. **Gap 11** — the tool surface went 23 → 3,
+and back up to 10, but all 10 are now stages of one loop rather than six unrelated
+products; the refusal check in `npm run probe` still reports no tool that can modify a
+student's build.
 
 You do **not** need ChatGPT Plus: NitroStudio's own AI Chat is an MCP client with a model
 picker, gated on NitroCloud sign-in rather than a ChatGPT plan. Confirm with the organizers

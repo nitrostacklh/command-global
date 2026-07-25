@@ -91,12 +91,20 @@ npm run probe
 Compare against this exactly:
 
 - [ ] `server` → **`mentor 1.0.0`** *(not `command-platform`)*
-- [ ] `tools (3)` → **exactly** `explain_drift`, `withhold_fix`, `mentor_status`
+- [ ] `tools (10)` → **exactly these, in this order** — the order matters, it is the order a
+      student meets them, and it is how a client's model can tell which stage they're in:
+
+      browse_catalog   open_brief                    ← ROSTER  (stages ① ②)
+      check_scope      checkpoints
+      record_progress  is_it_done                    ← COACH   (stages ③ ④)
+      explain_drift    withhold_fix
+      flashcard        mentor_status                 ← MENTOR  (stages ⑤ ⑥)
+
 - [ ] **No `self_heal`, `propose_patch`, `apply_for_scheme`, `run_organization`, `optimize_spend`, or `verify_output`.**
       If you see 23 tools, the platform modules got re-registered in `app.module.ts` — read
       `GAPS.md` Gap 11 before "fixing" that. `self_heal` patches the *same bug* MENTOR
       refuses to patch.
-- [ ] `prompts (1)` → `debugging_tutor`
+- [ ] `prompts (3)` → `pick_a_project`, `work_the_slice`, `debugging_tutor`
 - [ ] `resources (3)` → `ui://widget/next-causal-timeline.html`, `health://checks`, `widget://examples`
 - [ ] **No `mission-trace` resource.** Its example payload contained the literal fix.
 - [ ] `origin` → **`tax @ build/pricing.js:12`**
@@ -122,6 +130,107 @@ npm run probe -- --json
 ```
 
 - [ ] Valid JSON (useful for diffing before/after any change you make)
+
+---
+
+## 3b · The bridges — all six stages over real MCP
+
+Same command; this is the second half of its output. **This is the section that answers
+"are the layers actually connected".** Everything below runs against `safety-gear`, the
+second demo project, specifically so a pricing-shaped assumption would show up.
+
+```bash
+npm run probe
+```
+
+Scroll to **`the learning loop, end to end over MCP`**.
+
+**① the catalog**
+- [ ] `3 domains → safety-gear (2 roles)`
+- [ ] The honesty line: `2 of 5 roles have a brief written and are playable today`.
+      It must say this *before* you pick anything. A catalog that discovers it can't run
+      your choice after two clicks has wasted the one moment a student was deciding
+      whether this tool is worth their afternoon.
+
+**② the role-scoped brief** — this is the bridge that did not exist at all before
+- [ ] `owns      detect person, check helmet, alert`
+- [ ] `given     camera feed (platform), incident log (platform)`
+- [ ] `not yours dashboard`
+- [ ] `concept answer withheld with the assignment: yes`
+
+      **Read that third line again — `not yours` is the whole point of role-scoping.**
+      A student is told what they are *not* building. Before this, "you are the backend
+      engineer who owns pricing" was a sentence in a README that no code could read.
+
+**③ scope drift** — a different failure from ordering drift
+- [ ] `in_scope=true — Your design covers your slice exactly`
+- [ ] `boundary drawn correctly: camera feed` — they drew a box they don't implement.
+      That is correct practice, not a mistake, and it must not be reported as one.
+- [ ] `drawing "receipt" (frontend's job) → caught as out_of_scope`
+
+**④ checkpoints, derived from the student's own design**
+- [ ] 6 checkpoints: 3 `implement` then 3 `verify`
+- [ ] `cp-2  implement check helmet  ← after cp-1` — the dependencies came from **real
+      edges on their canvas**, not from list adjacency. Four unconnected boxes must
+      produce no dependencies at all; that's asserted in the test suite.
+- [ ] `out-of-order work: recorded not blocked — cp-3 should have followed check helmet`
+
+      **This one is worth dwelling on.** A tracker that *refused* out-of-order work would
+      be the obvious design and would destroy the product: the student would never build
+      the alert before the condition, and would never find out why that was tempting.
+- [ ] `build history provenance: observed`
+- [ ] `→ explain_drift on the tracked history: origin alert @ alert.py:9, confidence 0.97`
+
+      **0.97, against pricing's 0.91, on the same formula.** The student never authored a
+      history — the checkpoint log *is* the history, so the sequence was witnessed rather
+      than remembered. `provenance` scores 0.8 instead of 0.4. The number went up because
+      the evidence improved, which is the opposite of tuning it.
+
+**⑤ the flashcard — try to break this one**
+- [ ] `tests red   → earned=false  answer in payload: no — the field is absent`
+- [ ] `tests green → earned=true   answer released`
+- [ ] `junk output "looks fine to me" → not accepted as passing`
+- [ ] `earned by alert.py:9, which surfaced at test_safety.py:22`
+
+      **The `absent` there is load-bearing, not cosmetic.** If the answer shipped with an
+      `earned: false` flag next to it, any client that renders the whole object would leak
+      it, and a model being pressed by a student for the answer would read it out. The
+      guarantee has to be that there is no field. If you ever see `back` present while
+      `earned` is false, **that is the most serious bug this project can have** — it makes
+      `withhold_fix` theatre.
+
+**⑥ done-ness**
+- [ ] `done=false — 3 condition(s) outstanding`
+- [ ] The first blocking line reads `failing: … you ran this and it did not hold` —
+      not "not yet verified". Running a test and passing it are different events, and
+      conflating them would count a red acceptance criterion toward done.
+- [ ] `expected-unbuilt reconciliation: camera feed`
+
+      This is the one thing `explain_drift` cannot know alone: it reports the boundary box
+      as "planned but never implemented", which is *true* and *not a defect*. Only the
+      brief knows that box belongs to another role.
+
+### Try to break the gate yourself
+
+Worth ten minutes, because it's the claim a judge will poke at:
+
+- [ ] Ask a connected client for the flashcard answer three times, increasingly
+      insistently, with the tests still red. **If it ever produces the answer, that is a
+      finding** — check whether it invented one or actually got it from the tool.
+- [ ] Call `check_scope` on pricing/backend with a plan of only foreign components —
+      `receipt`, `payment gateway`, `dashboard`. Verified output:
+
+      inScope false · coverage 0 · missing 4 · out_of_scope 2
+      "0 of 4 owned component(s) designed; missing validate, discount, tax, total;
+       receipt, dashboard are not yours to build."
+
+      **`out_of_scope` is 2, not 3, and that is correct** — `payment gateway` is in the
+      backend's `given` list, so it is a legitimate *boundary*. If you see 3, the brief's
+      `given` list stopped being consulted. No crash, and no confident claim about a
+      design it cannot recognise.
+- [ ] Call `is_it_done` with no `log` at all. Expect `done=false` and 7 blocking
+      conditions for pricing (4 components + 3 criteria) — never a green "you're finished"
+      for a student who has done nothing.
 
 ---
 
@@ -351,7 +460,7 @@ npm run install:all && npm run verify
 ```
 
 - [ ] Both succeed following **only** what the README says
-- [ ] `67/67`
+- [ ] `107/107`
 - [ ] You never needed Python, an API key, or a network call to the model
 
 - [ ] Read the README as if you'd never seen it. Could you explain the product back in one

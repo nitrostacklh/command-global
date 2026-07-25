@@ -1,0 +1,100 @@
+{
+  "schema": "lumina.plan/v1",
+  "name": "Site safety-gear check",
+  "planId": "wf-safety-gear-fixture",
+  "nodes": [
+    {
+      "id": "n-camera",
+      "type": "component",
+      "label": "camera feed",
+      "position": {
+        "x": 0,
+        "y": 160
+      },
+      "data": {
+        "label": "camera feed",
+        "component": "camera feed",
+        "intent": "Frames arrive here. Platform owns this — I only read it."
+      }
+    },
+    {
+      "id": "n-person",
+      "type": "component",
+      "label": "detect person",
+      "position": {
+        "x": 260,
+        "y": 160
+      },
+      "data": {
+        "label": "detect person",
+        "component": "detect person",
+        "intent": "Find the people in the frame. No people, no decision to make."
+      }
+    },
+    {
+      "id": "n-helmet",
+      "type": "component",
+      "label": "check helmet",
+      "position": {
+        "x": 520,
+        "y": 160
+      },
+      "data": {
+        "label": "check helmet",
+        "component": "check helmet",
+        "intent": "Per person: helmet or no helmet. MUST run before anything alerts."
+      }
+    },
+    {
+      "id": "n-alert",
+      "type": "component",
+      "label": "alert",
+      "position": {
+        "x": 780,
+        "y": 160
+      },
+      "data": {
+        "label": "alert",
+        "component": "alert",
+        "intent": "One alert per person established as not wearing a helmet."
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "n-camera",
+      "target": "n-person",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "id": "e2",
+      "source": "n-person",
+      "target": "n-helmet",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "id": "e3",
+      "source": "n-helmet",
+      "target": "n-alert",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    }
+  ],
+  "order": [
+    "n-camera",
+    "n-person",
+    "n-helmet",
+    "n-alert"
+  ],
+  "entry": [
+    "n-camera"
+  ],
+  "terminal": [
+    "n-alert"
+  ],
+  "cyclic": false,
+  "warnings": []
+}

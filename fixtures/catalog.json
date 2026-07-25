@@ -1,0 +1,95 @@
+{
+  "schema": "mentor.catalog/v1",
+  "name": "MENTOR curated catalog",
+  "domains": [
+    {
+      "key": "web-service",
+      "title": "Web service / API",
+      "blurb": "Something other teams call over HTTP and then depend on. The work is mostly correctness under inputs you did not choose, and the failures are quiet — a wrong number ships and nobody notices for a week."
+    },
+    {
+      "key": "vision",
+      "title": "Vision system",
+      "blurb": "A camera, a model, and a decision. The hard part is almost never the model: it is deciding what counts as a detection, and what you do when you are not sure."
+    },
+    {
+      "key": "data-pipeline",
+      "title": "Data pipeline",
+      "blurb": "Move data, reshape it, and be able to prove afterwards what it looked like on the way through. Ordering and idempotency are the entire job."
+    }
+  ],
+  "projects": [
+    {
+      "key": "pricing",
+      "domain": "web-service",
+      "title": "Checkout pricing service",
+      "why_exemplary": "Every commerce company has this exact function, and it is the one place where an off-by-a-little bug turns into refunds and a finance escalation rather than a stack trace. It is also small enough to hold in your head, which is what makes the ordering mistake inside it so instructive.",
+      "components": [
+        "cart API",
+        "validate",
+        "discount",
+        "tax",
+        "total",
+        "receipt",
+        "payment gateway"
+      ],
+      "roles": [
+        {
+          "key": "backend",
+          "title": "Backend engineer — pricing",
+          "one_liner": "You own the four steps between a cart and a number finance reports off.",
+          "briefed": true
+        },
+        {
+          "key": "frontend",
+          "title": "Frontend engineer — checkout",
+          "one_liner": "You own the cart the pricing service is called with, and the receipt the customer reads.",
+          "briefed": false
+        }
+      ]
+    },
+    {
+      "key": "safety-gear",
+      "domain": "vision",
+      "title": "Site safety-gear check",
+      "why_exemplary": "A real deployment shape: a camera on a site entrance, a decision per person, and a consequence for being wrong in either direction. False negatives are a safety incident and false positives get the system switched off by the people it is meant to protect — so the interesting engineering is entirely in the ordering of the checks.",
+      "components": [
+        "camera feed",
+        "detect person",
+        "check helmet",
+        "alert",
+        "incident log",
+        "dashboard"
+      ],
+      "roles": [
+        {
+          "key": "cv",
+          "title": "CV engineer — detection and decision",
+          "one_liner": "You own who is in frame, whether they are wearing a helmet, and when to raise an alert.",
+          "briefed": true
+        },
+        {
+          "key": "platform",
+          "title": "Platform engineer — capture and storage",
+          "one_liner": "You own the camera feed the detector reads and the incident log it writes to.",
+          "briefed": false
+        }
+      ]
+    },
+    {
+      "key": "event-ingest",
+      "domain": "data-pipeline",
+      "title": "Idempotent event ingest",
+      "why_exemplary": "The canonical distributed-systems lesson in a form small enough to finish: the same event arrives twice and your job is for that to be boring. Almost every candidate can describe idempotency and almost none have implemented it.",
+      "components": ["receive", "deduplicate", "normalise", "persist", "replay"],
+      "roles": [
+        {
+          "key": "data",
+          "title": "Data engineer — ingest",
+          "one_liner": "You own everything between the webhook and the table.",
+          "briefed": false
+        }
+      ]
+    }
+  ]
+}

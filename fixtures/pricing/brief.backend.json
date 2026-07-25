@@ -1,0 +1,56 @@
+{
+  "schema": "mentor.brief/v1",
+  "project": "pricing",
+  "role": "backend",
+  "title": "Backend engineer — pricing",
+  "you_are": "You own the pricing function. Finance reports off your numbers, support answers tickets about your numbers, and when a customer says \"you charged me wrong,\" it is your function they are talking about.",
+  "stakes": "You are not doing an exercise. You own a thing other people depend on, and the people who depend on it will not read your code — they will read a total on an invoice and decide whether to trust the company.",
+  "deliverable": "computeTotal(items, discountRate, taxRate) → the order total, rounded to 2dp.",
+  "concept": {
+    "key": "order-of-operations-in-money-math",
+    "question": "When a cart has both a discount and a tax, which one has to be applied first, and how would you know if you got it backwards?",
+    "answer": "Tax is charged on what the customer actually pays, so it has to be computed after the discount is taken off. Getting it backwards is invisible whenever the discount is zero, because taxing the subtotal and taxing the discounted amount are then the same number — which is exactly why this class of bug survives the first few tests and ships.",
+    "transfers_to": "Any calculation where one step reduces the base another step is a percentage of: refunds and partial credits, commission on a net figure, tips after a voucher, interest on a balance after a payment posts."
+  },
+  "owns": [
+    {
+      "component": "validate",
+      "intent": "Reject malformed carts before any money is computed.",
+      "why_yours": "Nobody downstream can defend against a cart you already accepted."
+    },
+    {
+      "component": "discount",
+      "intent": "Apply the discount code to the subtotal.",
+      "why_yours": "The discount rules are pricing policy, and pricing policy lives with the pricing service."
+    },
+    {
+      "component": "tax",
+      "intent": "Apply tax to the amount the customer is actually paying.",
+      "why_yours": "Tax depends on the discounted figure, so it cannot be computed anywhere that does not already know the discount."
+    },
+    {
+      "component": "total",
+      "intent": "Round once, at the end, and return the number the customer is charged.",
+      "why_yours": "Rounding in more than one place is how two systems end up a cent apart, so exactly one component may do it — this one."
+    }
+  ],
+  "given": [
+    {
+      "component": "cart API",
+      "owned_by": "frontend",
+      "contract": "Gives you items as [{ sku, qty, unitPrice }]. unitPrice is already in minor units and is never null."
+    },
+    {
+      "component": "payment gateway",
+      "owned_by": "payments",
+      "contract": "Takes the total you return, in minor units. It will not re-derive it, and it will not check it."
+    }
+  ],
+  "acceptance": [
+    { "id": "a1", "given": "$100 cart, 0% discount, 20% tax", "must": "120.00" },
+    { "id": "a2", "given": "$100 cart, 0% discount, 0% tax", "must": "100.00" },
+    { "id": "a3", "given": "$100 cart, 40% discount, 20% tax", "must": "72.00" }
+  ],
+  "entry": "build/pricing.js",
+  "tests": "build/pricing.test.js"
+}

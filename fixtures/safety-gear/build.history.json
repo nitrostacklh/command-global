@@ -1,0 +1,96 @@
+{
+  "$comment": [
+    "schema mentor.build/v1 — the second instance, and the reason it exists.",
+    "",
+    "`fixtures/pricing/` proves the loop runs. This one proves the loop is not",
+    "*about pricing*. Three things are deliberately different from it, and each one",
+    "would have caught a hardcoded assumption:",
+    "",
+    "  1. Three owned components, not four. Anything that assumed a 4-step chain",
+    "     breaks here.",
+    "  2. A different drift shape: `alert` was built ahead of `check helmet`, so",
+    "     the mistake is acting on a condition that did not exist yet — not, as in",
+    "     pricing, computing a value from a stale base.",
+    "  3. `provenance: observed` rather than `authored`. This history was produced",
+    "     by the checkpoint tracker (learn/checkpoints.ts) from a progress log",
+    "     rather than written by hand, which is why its confidence is higher than",
+    "     pricing's 0.91. See the provenance note in mentor/build.ts.",
+    "",
+    "The plan also draws `camera feed`, which this role does not own — it is a",
+    "`given` in brief.cv.json. So MENTOR reports it as planned-but-never-built,",
+    "which is correct but incomplete on its own: only the brief knows that box was",
+    "somebody else's. `learn/coach.module.ts` reconciles the two."
+  ],
+
+  "schema": "mentor.build/v1",
+  "project": "safety-gear",
+  "planRef": "plan.lumina.json",
+  "entry": "detect.py",
+  "tests": "test_safety.py",
+
+  "provenance": "observed",
+
+  "steps": [
+    {
+      "seq": 1,
+      "at": "T+00m",
+      "component": "detect person",
+      "kind": "implement",
+      "file": "detect.py",
+      "line": 14,
+      "summary": "Ran the detector and kept the boxes classified as person."
+    },
+    {
+      "seq": 2,
+      "at": "T+07m",
+      "component": "alert",
+      "kind": "implement",
+      "file": "alert.py",
+      "line": 9,
+      "summary": "Raised an alert for each detected person.",
+      "note": "Plan puts alert last, after check helmet. Built second. This is the drift — at this point 'not wearing a helmet' was not yet a thing the code could know, so the alert is really firing on 'a person is present'."
+    },
+    {
+      "seq": 3,
+      "at": "T+21m",
+      "component": "check helmet",
+      "kind": "implement",
+      "file": "detect.py",
+      "line": 31,
+      "summary": "Added the helmet check — but alert.py was already deciding without it."
+    },
+    {
+      "seq": 4,
+      "at": "T+29m",
+      "component": "tests",
+      "kind": "verify",
+      "file": "test_safety.py",
+      "line": 22,
+      "summary": "Ran the acceptance tests: empty frame and bare head pass, helmeted worker fails."
+    }
+  ],
+
+  "failure": {
+    "test": "a1 — a worker wearing a helmet walks through frame",
+    "file": "test_safety.py",
+    "line": 22,
+    "expected": 0,
+    "actual": 1,
+    "message": "alerted on a compliant worker: expected 0 alerts, got 1",
+    "whyItHidUntilNow": "The other two criteria are an empty frame (no people, so no alerts either way) and a bare head (an alert is correct). Both pass whether or not the helmet check is wired in. a1 is the only case where alerting on presence and alerting on non-compliance differ."
+  },
+
+  "expectedDrift": {
+    "$comment": "What a correct MENTOR run must produce for this project. Asserted by learn/learn.test.ts.",
+    "originComponent": "alert",
+    "originFile": "alert.py",
+    "originLine": 9,
+    "surfacedAtFile": "test_safety.py",
+    "surfacedAtLine": 22,
+    "plannedPosition": 3,
+    "actualPosition": 2,
+    "$positionNote": "3 of 3, not 4 of 4. Positions are counted over the components present in BOTH artifacts, so `camera feed` — drawn as this role's boundary and correctly never implemented by them — is excluded. Comparing a position in the plan against a position in the build is only meaningful over components that appear in each.",
+    "explanation": "You designed alert as the step after check helmet. You implemented it before check helmet.",
+    "refusesToFix": true
+  }
+}

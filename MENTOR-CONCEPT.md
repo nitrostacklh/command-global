@@ -45,17 +45,37 @@ Alternates, depending on which room you're in:
 
 ---
 
-## 3. The four layers
+## 3. The layers
 
-The product is one learning loop with four stages. A student passes through all four on
-every project.
+The product is one learning loop. A student passes through every stage on every project,
+and each stage hands the next one a versioned JSON artifact — see §4 for the table of them.
 
-### Layer 1 — Roles *(`[[CONFIRM: "role-based" or "project-based"?]]`)*
+### Layer 1 — Path, then role ✅ **RESOLVED and BUILT** (2026-07-25)
 
-> **Assumption I've written to:** the student is assigned a *role* on a simulated team —
-> backend engineer, data engineer, `[[ROLE 3]]` — and receives the project as a brief from
-> that role's perspective, not as an exercise. If you meant plain project-based learning,
-> cut this section and the "team" framing throughout.
+> ~~`[[CONFIRM: "role-based" or "project-based"?]]`~~ → **both, in that order.** The student
+> first picks a **product type** (a web service, a vision system, a data pipeline), then a
+> **role inside it**. Product type is what a student can actually have an opinion about
+> before they know anything; role is what makes it a job instead of an exercise. Asking for
+> the role first would be asking them to choose a career before choosing a project.
+
+The student picks a product type, then a project from a **curated** list, then a role on that
+project — and receives the project as a brief from that role's perspective, not as an
+exercise. Two artifacts carry it, and both are built:
+
+| | |
+|---|---|
+| `mentor.catalog/v1` | the menu: product type → project → roles. Every project must justify its place in one sentence (`why_exemplary` is required), because a list nobody can say anything specific about is a list of homework. |
+| `mentor.brief/v1` | the assignment: `owns` (your slice), `given` (what another role hands you and you build *against*), acceptance criteria, and the concept. |
+
+**`owns` vs `given` is the load-bearing distinction**, and it is what makes this more than
+framing. A real engineer joining a real team does not build the system; they build a slice of
+it against interfaces other people own. So the brief names both — plus, implicitly, the
+components that are *neither*, which `open_brief` returns as `not_yours`.
+
+Knowing what you are not building is half of knowing what you are. And because it is
+machine-readable, `check_scope` can hold the student to it: draw the receipt when you own
+pricing and it says so. Before this, role-scoping was a paragraph in a README that no code
+could read — see `GAPS.md` Gap 12.
 
 Why it matters pedagogically: a role gives the student *constraints and a stake*. "Build a
 pricing service" is an exercise. "You own pricing; finance depends on your numbers being
@@ -176,19 +196,37 @@ And then it stops. The student writes the fix.
 ## 4. The loop
 
 ```
-  Layer 1          Layer 2            Layer 3           Layer 4
-  ROLE      ──▶    LESSON      ──▶    LUMINA     ──▶    BUILD ──▶ IT BREAKS
-  you own          learn the          design it,        MENTOR shows the drift
-  pricing          concept in         stress-test it    between plan and build
-                   panels             before coding              │
-                                          ▲                      │
-                                          └──────────────────────┘
-                                     revise the design, not just the line
+  Layer 1            Layer 2       Layer 3        Layer 4
+  PATH + ROLE   ──▶  LESSON   ──▶  LUMINA   ──▶   BUILD ──▶ IT BREAKS ──▶ CARD
+  pick what to       learn the     design your     checkpoints from        the concept,
+  build, then        concept in    slice, before    YOUR design, then      earned once
+  which slice        panels        any code        MENTOR names the        YOU fixed it
+  you own                          │              decision that broke it       │
+                                   ▲                       │                   │
+                                   └───────────────────────┘                   │
+                              revise the design, not just the line             │
+                                   ▲                                           │
+                                   └───────── next project ────────────────────┘
 ```
+
+**Each arrow is a file.** That is the architecture, and it is why the loop is a loop rather
+than four features that happen to sit in one repo:
+
+| | artifact | produced by |
+|---|---|---|
+| ① → ② | `mentor.catalog/v1` | curated, in `fixtures/catalog.json` |
+| ② → ③ | `mentor.brief/v1` | curated, one per project×role |
+| ③ → ④ | `lumina.plan/v1` | **the student**, drawing it |
+| ④ → ⑤ | `mentor.build/v1` | **the student**, working — `provenance: observed` |
+| ⑤ → ⑥ | `mentor.card/v1` | MENTOR, gated on the student's real test output |
+
+Rows 3 and 4 are the ones no comparable tool has, and they are the reason MENTOR can answer
+*when did I go wrong* rather than *what is wrong with this code*.
 
 The loop's payoff: the student doesn't just fix the bug, they see that the bug was **a
 design decision**, and they go back and change the design. That's the learning outcome, and
-it's the thing the whole four-layer structure exists to produce.
+it's the thing the whole structure exists to produce. The card is what carries it to the
+next project — a fix stays with the file, a concept doesn't.
 
 ---
 
@@ -223,7 +261,7 @@ We can, because we're building for learning outcomes rather than engagement.
 
 ## 6. Track fit — Education & Research
 
-**Education:** the four-layer loop, and specifically the refusal to give answers, which
+**Education:** the loop, and specifically the refusal to give answers, which
 directly addresses the anxiety every education judge has about AI in the classroom.
 
 **Research:** two claims worth making here.
@@ -303,7 +341,7 @@ This document describes the full vision. The submission is a subset, deliberatel
 - Roles beyond the first one
 - Live connectors, per-domain widgets (`ARCHITECTURE.md` §16.3)
 
-> **A note I'd keep in the doc:** the vision is four layers, and the demo is one project
+> **A note I'd keep in the doc:** the vision is the whole loop, and the demo is one project
 > through all four. One project executed completely is a stronger submission than four
 > layers half-built. Judges score what runs.
 
@@ -321,8 +359,10 @@ This document describes the full vision. The submission is a subset, deliberatel
 
 ## 10. Open questions
 
-- `[[Layer 1: role-based or project-based? This changes §3.]]` — *`fixtures/pricing/README.md`
-  is written **role-based**, per §3's stated assumption. If that's wrong, that file changes.*
+- ~~`[[Layer 1: role-based or project-based? This changes §3.]]`~~ → **answered: both, in
+  that order** — product type, then a project, then a role on it. §3 Layer 1 is rewritten and
+  the whole path is built: `mentor.catalog/v1` + `mentor.brief/v1`, with `owns` / `given` /
+  `not_yours` and a `check_scope` tool that enforces the slice.
 - ~~`[[Lumina export format — what does the graph look like on disk?]]`~~ → **answered in
   §3 Layer 3**: `lumina.plan/v1`, and it did not exist before — Lumina only wrote compiled
   n8n / Node-RED output. Now built and tested.

@@ -12,7 +12,7 @@ hour"*). **Read the box below first** — the fastest path is Studio's Deploy bu
 > |---|---|
 > | `git push origin main` | ✅ **pushed** — MENTOR is on GitHub, `main` green |
 > | `npm run build` in `sentinel/` | ✅ clean — `dist` + `src/widgets/out/` |
-> | `npm run verify` at root | ✅ 67/67 + fixture guard (Node-only) · `verify:all` adds the plan-determinism check |
+> | `npm run verify` at root | ✅ 107/107 + fixture guard (Node-only) · `verify:all` adds the plan-determinism check |
 > | **clean `git clone` → `install:all` → `verify`** | ✅ passes with nothing pre-installed — the judge's path |
 > | `npm run build` in `lumina/` | ✅ Next.js production build clean, 6 routes |
 > | `prompts/get debugging_tutor` | ✅ **fixed** — every `@Prompt` returned the wrong shape and had never worked |
@@ -89,7 +89,7 @@ and cloud deploy all require being signed in.** Two ways: *Continue with NitroCl
 cd sentinel
 npm install
 npm run build      # ✓ Widgets bundled + TypeScript compiled
-npm test           # ✓ 67/67
+npm test           # ✓ 107/107
 ```
 
 From the monorepo root, `npm run sentinel:build` and `npm test` do the same thing.
@@ -245,13 +245,46 @@ not plan a loop.
 Record this one. It is the Education & Research submission; §7b is the platform demo, now
 the backup and the "it also runs five other domains" beat.
 
-1. Show the student's Lumina canvas: four **Component** nodes, `validate → discount → tax → total`. *"This is the plan they drew before writing code."* — hit **Plan** to export it live if you want the beat; the checked-in fixture is byte-identical to what that button produces (`GAPS.md` Gap 2).
-2. Show the failing test: `test 3 ✗`, error points at **line 40**.
-3. *"When did I go wrong?"* → `explain_drift` (**no arguments** — it runs the bundled demo) → the **causal-timeline** widget: plan row on top, build row below, `tax` highlighted in both, the drift arrow landing on **line 12**, and **confidence 0.91** broken into five signals each with its reason.
-4. Point at the `provenance` bar — 40%. *"It tells you where it's guessing."* ← cheap, and it makes §3's uncertainty claim concrete.
-5. **Ask it to fix the bug.** → `withhold_fix` declines and says why. ← *this is the whole pitch; do not cut this beat*
-6. Click **"Ask instead → Why does tax have to come after discount?"** — the refusal hands the student the next question instead of a patch.
-7. (If time) call `explain_drift` with a *different* project's plan + build, to show it isn't one hardcoded demo.
+> **Rehearse it with `npm run probe` first.** That command walks all six stages over real
+> MCP and prints each artifact, so you can time the beats and confirm every number below
+> before you point a camera at Studio.
+
+**The three minutes are tight. Beats 4 and 6 are the ones nobody else can show — protect
+those two and cut anything else if the clock runs out.**
+
+1. **The choice** (~20s). `browse_catalog` → three product types. Pick `web-service` → the
+   pricing project. *"Real projects, and it says out loud that 2 of 5 roles are playable."*
+2. **The role** (~30s) — `open_brief` with `pricing` / `backend`. Read the three lists off
+   the screen: **owns** `validate, discount, tax, total`; **given** `cart API (frontend)`,
+   `payment gateway (payments)`; **not yours** `receipt`. *"You don't build the system. You
+   build your slice, against interfaces other people own — like a real job."*
+3. **The design** (~25s). Lumina canvas: four **Component** nodes,
+   `validate → discount → tax → total`. Hit **Plan** to export live if you want the beat —
+   the checked-in fixture is byte-identical to what that button produces (`GAPS.md` Gap 2).
+4. **Scope drift** (~25s) ⭐. Drag a `receipt` node on and call `check_scope`. → **`receipt`
+   is not yours to build.** *"It knows what your job is, so it can tell you when you've
+   wandered into someone else's."* Delete it; `in_scope: true`.
+5. **The work** (~20s). `checkpoints` → six, sequenced by **the order they drew**, with
+   dependencies from their own edges. *"Not our checklist. Theirs."*
+6. **The drift** (~40s) ⭐⭐ — the money beat. Show the failing test (`test 3 ✗`, **line
+   40**). *"When did I go wrong?"* → `explain_drift` (**no arguments** — bundled demo) → the
+   **causal-timeline** widget: plan row on top, build row below, `tax` highlighted in both,
+   the drift arrow landing on **line 12**, **confidence 0.91** in five signals each with its
+   reason. Point at the `provenance` bar — 40%. *"It tells you where it's guessing."*
+7. **The refusal** (~25s) ⭐⭐. **Ask it to fix the bug.** → `withhold_fix` declines and says
+   why. Then click **"Ask instead → Why does tax have to come after discount?"** — the
+   refusal hands the student the next question instead of a patch.
+   ← *this is the whole pitch; do not cut this beat*
+8. **The card** (~20s). Ask for the flashcard with the tests still red → **withheld, and the
+   answer is not in the response at all.** *"You earn the concept by fixing it yourself."*
+   If you have the seconds, paste passing output and watch it release.
+
+**If a judge asks "is this one hardcoded demo?"** — the honest answer, and it is a good one:
+`fixtures/safety-gear/` runs the identical loop with three owned components instead of four,
+a different bug (alerting on a condition that did not exist yet), and a **tracked** build
+history rather than an authored one — which scores **0.97** against pricing's 0.91 on the
+same formula, because the evidence was observed rather than remembered. `npm run probe`
+demonstrates it in about fifteen seconds.
 
 ## 7b. Demo script — the platform (backup only, and **not runnable as shipped**)
 

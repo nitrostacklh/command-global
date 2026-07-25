@@ -128,7 +128,180 @@ try {
     const writers = tools.result.tools.filter((t) => /patch|write|fix_code|edit|apply|heal/i.test(t.name));
     h('refusal check');
     console.log(`  tools that could modify a student's build: ${writers.length === 0 ? ok('none') : '\x1b[31m' + writers.map((t) => t.name).join(', ') + '\x1b[0m'}`);
+
+    await walkTheLoop();
   }
 } finally {
   srv.kill();
+}
+
+/**
+ * Walk all five bridges over the wire.
+ *
+ * The unit tests cover this logic in-process; this proves the same chain survives
+ * being an MCP server — schemas, JSON round-trips, and the client holding the
+ * progress log between calls, which it must because the server stores nothing.
+ *
+ * It doubles as the demo script, which is the real reason it lives here: if this
+ * section is green, the ≤3-min video has very little left to go wrong in.
+ */
+async function walkTheLoop() {
+  const call = async (name, args) => {
+    const res = await rpc('tools/call', { name, arguments: args });
+    const text = res.result?.content?.find((c) => c.type === 'text')?.text;
+    if (!text) throw new Error(`${name} returned no text content`);
+    return JSON.parse(text);
+  };
+  const step = (n, label) => console.log(`  ${'①②③④⑤'[n - 1]} ${label}`);
+  const bad = (s) => '\x1b[31m' + s + '\x1b[0m';
+
+  h('the learning loop, end to end over MCP');
+
+  // ① pick a product type, then a project
+  const domains = await call('browse_catalog', {});
+  const vision = await call('browse_catalog', { domain: 'vision' });
+  const project = vision.projects[0];
+  step(1, `${domains.domains.length} domains → ${project.project} (${project.roles.length} roles)`);
+  console.log(`     ${domains.honesty}`);
+
+  // ② the role-scoped brief — owns / given / not yours
+  const brief = await call('open_brief', { project: 'safety-gear', role: 'cv' });
+  step(2, `brief: owns ${brief.you_own.length}, given ${brief.given_to_you.length}, not yours ${brief.not_yours.length}`);
+  console.log(`     owns      ${brief.you_own.map((o) => o.component).join(', ')}`);
+  console.log(`     given     ${brief.given_to_you.map((g) => `${g.component} (${g.owned_by})`).join(', ')}`);
+  console.log(`     not yours ${brief.not_yours.join(', ')}`);
+  const LESSON = 'condition has to be established';
+  console.log(
+    `     concept answer withheld with the assignment: ${JSON.stringify(brief).includes(LESSON) ? bad('LEAKED') : ok('yes')}`,
+  );
+
+  // ③ does the design cover the slice?
+  const scope = await call('check_scope', { project: 'safety-gear', role: 'cv' });
+  step(3, `in_scope=${scope.in_scope ? ok('true') : bad('false')} — ${scope.summary}`);
+  console.log(`     boundary drawn correctly: ${scope.boundary.join(', ') || '(none)'}`);
+
+  const foreign = await call('check_scope', {
+    project: 'pricing',
+    role: 'backend',
+    plan: JSON.stringify(planWith(['validate', 'discount', 'tax', 'total', 'receipt'])),
+  });
+  console.log(
+    `     drawing "receipt" (frontend's job) → ${
+      !foreign.in_scope && foreign.out_of_scope.length === 1 ? ok('caught as out_of_scope') : bad('NOT CAUGHT')
+    }`,
+  );
+
+  // ④ checkpoints from the student's own plan, then build it in the wrong order
+  const cps = await call('checkpoints', { project: 'safety-gear', role: 'cv' });
+  const idOf = (s) => cps.checkpoints.find((c) => c.subject === s)?.id;
+  step(4, `${cps.checkpoints.length} checkpoints derived from the student's own design`);
+  for (const c of cps.checkpoints) {
+    const after = c.blocked_by.length ? `  ← after ${c.blocked_by.join(',')}` : '';
+    console.log(`     ${c.id}  ${c.kind.padEnd(9)} ${c.subject}${after}`);
+  }
+
+  const progress = await call('record_progress', {
+    project: 'safety-gear',
+    role: 'cv',
+    reached: [
+      { checkpoint: idOf('detect person'), file: 'detect.py', line: 14, at: 'T+00m' },
+      { checkpoint: idOf('alert'), file: 'alert.py', line: 9, at: 'T+07m' },
+      { checkpoint: idOf('check helmet'), file: 'detect.py', line: 31, at: 'T+21m' },
+      // They ran the acceptance tests and a1 went red. Recorded as a failure:
+      // still in the history (MENTOR needs it to link the failure to the work),
+      // but not counted toward done.
+      { checkpoint: idOf('a1'), file: 'test_safety.py', line: 22, at: 'T+29m', outcome: 'fail' },
+    ],
+  });
+  console.log(
+    `     out-of-order work: ${
+      progress.out_of_order.length
+        ? ok(`recorded not blocked — ${progress.out_of_order[0].checkpoint} should have followed ${progress.out_of_order[0].should_have_followed.join(', ')}`)
+        : bad('not detected')
+    }`,
+  );
+  console.log(`     build history provenance: ${ok(progress.build_history.provenance)}`);
+
+  // the join: that progress log IS explain_drift's input
+  const drift = await call('explain_drift', {
+    plan: JSON.stringify(await bundledSafetyPlan()),
+    build: JSON.stringify({
+      ...progress.build_history,
+      failure: {
+        test: 'a1',
+        file: 'test_safety.py',
+        line: 22,
+        message: 'alerted on a compliant worker: expected 0 alerts, got 1',
+      },
+    }),
+    symptom: 'my safety test fails on a worker who IS wearing a helmet',
+  });
+  console.log(
+    `     → explain_drift on the tracked history: origin ${ok(`${drift.origin?.component} @ ${drift.origin?.file}:${drift.origin?.line}`)}, confidence ${ok(String(drift.confidence))}`,
+  );
+  console.log(
+    `       provenance scored ${ok(String(drift.confidence_components.provenance.score))} — a hand-authored history would be 0.4`,
+  );
+
+  // ⑤ the card: refused while red, earned when green
+  const red = await call('flashcard', {
+    project: 'safety-gear',
+    role: 'cv',
+    test_output: '1 failed, 2 passed in 0.11s',
+  });
+  const green = await call('flashcard', {
+    project: 'safety-gear',
+    role: 'cv',
+    test_output: '3 passed in 0.09s',
+  });
+  step(5, 'flashcard');
+  console.log(
+    `     tests red   → earned=${red.earned}  answer in payload: ${JSON.stringify(red).includes(LESSON) ? bad('LEAKED') : ok('no — the field is absent')}`,
+  );
+  console.log(
+    `     tests green → earned=${green.earned}  ${green.earned ? ok('answer released') : bad('still withheld')}`,
+  );
+  console.log(`     earned by   ${green.earnedBy?.origin}, which surfaced at ${green.earnedBy?.surfaced}`);
+  console.log(
+    `     junk output "looks fine to me" → ${(await call('flashcard', { project: 'safety-gear', role: 'cv', test_output: 'looks fine to me' })).earned === false ? ok('not accepted as passing') : bad('ACCEPTED')}`,
+  );
+
+  const done = await call('is_it_done', {
+    project: 'safety-gear',
+    role: 'cv',
+    log: JSON.stringify(progress.log),
+  });
+  h('is_it_done (built, but nothing verified)');
+  console.log(`  done=${done.done === false ? ok('false') : bad('true')} — ${done.blocking.length} condition(s) outstanding`);
+  console.log(`  e.g. "${done.blocking[0]}"`);
+  console.log(`  expected-unbuilt reconciliation: ${done.expected_unbuilt.map((e) => e.component).join(', ') || '(none)'}`);
+}
+
+/** A chain plan with the given labels — for the negative scope case. */
+function planWith(labels) {
+  return {
+    schema: 'lumina.plan/v1',
+    name: 'probe',
+    nodes: labels.map((label, i) => ({
+      id: `n${i}`,
+      type: 'component',
+      label,
+      position: { x: i * 200, y: 0 },
+      data: {},
+    })),
+    edges: labels.slice(1).map((_, i) => ({ id: `e${i}`, source: `n${i}`, target: `n${i + 1}` })),
+    order: labels.map((_, i) => `n${i}`),
+    entry: ['n0'],
+    terminal: [`n${labels.length - 1}`],
+    cyclic: false,
+    warnings: [],
+  };
+}
+
+/** Read the bundled plan out of the built app, so this script holds no copy of it. */
+async function bundledSafetyPlan() {
+  const mod = await import(
+    new URL('../sentinel/dist/modules/learn/fixtures.learn.js', import.meta.url).href
+  );
+  return JSON.parse(mod.SAFETY_PLAN_JSON);
 }
