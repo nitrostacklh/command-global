@@ -29,6 +29,7 @@
     "probe": "node scripts/probe-mcp.mjs",
     "walk": "node scripts/walk-mcp.mjs",
     "verify:live": "node scripts/verify-deployed.mjs",
+    "verify:fleet": "node scripts/verify-fleet.mjs",
     "check:docs": "node scripts/check_docs.mjs",
     "mcp": "node scripts/start-mcp.mjs"
   },

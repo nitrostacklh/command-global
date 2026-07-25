@@ -340,7 +340,22 @@ automatically redeploy."*
 
 ## 5b. ✅ DEPLOYED AND VERIFIED (2026-07-25)
 
-**Live:** `https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai`
+**Live — all three, verified over the wire 2026-07-26** with `npm run verify:fleet`:
+
+| | Service URL | Surface |
+|---|---|---|
+| **MCP-1** roster | `https://roster-6a654317-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` | 8 tools |
+| **MCP-2** sentinel | `https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` | 3 tools |
+| **MCP-3** profile | `https://profile-6a65408b-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` | 9 tools |
+
+> ⚠️ **The peers are not wired yet.** All three pass every surface check while
+> `roster_status` reports `PROFILE_URL` and `SENTINEL_URL` unset. That is not a
+> contradiction — a missing peer is a *supported state*, so a completely disconnected
+> fleet looks identical to a healthy one from outside. Set the three env vars below on
+> each service, then re-check `roster_status`. Until then there are three working
+> services rather than one product.
+
+**Live (MCP-2, historical):** `https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai`
 
 Deployed by path C from the `nitrostacklh/mentor-mcp` mirror. Re-check it any time — after
 every redeploy, and once immediately before the demo:
