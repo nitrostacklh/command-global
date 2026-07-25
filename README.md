@@ -5,6 +5,23 @@
 > Copilot finishes your code. This one makes you finish it — it shows you the exact
 > moment your build stopped matching your plan, and then it stops.
 
+**The submission is `sentinel/` — an MCP app built entirely with the official NitroStack
+TypeScript SDK.** It runs standalone: `explain_drift` takes no arguments and answers from a
+bundled demo project, with no network, no API key and no model. Everything else in this
+repo supports it. `lumina/` is a **companion design tool**, not part of the deployed app —
+it exists to produce one plain-JSON file (`lumina.plan/v1`) that MENTOR can also be handed
+directly.
+
+> ### 🟢 One failing test in this repo is deliberate — please read before judging
+>
+> `fixtures/pricing/build/pricing.test.js` **fails on purpose.** The broken build *is* the
+> demo: MENTOR's whole job is explaining why it broke, so it has nothing to explain if the
+> fixture is green. `npm run fixture:check` asserts the failure is still exactly where it
+> should be (`pricing.test.js:40`, `80 !== 72`) and **fails loudly if someone "fixes" it.**
+>
+> The project's own test suite is **65/65 passing** — `npm test`. Those are separate: run
+> `npm test` to judge the code, `npm run fixture:test` to see the student's bug.
+
 ---
 
 ## Read these in this order
@@ -14,7 +31,7 @@
 | **[`MENTOR-CONCEPT.md`](MENTOR-CONCEPT.md)** | **Start here.** *Why* — the product, the four-layer learning loop, and why it survives "isn't this Copilot?" |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | *How* — the one engine all six commanders run on (only MENTOR ships registered). Long, and worth it. |
 | **[`GAPS.md`](GAPS.md)** | *What's left* — prioritized, honest, and the file to open if you're picking this up. |
-| [`DEPLOY.md`](DEPLOY.md) | The NitroCloud → ChatGPT runbook. Contains the only true blocker. |
+| [`DEPLOY.md`](DEPLOY.md) | The NitroCloud runbook + the demo-video script. ChatGPT is optional — see below. |
 | [`fixtures/pricing/README.md`](fixtures/pricing/README.md) | The one demo project, all four layers. |
 
 **If you have five minutes:** read the pitch above, then `GAPS.md`'s one-paragraph
@@ -50,28 +67,67 @@ The joint is one file shape, `lumina.plan/v1` — plain JSON, no Lumina types. P
 [`lumina/export_plan.py`](lumina/export_plan.py), consumed by MENTOR. That decoupling is
 deliberate: the Python/React half and the TypeScript half agree on exactly one thing.
 
-> ⚠️ **MENTOR is not written yet.** The plan side is built and tested; the consumer is
-> the main outstanding work. See `GAPS.md` Gap 3.
+Both sides are built and tested. MENTOR does not require Lumina to run — the plan is an
+optional tool argument that defaults to the bundled fixture, because on NitroCloud the app
+cannot see a student's laptop (`GAPS.md` Gap 6).
 
 ---
 
-## Running it
+## Installation
+
+**Prerequisites:** Node.js 20.x LTS (18+ works), npm, Git. Python 3.10+ **only** if you
+want the `lumina/` companion tool — the submission itself does not need Python.
 
 ```bash
+git clone https://github.com/nitrostacklh/command-global.git
+cd command-global
 npm run install:all      # deps for sentinel/ and lumina/
-npm run verify           # sentinel build + 32 tests + regenerate the fixture plan
+npm run verify           # sentinel build + 65 tests + fixture guard + plan regen
 ```
 
-### The MCP app — `sentinel/`
+`npm run verify` is the one command that tells you the repo is healthy. It should end with
+`65/65 pass` and four `ok` lines from the fixture guard.
+
+## Environment setup
+
+**Nothing is required to run MENTOR.** No API key, no `.env`, no network, no model — this
+is a design property, not an oversight (see *Why it needs no model* below), and it is why
+`npm test` passes on a fresh clone with the network off.
+
+[`.env.example`](.env.example) documents every variable the wider repo can *optionally*
+use — copy it to `.env` only if you want the `lumina/` companion's cloud-model fallbacks or
+the Python reference's connectors. `.env` is gitignored and no secrets are committed.
+
+| Variable | Needed for | Required? |
+|---|---|---|
+| *(none)* | `sentinel/` — the submission | ✅ runs with zero config |
+| `GEMINI_API_KEY` etc. | `lumina/` optional cloud fallback; it prefers local Ollama | optional |
+
+## Usage
+
+### The MCP app — `sentinel/` (the submission)
 
 ```bash
 npm run sentinel:dev     # then open the sentinel/ folder in NitroStudio
 npm test                 # 65/65, fully offline — no API key, no network, no model
 ```
 
-Point NitroStudio at the **`sentinel/` subfolder**, not the repo root.
+Point NitroStudio at the **`sentinel/` subfolder**, not the repo root — Studio validates a
+folder by `package.json` + `src/index.ts` + `@nitrostack/core`.
 
-### The design canvas — `lumina/`
+Then ask a connected MCP client *"a student's pricing test is failing — when did they go
+wrong?"*. It calls `explain_drift`, which needs no arguments, and renders the
+**causal-timeline** widget. Ask it to fix the bug and `withhold_fix` will decline — that is
+the product, not a missing feature.
+
+**Why it needs no model:** in MCP the *client* supplies the model. MENTOR's own work is an
+ordering comparison, a weighted formula, and a refusal — there is nothing to generate. So
+it runs offline, with no API key and no per-student cost.
+
+### The design canvas — `lumina/` *(companion tool, not part of the submission)*
+
+Next.js + FastAPI, so it is deliberately **outside** the deployed MCP app. Its only contract
+with MENTOR is one plain-JSON file. You can judge the submission without ever running it.
 
 ```bash
 cd lumina
