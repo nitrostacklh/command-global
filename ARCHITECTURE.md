@@ -653,9 +653,19 @@ Lumina, MENTOR has nothing to compare to and degrades into "an AI explaining a s
 trace." It is the load-bearing piece of the differentiation, not a bolt-on.
 
 **Q: Does the monorepo break the NitroCloud deploy?**
-Possibly — NitroCloud's "Connect Repository" flow assumes the repo root *is* the
-NitroStack project, and here the project is in `sentinel/`. See **`GAPS.md` Gap 1** for the
-`git subtree` mitigation. **Verify this before anything else**; it is the only true blocker.
+**No.** Studio's *Deploy* button bundles and uploads the **connected project folder**
+(`sentinel/`), so the repo layout never enters into it — and a `.zip` upload works the same
+way (limit 100 MB; `sentinel/` is 0.21 MB). Only *GitHub auto-deploy* cares about the repo
+root, and that's a push-to-deploy convenience with a `git subtree` mirror already wired
+(`npm run push:sentinel`). See `DEPLOY.md` for all three paths and `GAPS.md` Gap 1.
+
+**Q: How does Studio actually start the app?**
+`npx tsx src/index.ts`, from the project folder — **not** `npm run dev`. It auto-runs
+`npm install` first if dependencies are missing. Which is why `tsx` is an explicit
+`devDependency`: without it `npx` fetches `tsx` at every launch, and that fails on a flaky
+network or a locked npm cache (it did here). Studio also validates a folder by looking for
+`package.json` + `src/index.ts` + `@nitrostack/core` — so point it at **`sentinel/`**; the
+monorepo root has only the first and is correctly rejected.
 
 ---
 

@@ -120,12 +120,20 @@ working human-approval UI.
 | | |
 |---|---|
 | Platform (5 commanders + coordinator + trust layer) | ✅ complete, 32/32 |
+| Studio launch path (`npx tsx src/index.ts`) | ✅ verified — 20 tools over stdio |
 | Lumina → MENTOR plan contract | ✅ built + tested (15/15) |
-| The demo fixture, all inputs | ✅ complete and verified |
-| **MENTOR itself** | ⬜ **not started** — `GAPS.md` Gap 3 |
+| The demo fixture, all inputs | ✅ complete, verified, and guarded |
+| **MENTOR itself** | ⬜ **not started** — `GAPS.md` Gap 3 ← **critical path** |
 | `causal-timeline` widget | ⬜ not started — Gap 4 |
-| **Deployed to NitroCloud** | ⬜ **the blocker** — Gap 1, ~5 min to de-risk |
+| Deployed to NitroCloud | ⬜ not done, but **de-risked** — `DEPLOY.md` path A ignores the monorepo layout |
+| ChatGPT Plus/Pro on the team | ❓ **confirm this** — Developer mode is paywalled, Gap 1 |
 | Evidence study (n=5) | ⬜ not run — Gap 7 |
 
-**Next action:** Gap 1. Open the NitroCloud *Connect Repository* dialog and check
-whether it has a Root Directory field. Everything else is downstream of a green deploy.
+**Next action:** build MENTOR (Gap 3). The deploy turned out not to be the blocker —
+Studio deploys the connected *folder*, so `sentinel/` ships regardless of the repo shape.
+Two things to settle first because they change the code you'd write: **Gap 2** (Lumina
+can't draw a software architecture yet) and **Gap 3b** (the engine can't finish without
+deploying a fix, which is the one thing MENTOR must never do).
+
+Alongside that, make sure someone on the team has **ChatGPT Plus or Pro** — Developer mode
+requires it and nothing in this repo can route around it.

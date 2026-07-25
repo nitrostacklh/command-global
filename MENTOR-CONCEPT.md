@@ -267,7 +267,7 @@ This document describes the full vision. The submission is a subset, deliberatel
 - [x] Lumina graph as the plan input — **integration cost was small**, and it's done:
       `lumina.plan/v1` + the **Plan** button. See §3 Layer 3.
 - [ ] The refusal: MENTOR names the origin and declines to write the fix
-- [ ] ≤3-min demo video *(script drafted — `DEPLOY.md` §6a)*
+- [ ] ≤3-min demo video *(script drafted — `DEPLOY.md` §7a)*
 
 ### Roadmap — say it on the last slide, don't build it
 - Comic-styled panels for Layer 2 *(build only if the deploy is already green)*
