@@ -22,7 +22,28 @@ it breaks MENTOR shows them the exact moment their build stopped matching their 
 refuses to write the fix.** The refusal is the product. Every architectural decision in this
 repo exists to protect it.
 
-## The three apps
+## Four repos, three apps — read this before you touch git
+
+You work in **one** repo, `command-global`. It contains three deployable apps as
+subdirectories. Each app *also* exists as its own GitHub repo, because NitroCloud's Connect
+Repository dialog has **no Root Directory field** — it deploys a repo at that repo's root, so
+an app in a subdirectory cannot be deployed by it. Those three extra repos are **mirrors**:
+generated, one-way, never edited by hand.
+
+```
+command-global/  ← you work HERE. The only repo with history you author.
+├── mcp-roster/   ─ mirror ─▶  nitrostacklh/mentor-roster    ─▶ NitroCloud (MCP-1)  ← yours
+├── sentinel/     ─ mirror ─▶  nitrostacklh/mentor-mcp       ─▶ NitroCloud (MCP-2)  ← NOT yours
+├── mcp-profile/  ─ mirror ─▶  nitrostacklh/mentor-profile   ─▶ NitroCloud (MCP-3)  ← yours
+└── shared/       ─ copied into all three by `npm run sync:shared`
+```
+
+**All three are already deployed and live**, verified over the wire — 8 / 3 / 9 tools, each
+serving its own surface. URLs are in `DEPLOY.md`. You do not deploy anything and you never
+run `npm run push`; that is Stream A's, and two force-pushes racing on one mirror is the one
+way to actually lose work here. Commit to a branch and open a PR — Stream A pushes.
+
+**Never commit inside a mirror repo.** The next push force-overwrites it, silently.
 
 | | Folder | Owns |
 |---|---|---|
@@ -42,8 +63,12 @@ is wrong.
 ### B1 — Port the 58 deleted tests. This is the urgent one.
 
 The three-way split moved `learn/` and `registrar/` out of `sentinel/` into the new apps and
-**deleted their test files without recreating them.** `mcp-profile` is deployed to the cloud
-right now with **zero tests**. It builds, it runs, and nothing proves it behaves.
+**deleted their test files without recreating them.** `mcp-profile` is serving live traffic
+right now — 9 tools, publicly reachable — with **zero tests**. It builds, it runs, and
+nothing proves it behaves. That is the single weakest point in the product today.
+
+Current real counts, so you can tell when you are done: **sentinel 47 · mcp-roster 14 ·
+mcp-profile 0**. Any number you report must be one you watched print.
 
 Recover the originals from git — they are good tests, and rewriting from scratch loses the
 edge cases their authors already found:

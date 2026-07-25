@@ -22,48 +22,84 @@ it breaks MENTOR shows them the exact moment their build stopped matching their 
 refuses to write the fix.** The refusal is the product. Every architectural decision in this
 repo exists to protect it.
 
-## The three apps
+## Four repos, three apps — read this before you touch git
 
-| | Folder | Mirror repo | Owns |
+You work in **one** repo, `command-global`. It contains three deployable apps as
+subdirectories. Each app *also* exists as its own GitHub repo, because NitroCloud's Connect
+Repository dialog has **no Root Directory field** — it deploys a repo at that repo's root, so
+an app in a subdirectory cannot be deployed by it. Those three extra repos are **mirrors**:
+generated, one-way, never edited by hand.
+
+```
+command-global/  ← you work HERE. The only repo with history you author.
+├── mcp-roster/   ─ subtree push ─▶  nitrostacklh/mentor-roster    ─▶ NitroCloud (MCP-1)
+├── sentinel/     ─ subtree push ─▶  nitrostacklh/mentor-mcp       ─▶ NitroCloud (MCP-2)
+├── mcp-profile/  ─ subtree push ─▶  nitrostacklh/mentor-profile   ─▶ NitroCloud (MCP-3)
+└── shared/       ─ copied into all three by `npm run sync:shared`
+```
+
+| | Folder | Owns | Live |
 |---|---|---|---|
-| MCP-1 | `mcp-roster/` | `nitrostacklh/mentor-roster` | catalog, role-scoped briefs, lessons, checkpoint spec |
-| MCP-2 | `sentinel/` | `nitrostacklh/mentor-mcp` | verification, drift, the build verdict |
-| MCP-3 | `mcp-profile/` | `nitrostacklh/mentor-profile` | the student record, and the flashcards |
+| MCP-1 | `mcp-roster/` | catalog, role-scoped briefs, lessons, checkpoint spec | `roster-6a654317-…` |
+| MCP-2 | `sentinel/` | verification, drift, the build verdict | `mentor-6a64f852-…` |
+| MCP-3 | `mcp-profile/` | the student record, and the flashcards | `profile-6a65408b-…` |
 
-They share nothing but `shared/`, copied into each app by `npm run sync:shared`. They talk to
-each other over HTTP via `shared/peer.ts`. **MCP-3 is the only process that ever holds a
-flashcard answer** — that is a load-bearing invariant, not filing. If a task ever seems to
-want an answer in MCP-1 or MCP-2, the task is wrong.
+*(full URLs are in `DEPLOY.md`; the host suffix is
+`the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai`)*
 
-`npm run push` pushes the monorepo to `origin` and force-pushes each subtree to its mirror.
-**Mirrors are one-way** — never commit inside one.
+**`npm run push`** commits nothing — it pushes `command-global` to `origin` and then
+force-pushes each subtree to its mirror, which makes NitroCloud redeploy that app. So the
+normal loop is: commit here → `npm run push` → the right app redeploys. A mirror only moves
+when its own folder changed; a commit touching only root-level files updates `origin` alone,
+and that is correct rather than a failure.
+
+**Never commit inside a mirror.** The next push force-overwrites it and the work is gone with
+no warning.
+
+**MCP-3 is the only process that ever holds a flashcard answer** — a load-bearing invariant,
+not filing. A bug anywhere else cannot leak what the student is meant to earn, because the
+string is not in that process. If a task ever seems to want an answer in MCP-1 or MCP-2, the
+task is wrong.
 
 ## Your three tasks, in order
 
-### A1 — Deploy all three to NitroCloud, and prove they are live
+### A1 — Wire the peers, and fix the verifier that lies
 
-The mirrors already exist and are current. NitroCloud's Connect Repository dialog has **no
-Root Directory field** (confirmed in the real console — `DEPLOY.md` §5), which is the entire
-reason the mirrors exist: each mirror's *root* is an app.
+**All three are already deployed and verified.** `npm run verify:fleet -- <three urls>`
+passes: 8 / 3 / 9 tools, each app serving its own surface and only its own, no flashcard
+answer present in MCP-1 or MCP-2. `open_lesson`'s gate was driven on the live roster too.
+Do not redo this.
 
-1. For each of the three mirrors: New Project → Connect GitHub → select repo → deploy.
-2. Collect the three service URLs.
-3. Set the peer env vars on each service. Each app needs the **other two**:
-   ```
-   ROSTER_URL   = https://<roster>/
-   SENTINEL_URL = https://<sentinel>/
-   PROFILE_URL  = https://<profile>/
-   MENTOR_PEER_TOKEN = <shared secret>   # optional; sent as a bearer token
-   ```
-4. **Verify over the wire, do not assume.** `npm run verify:live` exists for this. A missing
-   peer is a *supported state* rather than a crash, so a half-configured deployment looks
-   healthy — call `roster_status`, which reports which peers it can actually reach, and make
-   it say all of them.
+Two things remain.
 
-Extend `scripts/verify-deployed.mjs` to cover all three services if it only covers one.
+**A1a — the peers are unset.** `roster_status` on the live service reports
+`PROFILE_URL` and `SENTINEL_URL` both `configured: false`. Every check above passes anyway,
+because a missing peer is a *supported state* rather than a crash — which means **a fully
+disconnected fleet is indistinguishable from a healthy one** unless you ask this exact
+question. Right now there are three working services and not one product.
 
-**Deliverable:** three live URLs, `verify:live` green against each, and `DEPLOY.md` updated
-with the real URLs and anything that surprised you.
+In NitroCloud, set env vars per service. Each app needs the **other two**:
+
+| Service | Set |
+|---|---|
+| roster | `SENTINEL_URL` `PROFILE_URL` |
+| sentinel | `ROSTER_URL` `PROFILE_URL` |
+| profile | `ROSTER_URL` `SENTINEL_URL` |
+
+Values are the three live URLs in `DEPLOY.md`. `MENTOR_PEER_TOKEN` is **optional** — a shared
+secret sent as a bearer header between the services when set. Leave it unset unless asked;
+the services already admit anonymous callers by design, so it buys little here. Redeploy,
+then confirm with `roster_status` that every peer reports reachable.
+
+**A1b — `npm run verify:live` is wrong and will fail all three.** Its `EXPECTED_TOOLS` is the
+pre-split **13-tool single-server** list, from when this was one app. Either retire it in
+favour of `scripts/verify-fleet.mjs`, or teach it to resolve its expectation from
+`serverInfo.name` the way the fleet checker does. Do not "fix" it by widening the expected
+list until it passes — the point of that assertion is to catch an app serving another app's
+verbs.
+
+**Deliverable:** `roster_status` reporting all peers reachable, and one verify command that
+tells the truth about all three.
 
 ### A2 — Make `npm run verify` green again
 
