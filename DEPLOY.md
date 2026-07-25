@@ -12,11 +12,11 @@ hour"*). **Read the box below first** — the fastest path is Studio's Deploy bu
 > |---|---|
 > | `git push origin main` | ✅ **pushed** — MENTOR is on GitHub, `main` green |
 > | `npm run build` in `sentinel/` | ✅ clean — `dist` + `src/widgets/out/` |
-> | `npm run verify` at root | ✅ 109/109 + fixture guard (Node-only) · `verify:all` adds the plan-determinism check |
+> | `npm run verify` at root | ✅ 128/128 + fixture guard (Node-only) · `verify:all` adds the plan-determinism check |
 > | **clean `git clone` → `install:all` → `verify`** | ✅ passes with nothing pre-installed — the judge's path |
 > | `npm run build` in `lumina/` | ✅ Next.js production build clean, 6 routes |
 > | `prompts/get debugging_tutor` | ✅ **fixed** — every `@Prompt` returned the wrong shape and had never worked |
-> | **built** server over stdio, via `npm run mcp` | ✅ `initialize` → **`mentor 1.0.0`**; `tools/list` → **10 tools**, the six stages of the loop |
+> | **built** server over stdio, via `npm run mcp` | ✅ `initialize` → **`mentor 1.0.0`**; `tools/list` → **13 tools**, the six stages of the loop |
 > | `npm run walk` | ✅ the nine-turn student journey asserted over real MCP |
 > | `explain_drift` on the built artifact | ✅ origin `tax @ build/pricing.js:12`, confidence **0.91**, `fix_withheld: true` |
 > | `resources/list` | ✅ advertises **only** `causal-timeline` (+ health, examples) — `mission-trace` removed |
@@ -99,7 +99,7 @@ and cloud deploy all require being signed in.** Two ways: *Continue with NitroCl
 cd sentinel
 npm install
 npm run build      # ✓ Widgets bundled + TypeScript compiled
-npm test           # ✓ 109/109
+npm test           # ✓ 128/128
 ```
 
 From the monorepo root, `npm run sentinel:build` and `npm test` do the same thing.
@@ -128,7 +128,7 @@ From the monorepo root, `npm run sentinel:build` and `npm test` do the same thin
 > launch — which fails on a flaky network or a locked npm cache (seen here: `EPERM` on
 > cache cleanup, server never started, no output). It is now a `devDependency`, so the
 > launch is deterministic and offline. **Verified:** `npx tsx src/index.ts` serves
-> `initialize` as `mentor 1.0.0` and returns **10 tools** — `browse_catalog`, `open_brief`,
+> `initialize` as `mentor 1.0.0` and returns **13 tools** — `browse_catalog`, `open_brief`,
 > `check_scope`, `checkpoints`, `record_progress`, `is_it_done`, `explain_drift`,
 > `withhold_fix`, `flashcard`, `mentor_status`. Those are the six stages of one loop
 > (`GAPS.md` Gap 12).
@@ -232,7 +232,7 @@ npm run build                  → Installing widget dependencies...  ✓
                                  Bundling widgets...  ✓ (2 widgets)
                                  Compiling TypeScript...  ✓
                                  Build Complete (48.5s)   exit 0
-node dist/index.js             → mentor 1.0.0, 10 tools
+node dist/index.js             → mentor 1.0.0, 13 tools
 ```
 
 **`nitrostack-cli build` installs the widget dependencies itself**, so a plain
@@ -280,7 +280,7 @@ automatically redeploy."*
 > |---|---|
 > | `npm install` | ✅ 330 packages — **including `src/widgets/node_modules`**, so the nested widget deps need no separate step |
 > | `npm run build` | ✅ 5.7s — `src/widgets/out/` (2 widgets) + `dist` |
-> | `node dist/index.js` over stdio | ✅ `mentor 1.0.0`, **10 tools** |
+> | `node dist/index.js` over stdio | ✅ `mentor 1.0.0`, **13 tools** |
 >
 > The cwd trap that `scripts/start-mcp.mjs` exists to work around does **not** affect a
 > deployment: the platform runs the app from its own project root, which is the condition the
@@ -349,7 +349,7 @@ every redeploy, and once immediately before the demo:
 npm run verify:live -- https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai
 ```
 
-**16/16 against the live service**: `mentor 1.0.0` · exactly 10 tools, all six stages, nothing
+**16/16 against the live service**: `mentor 1.0.0` · exactly 13 tools, all six stages, nothing
 extra · **no tool that can modify a student's build** · `causal-timeline` served and
 `mission-trace` not · `explain_drift` → `tax @ build/pricing.js:12`, confidence **0.91**,
 `fix_withheld` · catalog and brief bundled · **the flashcard's answer appears nowhere in a

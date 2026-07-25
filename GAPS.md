@@ -9,7 +9,7 @@
 
 ## The one-paragraph summary
 
-**MENTOR is built** (Gap 3) **and so is its widget** (Gap 4). 109/109 tests green, verified
+**MENTOR is built** (Gap 3) **and so is its widget** (Gap 4). 128/128 tests green, verified
 end-to-end over real MCP: `explain_drift` returns the exact claim the concept doc promises —
 origin `pricing.js:12`, error surfaced at `pricing.test.js:40`, confidence 0.91 computed
 rather than hardcoded — and the causal-timeline widget renders it with the fix withheld and
@@ -54,7 +54,7 @@ the lesson panels, is now the only stage of the loop with nothing behind it** (G
 | 6 | ~~Plan can't reach a deployed MENTOR~~ | ✅ **resolved** — tool argument | done |
 | 3 | ~~MENTOR doesn't exist~~ | ✅ **built** | done |
 | 4 | ~~`causal-timeline` widget~~ | ✅ **built** | done |
-| 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 → 3, now 10 on one story | done |
+| 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 → 3, now 13 on one story | done |
 | 15 | ~~Docs asserted counts the code owns, and drifted~~ | ✅ **fixed** — `npm run check:docs` | done |
 
 *Reordered 2026-07-25 (five times): after the Studio handbook downgraded Gap 1, after MENTOR
@@ -95,7 +95,7 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 
 - **`sentinel/` calls no LLM at all.** Verified: zero LLM references in its own source, zero
   outbound HTTP, four dependencies (`@nitrostack/core`, `@modelcontextprotocol/ext-apps`,
-  `dotenv`, `zod`), and 109/109 tests pass with no key and no network. In MCP the *client* model
+  `dotenv`, `zod`), and 128/128 tests pass with no key and no network. In MCP the *client* model
   is the agent (`ARCHITECTURE.md` §2, Idea 2), and MENTOR needs one least of all six
   commanders — drift detection is an ordering comparison, the confidence is a formula, the
   refusal is hardcoded. **There is nothing to generate.**
@@ -115,7 +115,7 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 per-student cost.* Schools cannot buy Copilot seats for every student, and that argument
 lands with an education judge while reinforcing the §5 incentive moat.
 
-> **Verified:** `sentinel/` builds and passes 109/109 from its new path, and
+> **Verified:** `sentinel/` builds and passes 128/128 from its new path, and
 > `npx tsx src/index.ts` — Studio's actual launch command — serves `initialize` +
 > `tools/list` over stdio with every tool registered. Also fixed along the way: **`tsx`
 > was not a declared dependency**, so Studio's launch relied on `npx` fetching it and
@@ -156,7 +156,7 @@ what a wired canvas produces.
 **MENTOR's finding did not change** — origin still `tax @ build/pricing.js:12`,
 confidence still **0.91**, failure still `pricing.test.js:40`. That was the prediction
 when this gap was opened ("switching to A requires no change to the plan artifact"), and
-it held: 109/109 tests pass untouched, and `fixture:check` confirms the embedded copies
+it held: 128/128 tests pass untouched, and `fixture:check` confirms the embedded copies
 still match disk.
 
 <details>
@@ -458,11 +458,11 @@ fifteen platform tool names finds none of them.
 
 | Check | Result |
 |---|---|
-| `cd sentinel && npm test` | ✅ **109/109 pass** (32 platform + 33 MENTOR) |
+| `cd sentinel && npm test` | ✅ **128/128 pass** (32 platform + 33 MENTOR) |
 | `explain_drift` over real MCP (`node dist/index.js`, stdio) | ✅ origin `tax @ build/pricing.js:12`, planned 3rd / built 2nd |
 | … its confidence | ✅ **0.91**, computed from 5 signals; engine gate **0.964 autonomous** |
 | … its refusal | ✅ `fix_withheld: true` + a follow-up question, not a patch |
-| `tools/list` | ✅ **10 tools, all one loop** — was 3 after Gap 11; +7 for the bridges (Gap 12) |
+| `tools/list` | ✅ **13 tools, all one loop** — was 3 after Gap 11; +7 for the bridges (Gap 12) |
 | `npm run probe` — all six stages over real MCP | ✅ every bridge green, refusal check still `none` |
 | `npx tsx src/index.ts` — Studio's real launch command | ✅ serves the full tool list over stdio |
 | Studio project validity | ✅ `sentinel/` valid · monorepo root correctly **invalid** |
@@ -656,4 +656,71 @@ Any number in prose that the code also knows is a latent contradiction. Either d
 check it. This repo now checks tool counts, fixture state (`fixture:check`), embedded-copy
 sync (`embed_learn_fixtures --check`), and the student journey (`walk`) — four different
 places where docs and code could previously have drifted apart silently.
+
+
+---
+
+## Gap 16 — Student work did not survive the conversation ✅ **FIXED** (2026-07-25)
+
+Every tool was pure and the client held the progress log. Right for a stateless deploy, and
+it had one cost nobody had said out loud: **close the chat and the student's afternoon was
+gone.** The checkpoint log only ever existed in the transcript.
+
+**REGISTRAR** (`sentinel/src/modules/registrar/`) fixes that — identity, storage, and one
+instructor view.
+
+### The three decisions worth defending
+
+**1. Persistence added no verbs.** `record_progress` gained a server side *invisibly*; there
+is no `save` tool. Saving is a consequence of working rather than something to remember. The
+surface went 10 → 13, and the three are the parts a student must actually ask for: `whoami`
+(am I being kept?), `resume` (what was I doing?), `class_progress` (instructors only).
+
+**2. There is deliberately no `query` / `execute_sql`.** A generic database tool hands the
+client's model arbitrary access to every student's record, and *"the model only runs safe
+queries"* is not a security model. Every operation here is named, with the identity check
+compiled in, so there is no path from a prompt to a table.
+
+**3. Anonymous is stateless, and `npm run walk` is why.** The first cut had every caller fall
+back to stored progress. The walk immediately failed on *"no log at all → 7 blocking"*, and
+the reason was worse than a broken assertion: **every anonymous caller shares one identity**,
+so one judge's run would surface in the next judge's session and the demo would stop being
+deterministic. Anonymous now never reads or writes storage. Persistence is exactly for the
+people it is for.
+
+### Durability is reported, never assumed
+
+The durable backend is **`node:sqlite`** — Node's standard library, so it adds **zero
+dependencies**, which matters under a rule that says to use no SDK but NitroStack's. No
+driver, no native build, no connection string.
+
+The catch is real: `node:sqlite` needs **Node 22.5+**, and **NitroCloud builds on Node 20**.
+So on the deployed service it will almost certainly be missing. That is handled by detection
+and honest reporting rather than a crash — `openStore()` falls back to memory, explains why,
+and `whoami` surfaces it to the student. An exception at startup would have taken the whole
+demo down to protect a feature nobody had relied on yet, and silently pretending progress was
+safe would be worse still.
+
+| | |
+|---|---|
+| `MENTOR_STORE` unset | memory · survives the conversation and reconnecting, not a restart |
+| `MENTOR_STORE=sqlite`, Node 22.5+ | durable at `MENTOR_DB_PATH` |
+| `MENTOR_STORE=sqlite`, Node 20 | **memory, with the reason stated** — not an error |
+
+### What is still open
+
+- **Nothing durable on the deployed service.** Until NitroCloud offers Node 22 or a managed
+  database, live progress is per-restart. `whoami` tells the student that; it is honest, not
+  fixed. Adding a Postgres adapter is one file behind the existing `ProgressStore` interface
+  if a connection string ever appears — and it would cost the "no secret, no network" line.
+- **Auth is wired but no issuer is configured.** The SDK supplies `JWTModule` /
+  `ApiKeyModule` / `OAuthModule`; `resolveIdentity` reads `context.auth.subject` and takes the
+  instructor role from an `instructor` scope or a `role` claim. Until an issuer is registered
+  in `app.module.ts`, every caller is anonymous — so identity and RBAC are **implemented and
+  tested but not yet exercised end to end against a real token.** Do not claim otherwise.
+
+> **Verified:** 128/128 (was 109) — 19 new tests covering the store contract against both
+> backends, role extraction from scopes *and* claims, an unauthenticated caller presenting an
+> instructor scope being refused, and the fallback-not-throw path. `npm run walk` and
+> `npm run check:docs` green.
 

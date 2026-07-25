@@ -36,6 +36,7 @@ file you can print.
 
 | Stage | Lives in | Does |
 |---|---|---|
+| **⓪ Identity** | **`sentinel/src/modules/registrar/`** — REGISTRAR | who is asking, and whether their progress is being kept. Anonymous is a supported state, so a judge with no account still gets the whole loop |
 | **① Path · ② Role** | **`sentinel/src/modules/learn/`** — ROSTER | a curated catalog of exemplary projects, then the **role-scoped brief**: the components you own, the ones another role hands you, and the ones that are explicitly not your job |
 | 2 · Lesson | *roadmap* | the concept as interactive panels, not documentation |
 | **③ Design** | **`lumina/`** | the student draws components + data flow, then exports `lumina.plan/v1` — **the machine-readable record of intent, and the thing no comparable tool has** |
@@ -81,7 +82,7 @@ its own.
 > fixture is green. `npm run fixture:check` asserts the failure is still exactly where it
 > should be (`pricing.test.js:40`, `80 !== 72`) and **fails loudly if someone "fixes" it.**
 >
-> The project's own test suite is **109/109 passing** — `npm test`. Those are separate: run
+> The project's own test suite is **128/128 passing** — `npm test`. Those are separate: run
 > `npm test` to judge the code, `npm run fixture:test` to see the student's bug.
 
 ---
@@ -109,7 +110,7 @@ summary. That tells you the state of things faster than anything else here.
 
 ```
 command-global/
-├── sentinel/                  ⭐ the deliverable — TS NitroStack MCP app, 109/109 tests
+├── sentinel/                  ⭐ the deliverable — TS NitroStack MCP app, 128/128 tests
 │   ├── src/modules/learn/        ROSTER + COACH — and card.ts, whose tool MENTOR exposes
 │   └── src/modules/mentor/       MENTOR: explain_drift, withhold_fix, flashcard
 ├── lumina/                    stage ③ — the canvas the student designs in (Next.js + FastAPI)
@@ -138,7 +139,7 @@ history — the platform arrives at `1e4067a` as a consolidation of earlier work
 `b0531b6`.
 
 **Four of those five commanders are still here, still tested, and deliberately unregistered.**
-The deployed server offers 10 tools and all 10 are MENTOR's loop. The reason for cutting them
+The deployed server offers 13 tools and all 10 are MENTOR's loop. The reason for cutting them
 is not tidiness: `self_heal` runs on the *same* pricing service and the *same*
 tax-before-discount bug as MENTOR's fixture, and its description offers to patch, prove and
 deploy the fix. Ask a model *"the pricing test is failing, help"* next to that tool and it
@@ -186,11 +187,11 @@ want the `lumina/` companion tool — the submission itself does not need Python
 git clone https://github.com/nitrostacklh/command-global.git
 cd command-global
 npm run install:all      # deps for sentinel/ and lumina/
-npm run verify           # sentinel build + 109 tests + the fixture guard
+npm run verify           # sentinel build + 128 tests + the fixture guard
 ```
 
 `npm run verify` is the one command that tells you the repo is healthy. It should end with
-`109/109 pass` and four `ok` lines from the fixture guard. **It needs only Node** — no Python,
+`128/128 pass` and four `ok` lines from the fixture guard. **It needs only Node** — no Python,
 no network, no key. Verified from a clean `git clone` on a machine with nothing installed.
 
 `npm run verify:all` additionally re-derives the fixture's plan through Lumina's exporter and
@@ -225,7 +226,7 @@ the Python reference's connectors. `.env` is gitignored and no secrets are commi
 
 ```bash
 npm run sentinel:dev     # then open the sentinel/ folder in NitroStudio
-npm test                 # 109/109, fully offline — no API key, no network, no model
+npm test                 # 128/128, fully offline — no API key, no network, no model
 ```
 
 Point NitroStudio at the **`sentinel/` subfolder**, not the repo root — Studio validates a
@@ -304,8 +305,11 @@ working human-approval UI.
 | ⑤ drift → ⑥ flashcard | ✅ built + tested — answer absent from the payload until earned |
 | **`causal-timeline` widget** | ✅ **built** — renders the drift, withholds the fix |
 | The two demo projects, all inputs | ✅ complete, verified, and guarded |
-| Whole suite | ✅ **109/109**, offline, no API key, no model |
+| Whole suite | ✅ **128/128**, offline, no API key, no model |
 | Docs agree with the code | ✅ guarded — `npm run check:docs` reads the live tool list |
+| Student work survives the chat | ✅ REGISTRAR — identity + storage, **no `save` verb added** — Gap 16 |
+| Durable storage on the deployed service | ⬜ NitroCloud is Node 20; `node:sqlite` needs 22.5, so live progress is per-restart **and says so** |
+| Auth exercised against a real token | ⬜ implemented + tested, no issuer configured yet — Gap 16 |
 | **Deployed to NitroCloud** | ✅ **LIVE and verified** — 16/16 over the wire, `npm run verify:live` |
 | Can a student really draw this in Lumina? | ✅ **yes** — real `component` node, verified in-browser end to end |
 | Layer 2 · the lesson panels | ⬜ roadmap — the one stage of the loop still missing |

@@ -97,7 +97,7 @@ npm run probe
 Compare against this exactly:
 
 - [ ] `server` → **`mentor 1.0.0`** *(not `command-platform`)*
-- [ ] `tools (10)` → **exactly these, in this order** — the order matters, it is the order a
+- [ ] `tools (13)` → **exactly these, in this order** — the order matters, it is the order a
       student meets them, and it is how a client's model can tell which stage they're in:
 
       browse_catalog   open_brief                    ← ROSTER  (stages ① ②)
@@ -466,7 +466,7 @@ npm run install:all && npm run verify
 ```
 
 - [ ] Both succeed following **only** what the README says
-- [ ] `109/109`
+- [ ] `128/128`
 - [ ] You never needed Python, an API key, or a network call to the model
 
 - [ ] Read the README as if you'd never seen it. Could you explain the product back in one
