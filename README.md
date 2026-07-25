@@ -81,7 +81,7 @@ its own.
 > fixture is green. `npm run fixture:check` asserts the failure is still exactly where it
 > should be (`pricing.test.js:40`, `80 !== 72`) and **fails loudly if someone "fixes" it.**
 >
-> The project's own test suite is **107/107 passing** — `npm test`. Those are separate: run
+> The project's own test suite is **109/109 passing** — `npm test`. Those are separate: run
 > `npm test` to judge the code, `npm run fixture:test` to see the student's bug.
 
 ---
@@ -108,7 +108,7 @@ summary. That tells you the state of things faster than anything else here.
 
 ```
 command-global/
-├── sentinel/                  ⭐ the deliverable — TS NitroStack MCP app, 107/107 tests
+├── sentinel/                  ⭐ the deliverable — TS NitroStack MCP app, 109/109 tests
 │   └── src/modules/learn/        ROSTER + COACH: the catalog, briefs, checkpoints, card
 ├── lumina/                    stage ③ — the canvas the student designs in (Next.js + FastAPI)
 ├── fixtures/
@@ -157,11 +157,11 @@ want the `lumina/` companion tool — the submission itself does not need Python
 git clone https://github.com/nitrostacklh/command-global.git
 cd command-global
 npm run install:all      # deps for sentinel/ and lumina/
-npm run verify           # sentinel build + 107 tests + the fixture guard
+npm run verify           # sentinel build + 109 tests + the fixture guard
 ```
 
 `npm run verify` is the one command that tells you the repo is healthy. It should end with
-`107/107 pass` and four `ok` lines from the fixture guard. **It needs only Node** — no Python,
+`109/109 pass` and four `ok` lines from the fixture guard. **It needs only Node** — no Python,
 no network, no key. Verified from a clean `git clone` on a machine with nothing installed.
 
 `npm run verify:all` additionally re-derives the fixture's plan through Lumina's exporter and
@@ -196,7 +196,7 @@ the Python reference's connectors. `.env` is gitignored and no secrets are commi
 
 ```bash
 npm run sentinel:dev     # then open the sentinel/ folder in NitroStudio
-npm test                 # 107/107, fully offline — no API key, no network, no model
+npm test                 # 109/109, fully offline — no API key, no network, no model
 ```
 
 Point NitroStudio at the **`sentinel/` subfolder**, not the repo root — Studio validates a
@@ -275,7 +275,7 @@ working human-approval UI.
 | ⑤ drift → ⑥ flashcard | ✅ built + tested — answer absent from the payload until earned |
 | **`causal-timeline` widget** | ✅ **built** — renders the drift, withholds the fix |
 | The two demo projects, all inputs | ✅ complete, verified, and guarded |
-| Whole suite | ✅ **107/107**, offline, no API key, no model |
+| Whole suite | ✅ **109/109**, offline, no API key, no model |
 | Deployed to NitroCloud | ⬜ **next** — `DEPLOY.md` path A, ~30 min |
 | Can a student really draw this in Lumina? | ✅ **yes** — real `component` node, verified in-browser end to end |
 | Layer 2 · the lesson panels | ⬜ roadmap — the one stage of the loop still missing |

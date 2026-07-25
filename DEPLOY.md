@@ -12,7 +12,7 @@ hour"*). **Read the box below first** — the fastest path is Studio's Deploy bu
 > |---|---|
 > | `git push origin main` | ✅ **pushed** — MENTOR is on GitHub, `main` green |
 > | `npm run build` in `sentinel/` | ✅ clean — `dist` + `src/widgets/out/` |
-> | `npm run verify` at root | ✅ 107/107 + fixture guard (Node-only) · `verify:all` adds the plan-determinism check |
+> | `npm run verify` at root | ✅ 109/109 + fixture guard (Node-only) · `verify:all` adds the plan-determinism check |
 > | **clean `git clone` → `install:all` → `verify`** | ✅ passes with nothing pre-installed — the judge's path |
 > | `npm run build` in `lumina/` | ✅ Next.js production build clean, 6 routes |
 > | `prompts/get debugging_tutor` | ✅ **fixed** — every `@Prompt` returned the wrong shape and had never worked |
@@ -98,7 +98,7 @@ and cloud deploy all require being signed in.** Two ways: *Continue with NitroCl
 cd sentinel
 npm install
 npm run build      # ✓ Widgets bundled + TypeScript compiled
-npm test           # ✓ 107/107
+npm test           # ✓ 109/109
 ```
 
 From the monorepo root, `npm run sentinel:build` and `npm test` do the same thing.

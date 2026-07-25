@@ -9,7 +9,7 @@
 
 ## The one-paragraph summary
 
-**MENTOR is built** (Gap 3) **and so is its widget** (Gap 4). 107/107 tests green, verified
+**MENTOR is built** (Gap 3) **and so is its widget** (Gap 4). 109/109 tests green, verified
 end-to-end over real MCP: `explain_drift` returns the exact claim the concept doc promises —
 origin `pricing.js:12`, error surfaced at `pricing.test.js:40`, confidence 0.91 computed
 rather than hardcoded — and the causal-timeline widget renders it with the fix withheld and
@@ -94,7 +94,7 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 
 - **`sentinel/` calls no LLM at all.** Verified: zero LLM references in its own source, zero
   outbound HTTP, four dependencies (`@nitrostack/core`, `@modelcontextprotocol/ext-apps`,
-  `dotenv`, `zod`), and 107/107 tests pass with no key and no network. In MCP the *client* model
+  `dotenv`, `zod`), and 109/109 tests pass with no key and no network. In MCP the *client* model
   is the agent (`ARCHITECTURE.md` §2, Idea 2), and MENTOR needs one least of all six
   commanders — drift detection is an ordering comparison, the confidence is a formula, the
   refusal is hardcoded. **There is nothing to generate.**
@@ -114,7 +114,7 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 per-student cost.* Schools cannot buy Copilot seats for every student, and that argument
 lands with an education judge while reinforcing the §5 incentive moat.
 
-> **Verified:** `sentinel/` builds and passes 107/107 from its new path, and
+> **Verified:** `sentinel/` builds and passes 109/109 from its new path, and
 > `npx tsx src/index.ts` — Studio's actual launch command — serves `initialize` +
 > `tools/list` over stdio with every tool registered. Also fixed along the way: **`tsx`
 > was not a declared dependency**, so Studio's launch relied on `npx` fetching it and
@@ -155,7 +155,7 @@ what a wired canvas produces.
 **MENTOR's finding did not change** — origin still `tax @ build/pricing.js:12`,
 confidence still **0.91**, failure still `pricing.test.js:40`. That was the prediction
 when this gap was opened ("switching to A requires no change to the plan artifact"), and
-it held: 107/107 tests pass untouched, and `fixture:check` confirms the embedded copies
+it held: 109/109 tests pass untouched, and `fixture:check` confirms the embedded copies
 still match disk.
 
 <details>
@@ -439,7 +439,7 @@ fifteen platform tool names finds none of them.
 
 | Check | Result |
 |---|---|
-| `cd sentinel && npm test` | ✅ **107/107 pass** (32 platform + 33 MENTOR) |
+| `cd sentinel && npm test` | ✅ **109/109 pass** (32 platform + 33 MENTOR) |
 | `explain_drift` over real MCP (`node dist/index.js`, stdio) | ✅ origin `tax @ build/pricing.js:12`, planned 3rd / built 2nd |
 | … its confidence | ✅ **0.91**, computed from 5 signals; engine gate **0.964 autonomous** |
 | … its refusal | ✅ `fix_withheld: true` + a follow-up question, not a patch |
@@ -524,7 +524,7 @@ The number went up because the evidence improved.
    (ROSTER → COACH → MENTOR) so the shape is legible from `tools/list` alone. The refusal
    check in `npm run probe` still reports **no tool that can modify a student's build.**
 
-> **Verified:** 107/107 tests (was 67). `npm run probe` walks all six stages over real MCP
+> **Verified:** 109/109 tests (was 67). `npm run probe` walks all six stages over real MCP
 > against `safety-gear` and prints each artifact. `npm run fixture:check` now also asserts
 > the generated `fixtures.learn.ts` matches `fixtures/*.json`.
 >

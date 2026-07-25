@@ -31,7 +31,11 @@
 node -v
 ```
 
-- [ ] **Node is 20.x** (18 is Studio's hard minimum; 20 is what NitroCloud's images use)
+- [ ] **Node is 20.x** (18 is Studio's hard minimum; 20 is what NitroCloud's images use, and
+      the official NitroStack video pins **20.18.1**).
+      > This machine is on **v22.19.0** and everything builds and passes on it. Newer is
+      > normally fine — but if a *deploy* fails for no visible reason, switch to 20.18.1
+      > before suspecting anything else.
 
 ```bash
 cd /path/to/command-global
@@ -53,9 +57,11 @@ npm run install:all
 npm run verify
 ```
 
-- [ ] Ends with `# pass 67` and `# fail 0`
-- [ ] Then four `ok` lines from the fixture guard, ending
-      `ok    MENTOR's embedded plan + build + source match the files on disk`
+- [ ] Ends with `# pass 109` and `# fail 0`
+- [ ] Then five `ok` lines from the fixture guard, ending
+      `ok  fixtures.learn.ts matches fixtures/*.json`
+- [ ] Then `ALL CHECKS PASSED` from `npm run walk` — the nine-turn student journey
+      asserted over real MCP (`WALKTHROUGH.md` is the manual version)
 - [ ] **Needed only Node** — no Python was invoked
 
 ```bash
@@ -460,7 +466,7 @@ npm run install:all && npm run verify
 ```
 
 - [ ] Both succeed following **only** what the README says
-- [ ] `107/107`
+- [ ] `109/109`
 - [ ] You never needed Python, an API key, or a network call to the model
 
 - [ ] Read the README as if you'd never seen it. Could you explain the product back in one
