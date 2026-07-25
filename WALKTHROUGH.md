@@ -20,11 +20,21 @@ npm run sentinel:build
 
 Then open **this folder** in Claude Code. `.mcp.json` connects MENTOR automatically.
 
-Confirm it's live — you should see `mentor` listed with 10 tools:
+Confirm the server is sound before you blame the model for anything:
 
 ```bash
-npm run probe
+npm run walk
 ```
+
+That asserts all nine turns below over real MCP and exits non-zero on a regression, so
+anything you hit by hand afterwards is a *model* problem rather than a server problem.
+`npm run probe` prints the same journey for reading instead of asserting.
+
+> **Node version.** The official NitroStack video pins **20.18.1**; this machine is on
+> **v22.19.0** and everything builds and passes. Newer is normally fine — but if a *deploy*
+> misbehaves later, this is the first thing to change (`nvm use 20.18.1`), not the last.
+> `tsx` and `typescript` are declared devDependencies rather than global, which is what
+> Studio's `npx tsx src/index.ts` resolves. `tsc` does not need to be global.
 
 <details>
 <summary>Other clients, or if <code>.mcp.json</code> isn't picked up</summary>
@@ -145,15 +155,32 @@ The beat everything exists for.
 > check. The give-away is `provenance`: **0.8 / observed** means it used yours, **0.4 /
 > hand-authored** means it ignored you.
 
-**A verified detail worth knowing here.** If you only logged the four `implement`
-checkpoints and never told it the tests failed, `record_progress` returns a history with
-`failure: null`. Passing that through still names `tax @ pricing.js:12` correctly, but
-confidence is **0.87 not 0.97**, and MENTOR volunteers a caveat: *"no failure was reported —
-this describes where the build left the plan, not the cause of a symptom anyone has seen."*
-That is the honest answer, and it is the state you will actually be in mid-session.
+### ⚠️ The one thing that confused me when I ran this
 
-- [ ] If you skipped logging the test run, check that caveat appears. It should never present
-      an ordering claim as though it explained a failure it was never told about.
+**Expect 0.87 here, not 0.97 — and know why.** I hit this and briefly thought it was a bug.
+
+If you logged only the four `implement` checkpoints, `record_progress` hands back a history
+with `failure: null`. Pass it through and MENTOR still names `tax @ pricing.js:12` correctly,
+but confidence is **0.87**, with a caveat: *"no failure was reported — this describes where
+the build left the plan, not the cause of a symptom anyone has seen."*
+
+**And attaching a failure is not enough to fix it.** The `failureLink` signal needs a
+*recorded step in that file*. Bolt a `pricing.test.js:40` failure onto a history that only
+ever touched `pricing.js` and you still get 0.87, now saying *"the reported failure does not
+link to any recorded step."* Which is correct: you told it a test broke, and your own history
+never mentions that test.
+
+To reach **0.97** you must also log the test run — which is what a student really does, since
+running the tests is how they know it failed:
+
+> *"I ran the tests and criterion a1 failed, at pricing.test.js line 40."*
+
+- [ ] That records as `outcome: fail` — **in the history, but not counted toward done**
+- [ ] `explain_drift` now reports **0.97**, above the hand-authored fixture's 0.91
+- [ ] `is_it_done` says `failing: …` rather than `not yet verified` — it distinguishes
+      "ran it and it broke" from "haven't run it"
+
+All three states are asserted in `npm run walk`, so if you see something else, that's real.
 
 ### 8 · "Just fix it for me." ⭐⭐ — the pitch
 

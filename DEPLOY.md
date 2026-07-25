@@ -27,7 +27,16 @@ hour"*). **Read the box below first** — the fastest path is Studio's Deploy bu
 > a sign-in to the organizer-provided account, so it can't be automated from a terminal.
 
 ## 0. Prerequisites (one-time)
-- **Node 20.x** (`node -v` → v20.x; 18 is Studio's hard minimum, 20 is what Studio bundles and what the cloud Docker images use — use 20).
+- **Node 20.x** (`node -v` → v20.x; 18 is Studio's hard minimum, 20 is what Studio bundles and what the cloud Docker images use — use 20). The official walkthrough video pins **20.18.1** with **npm 9+**.
+  > ⚠️ **This machine is on Node v22.19.0 / npm 11.11.0.** Newer, not older, and everything
+  > here builds and tests clean on it — but the video explicitly recommends 20.18.1, and the
+  > cloud build images are Node 20. **If a deploy fails for no obvious reason, this is the
+  > first thing to change**, with `nvm use 20.18.1`. Don't switch pre-emptively; do switch
+  > before blaming anything else.
+- **`tsx` and `typescript`** — the video says install them **globally**. Ours are declared
+  `devDependencies` in `sentinel/`, which is strictly better (deterministic, offline) and is
+  what Studio's `npx tsx src/index.ts` resolves. `tsc` is **not** global here and does not
+  need to be. Verified: `npx tsx --version` → 4.23.1.
 - **NitroStudio** desktop app — nitrostack.ai → Product → Studio. The **desktop app is required**: STDIO spawns a local process and HTTP needs a CORS bypass, so neither works in a browser.
 - **NitroCloud account** — use the **organizer-provided** account (submissions must go through it). API keys are `nsk_live_` + 64 chars.
 - **An MCP client to demo in.** See §6 — **NitroStudio's own AI Chat is the default** and needs only NitroCloud sign-in. ChatGPT is optional and its Developer mode requires a paid plan.
@@ -143,7 +152,23 @@ Compose's MCP chat header.
 > one first**, then redeploy.
 
 Because Studio deploys the folder you connected (`sentinel/`), the monorepo layout is
-irrelevant on this path. Skip to **§6** to connect ChatGPT.
+irrelevant on this path.
+
+> **Cross-checked against the official walkthrough video (06:45–07:53).** Its sequence, which
+> is more explicit than the handbook and is the one to follow:
+>
+> 1. Go to **App** in Studio.
+> 2. You must **be signed in to NitroCloud** — the app list is empty until you are.
+> 3. **Create New App**, give it a name, create it. *This happens in the NitroCloud console,
+>    and it is a separate step from deploying.* Nothing to deploy *to* exists until you do it.
+> 4. **Link your server to that application** — pick it from the Studio application dropdown.
+> 5. **Deploy** → **Deploy Now**. Two clicks, not one.
+>
+> The trap: **"click Deploy" is not step one.** If you go looking for a Deploy button before
+> creating and linking a cloud app, there is nothing for it to act on. Budget for the
+> create-and-link step.
+
+Then **§6** to connect a client.
 
 ## 4. Deploy path B — upload a .zip
 
@@ -210,6 +235,27 @@ widgets live. It is gated on **NitroCloud sign-in**, not on any ChatGPT subscrip
 > Do's & Don'ts record a requirement to connect to ChatGPT at `{serviceUrl}/sse`. If that is
 > a hard criterion, a Studio demo will not substitute — **ask the organizers**, and if they
 > insist, borrow *one* teammate's Plus account for the ten minutes §6b takes. Don't buy five.
+>
+> ✅ **The official video materially weakens this worry (07:54–09:09).** After deploying, it
+> goes **dashboard → MCP → the manual-deployment link**, and says that URL can be added as a
+> cloud connector to **Cursor, Claude, GPT — "Anthropic Claude"** by name. So the deployed
+> service is explicitly meant to be consumed by more than ChatGPT, and **Claude is a
+> first-class target.** That is a much better answer to "no paid ChatGPT plan" than ours was:
+> not *we found a workaround*, but *the platform supports the client we already have.*
+> Still worth one question to the organizers, but the risk is now small.
+
+### 6a-bis. Claude / Cursor via the deployed URL — per the official video
+
+The post-deploy path the video actually demonstrates, and the one to prefer if the Studio
+demo is questioned:
+
+1. NitroCloud **dashboard** → your app → **MCP**.
+2. Open the **manual deployment** link — it lists integration endpoints.
+3. Add that URL as a **cloud connector** in Claude (or Cursor). The video names Cursor,
+   Claude, GPT and "Anthropic Claude" as supported targets.
+
+Same server, same tools, no ChatGPT subscription. Record the Service URL here when you have
+it: `________________________________`
 
 ### 6b. ChatGPT — optional, needs Plus or Pro
 

@@ -60,10 +60,13 @@ not present with a flag, because a field a model can read is a field it will rea
 See [`card.ts`](sentinel/src/modules/learn/card.ts).
 
 ```bash
-npm run probe
+npm run walk
 ```
 
-Walks all six stages over real MCP and prints each one. If that is green, the demo is.
+Asserts the nine turns a student actually takes, over real MCP, and exits non-zero on a
+regression. `npm run probe` prints the same journey for reading instead. Both are in
+`npm run verify`. Neither can tell you whether *a model* picks the right tool — that is
+what [`WALKTHROUGH.md`](WALKTHROUGH.md) is for.
 
 **What deploys to NitroCloud is `sentinel/` — built entirely with the official NitroStack
 TypeScript SDK**, and it runs with no network, no API key and no model. `lumina/` is the
