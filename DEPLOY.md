@@ -290,12 +290,12 @@ automatically redeploy."*
 > later be switched to GitHub auto-deploy. Probably yes — same app, different source — but it
 > is not documented and I could not test it. If it can't, make a second app; either is cheap.
 
-> ⚠️ **The handbook's URL does not resolve.** Both `https://nitrocloud.ai` and
-> `https://nitrocloud.ai/home/api-keys` appear verbatim in `NitroStack_Studio_Handbook.pdf`
-> (confirmed by extracting the PDF), and **nitrocloud.ai did not exist** when we tried it. The
-> CLI only ever prints `nitrostack.ai`, `docs.nitrostack.ai` and `nitrostack.ai/studio`, so
-> start from **`nitrostack.ai`** and find the cloud console from there. Do not trust the
-> handbook's domain.
+> ⚠️ **The handbook's bare `nitrocloud.ai` does not resolve** — both `https://nitrocloud.ai`
+> and `https://nitrocloud.ai/home/api-keys` appear verbatim in the handbook PDF, and the apex
+> domain did not load when tried. **The subdomains are real**, though: a deployed app lands on
+> `https://<app>-<id>-<team>-<org>.app.nitrocloud.ai`. So reach the console from
+> **`nitrostack.ai`**, and treat the handbook's apex URLs as unreliable rather than the whole
+> domain as fictional.
 
 **First, create the cloud app** (any path needs this):
 `nitrostack.ai` → the cloud console → **Create Nitrostack App** → name it
@@ -337,6 +337,40 @@ automatically redeploy."*
 >
 > `git subtree push` recomputes history each time and slows down as the repo grows. If it
 > gets painful: ``git push sentinel-origin `git subtree split --prefix sentinel main`:main --force``.
+
+## 5b. ✅ DEPLOYED AND VERIFIED (2026-07-25)
+
+**Live:** `https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai`
+
+Deployed by path C from the `nitrostacklh/mentor-mcp` mirror. Re-check it any time — after
+every redeploy, and once immediately before the demo:
+
+```bash
+npm run verify:live -- https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai
+```
+
+**16/16 against the live service**: `mentor 1.0.0` · exactly 10 tools, all six stages, nothing
+extra · **no tool that can modify a student's build** · `causal-timeline` served and
+`mission-trace` not · `explain_drift` → `tax @ build/pricing.js:12`, confidence **0.91**,
+`fix_withheld` · catalog and brief bundled · **the flashcard's answer appears nowhere in a
+live withheld payload.**
+
+That last group is the one worth re-running before you present: it proves the bundled fixtures
+travelled inside the image, so the app has something to talk about with nothing uploaded.
+
+> **Transport note.** The script drives **`{serviceUrl}/mcp`** (streamable HTTP), not the
+> `/sse` URL the handbook quotes for ChatGPT. Both are served. `/mcp` is request/response with
+> an `Mcp-Session-Id` header carried between calls — but note the replies still come back
+> SSE-framed (`event: message` / `data: {…}`) even on the POST endpoint, so a client that
+> assumes plain JSON on `/mcp` will fail to parse them.
+
+**Deploys are now one command.** After any change under `sentinel/`:
+
+```bash
+npm run push:sentinel
+```
+
+NitroCloud redeploys itself from the mirror. No GUI trip, no zip.
 
 ## 6. Connect a client
 

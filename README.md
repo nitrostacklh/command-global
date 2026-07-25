@@ -306,16 +306,19 @@ working human-approval UI.
 | The two demo projects, all inputs | ✅ complete, verified, and guarded |
 | Whole suite | ✅ **109/109**, offline, no API key, no model |
 | Docs agree with the code | ✅ guarded — `npm run check:docs` reads the live tool list |
-| Deployed to NitroCloud | ⬜ **next** — `DEPLOY.md` path A, ~30 min |
+| **Deployed to NitroCloud** | ✅ **LIVE and verified** — 16/16 over the wire, `npm run verify:live` |
 | Can a student really draw this in Lumina? | ✅ **yes** — real `component` node, verified in-browser end to end |
 | Layer 2 · the lesson panels | ⬜ roadmap — the one stage of the loop still missing |
 | Evidence study (n=5) | ⬜ **not run** — protocol ready in [`STUDY.md`](STUDY.md), Gap 7 |
 | Product name | ❓ still `[[PRODUCT NAME]]` — Gap 8 |
 
-**Next action: deploy it.** The code exists and works; it just isn't live. Follow
-`DEPLOY.md` path A — Studio's **Deploy** button bundles the connected `sentinel/` folder, so
-the monorepo layout is irrelevant. Then connect a client and record the ≤3-min demo
-(script in `DEPLOY.md` §7a).
+**It is live**, deployed by GitHub auto-deploy from the `nitrostacklh/mentor-mcp` mirror —
+`sentinel/` at a repo root, because NitroCloud's Connect Repository dialog has no root-directory
+field. `npm run verify:live -- <url>` re-checks the deployed service (16 assertions, including
+that the flashcard's answer appears nowhere in a live withheld payload). Deploys are now one
+command: `npm run push:sentinel`.
+
+**Next action: record the ≤3-min demo** — script with timings in `DEPLOY.md` §7a.
 
 Two things worth settling while that runs:
 
