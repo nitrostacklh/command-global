@@ -490,6 +490,7 @@ Verbatim error strings from the Studio handbook §11, plus what we hit ourselves
 | *"MCP server unreachable after 5 reconnect attempts"* | Reopen the project in Studio. |
 | Widgets stay blank / don't render | Disconnect and reconnect the MCP server to reload widgets. |
 | Build fails on push (path C) | `npm run build` locally first; fix TS errors before pushing. Compose feeds build errors back to the agent, but GitHub auto-deploy just fails. |
+| `Permission to <org>/<repo>.git denied to <user>` (403) on `npm run push:sentinel` | The pushing account has **read but not write** on the mirror repo. Being an org member and being able to *see* a new repo are not the same as being able to push to it — org base permissions often stop at Read, and a repo created by a different admin grants nothing automatically. Fix on the mirror repo: **Settings → Collaborators and teams → Add people → Write**. Diagnose with `git ls-remote <url>` (succeeds = read is fine, so it is purely a write grant). The subtree push does all its work locally first, so the 403 lands at the very end — nothing is lost, just re-run it. |
 | Studio rejects the folder | You pointed it at the monorepo root. Point it at **`sentinel/`** — Studio needs `package.json` + `src/index.ts` + `@nitrostack/core`. |
 
 ### Restore paths (handbook §11)
