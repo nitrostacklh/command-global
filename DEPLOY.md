@@ -216,6 +216,32 @@ NitroCloud → app → **MCP** ("Ship your MCP server") → **Upload a code pack
 `.zip` (max **100 MB**). `sentinel/` without `node_modules`/`dist` zips to **0.21 MB**, so
 the limit is not a concern. Useful when Studio can't reach the network but a browser can.
 
+## 4b. Pre-flight: will NitroCloud's build actually succeed? ✅ **tested**
+
+The quietest way B and C fail is the build. `pack` excludes `dist/` and
+`src/widgets/out/`, so **NitroCloud builds from source** — and our build needs deps in
+*two* places (`sentinel/` and the nested `src/widgets/`). If their pipeline runs a plain
+`npm install`, the nested one is missed and the widget bundle dies.
+
+**Tested by extracting the zip to a clean directory and running exactly what a build
+pipeline runs.** No repo, no caches, nothing pre-installed:
+
+```
+npm install                    → added 330 packages in 29s
+npm run build                  → Installing widget dependencies...  ✓
+                                 Bundling widgets...  ✓ (2 widgets)
+                                 Compiling TypeScript...  ✓
+                                 Build Complete (48.5s)   exit 0
+node dist/index.js             → mentor 1.0.0, 10 tools
+```
+
+**`nitrostack-cli build` installs the widget dependencies itself**, so a plain
+`npm install && npm run build` is sufficient and the two-places problem does not exist.
+That was the largest unmeasured risk in the whole deploy and it is now closed.
+
+Also note: on NitroCloud the project root *is* the process working directory, so the
+`cwd` trap that `scripts/start-mcp.mjs` exists to solve locally does not apply there.
+
 ## 5. Deploy path C — GitHub auto-deploy (**the right steady state**, and the monorepo-sensitive one)
 
 Once linked, every push to the branch redeploys — so **this is the only path where deploying
