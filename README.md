@@ -92,11 +92,14 @@ toolbar. It downloads `plan.lumina.json` — MENTOR's intent input.
 ### The demo fixture
 
 ```bash
-npm run fixture:test     # 2 pass, 1 fail — THIS IS CORRECT, do not fix it
+npm run fixture:check    # ✅ asserts the fixture is correctly BROKEN
+npm run fixture:test     # raw runner output: 2 pass, 1 fail — this is correct
 npm run fixture:plan     # regenerate plan.lumina.json (deterministic)
 ```
 
-The failing test *is* the fixture. MENTOR has nothing to explain if it's green.
+The failing test *is* the fixture. MENTOR has nothing to explain if it's green — so
+`fixture:check` fails loudly if someone "fixes" `pricing.js`, and it's part of
+`npm run verify`.
 
 ### The Python reference — `reference/python/`
 

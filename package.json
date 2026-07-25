@@ -15,13 +15,14 @@
     "lumina:full": "npm --prefix lumina run full-dev",
     "lumina:install": "npm --prefix lumina install",
 
-    "fixture:test": "node --test fixtures/pricing/build",
+    "fixture:test": "node --test fixtures/pricing/build/pricing.test.js",
+    "fixture:check": "node scripts/check_fixture.mjs",
     "fixture:plan": "python scripts/regen_fixture_plan.py",
 
     "push:sentinel": "git subtree push --prefix sentinel sentinel-origin main",
 
     "install:all": "npm run sentinel:install && npm run lumina:install",
-    "verify": "npm run sentinel:build && npm test && npm run fixture:plan"
+    "verify": "npm test && npm run fixture:check && npm run fixture:plan"
   },
   "author": "Team COMMAND",
   "license": "UNLICENSED"

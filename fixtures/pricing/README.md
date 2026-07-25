@@ -112,13 +112,20 @@ regression-tested rather than eyeballed.
 ## Verified state of these files
 
 ```
-$ cd build && node --test
-# pass 2
-# fail 1        ← test 3, at pricing.test.js:40, "80 !== 72"
+$ npm run fixture:check          # from the monorepo root
+ok  fixture is correctly broken:
+ok    2/3 pass, 1 fails as designed
+ok    surfaces at pricing.test.js:40 ("80 !== 72")
+ok    origin is pricing.js:12 — tax computed before discount exists
 ```
 
 That is the intended state. **Do not fix `pricing.js`.** The broken build *is*
 the fixture — MENTOR has nothing to explain if it's green.
+
+A red test is an irresistible target and a prose warning doesn't stop anyone, so
+the intended state is asserted rather than requested: `scripts/check_fixture.mjs`
+fails if the test goes green, if the failure moves off line 40, or if the
+assertion message changes. It runs as part of `npm run verify`.
 
 ---
 
