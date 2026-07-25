@@ -256,18 +256,24 @@ This document describes the full vision. The submission is a subset, deliberatel
       Until this works there is no submission, regardless of how good the idea is.
 
 ### Ships for the hackathon
-- [ ] MENTOR as the sixth commander — one `DomainAdapter`, one module (`ARCHITECTURE.md` §14)
-      ⚠️ costs more than §14 implies: the engine has no successful path that skips
-      `deploy()`, and not deploying is the point. `GAPS.md` Gap 3b, with two options.
+- [x] MENTOR as the sixth commander — **built**, `sentinel/src/modules/mentor/`, 33 tests.
+      §14's "one adapter + one module" did cost more than advertised: the engine has no
+      successful path that skips `deploy()`. Resolved by re-reading the lifecycle rather
+      than bypassing it — `deploy()` delivers the explanation, and `awaitRecovery()` now
+      asserts the student's source is byte-identical, which makes the refusal a runtime
+      invariant. Full mapping in `ARCHITECTURE.md` §7.6.
 - [x] **One** project, executed completely: the pricing / tax-discount fixture →
       `fixtures/pricing/`. Plan, build, history and failing test all present; the
       §3 line numbers (40 and 12) are now literally true of it.
-- [ ] The causal timeline widget — plan row, build row, labelled drift arrow, confidence badge
-      *(only `mission-trace` exists today — `GAPS.md` Gap 4)*
+- [x] The causal timeline widget — **built**. Plan row, build row, labelled drift arrow,
+      five confidence bars each with its reason, and an *"Ask instead →"* button wired to
+      `sendFollowUpMessage` so the refusal doesn't dead-end the student.
 - [x] Lumina graph as the plan input — **integration cost was small**, and it's done:
       `lumina.plan/v1` + the **Plan** button. See §3 Layer 3.
-- [ ] The refusal: MENTOR names the origin and declines to write the fix
-- [ ] ≤3-min demo video *(script drafted — `DEPLOY.md` §7a)*
+- [x] The refusal: **built and enforced.** `withhold_fix` and `request_fix` exist only to
+      decline; no tool on the adapter can write to the build; and `awaitRecovery` fails the
+      incident if the source ever changes. Tested by trying six plausible write-tool names.
+- [ ] ≤3-min demo video *(script drafted — `DEPLOY.md` §7a; needs the deploy first)*
 
 ### Roadmap — say it on the last slide, don't build it
 - Comic-styled panels for Layer 2 *(build only if the deploy is already green)*

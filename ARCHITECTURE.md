@@ -45,7 +45,7 @@
 
 **COMMAND** is an **autonomous "enterprise operations" platform** built as a single
 **MCP app** (Model Context Protocol) on **NitroStack**, deployable to **NitroCloud**
-and usable from **ChatGPT**.
+and drivable from any MCP client — NitroStudio AI Chat, ChatGPT, or a local one.
 
 It is made of **independent "commanders"** — each one an autonomous agent for a
 different domain — plus a **coordinator** that runs them together as a governed
@@ -59,14 +59,16 @@ organization:
 | **RELAY** | Civic | Matches a citizen to a government scheme, files & tracks the application. | ✅ |
 | **AEGIS** | Trust/Safety | Guardrail: scores & rewrites unsafe AI output; **every** action routes through it. | ✅ |
 | **COMMAND** | (coordinator) | Runs the whole fleet; commanders can call each other for help. | ✅ |
-| **MENTOR** | Education | Shows a student the moment their build diverged from the plan they drew — and refuses to write the fix. | ⬜ **not yet** |
+| **MENTOR** | Education | Shows a student the moment their build diverged from the plan they drew — and refuses to write the fix. | ✅ |
 
 Each commander is genuinely a standalone "winning" idea; together they form one product.
 
 **MENTOR is the sixth commander and the hackathon submission.** It is the one
-commander that inverts the engine: the other five *resolve* an incident, MENTOR
-*declines to*. It is specified in **`MENTOR-CONCEPT.md`** and is the only module
-in the table above that is not written yet — see **`GAPS.md`**.
+commander that inverts the engine: the other five *resolve* an incident by changing
+something, MENTOR resolves one by **explaining** it and changing nothing. It is
+specified in **`MENTOR-CONCEPT.md`** and built in `sentinel/src/modules/mentor/` —
+see §7.6 for how the lifecycle was re-read to make "explain but don't fix" a
+first-class outcome rather than a failure.
 
 The TypeScript app at `sentinel/` is the **deliverable**. The Python
 implementation at `reference/python/` was the original prototype and IP source —
@@ -90,7 +92,7 @@ detect → diagnose → verify (loop until the fix proves out) → confidence ga
 The engine knows nothing about services, cloud bills, or contracts. Each domain plugs
 in a small **adapter** that teaches the engine the domain-specific bits (what tools
 exist, how a fix is proven, how risky it is, how to deploy). **Every commander is
-`core + one adapter`.** Build the engine once; skin it five times.
+`core + one adapter`.** Build the engine once; skin it six times.
 
 ### Idea 2 — In MCP, the *client model is the agent*
 This is the key mental shift. In a normal agent you write a loop that calls an LLM. In
@@ -104,7 +106,7 @@ API key: the model is pluggable.
 ### Idea 3 — Nothing acts unchecked (AEGIS) and they help each other (COMMAND)
 - **AEGIS** is a trust guardrail wired into *every* commander: before any action is
   "deployed," AEGIS scores it and can block it. This is the safety/governance layer.
-- **COMMAND** turns the five into an **organization**: a commander that hits a problem
+- **COMMAND** turns the fleet into an **organization**: a commander that hits a problem
   outside its domain can **pull in a teammate mid-task, wait for them, and continue** —
   real delegation and synchronization, all AEGIS-gated.
 
@@ -234,19 +236,22 @@ sentinel/
 │   │   │   ├── command.module.ts    #   Tools: platform_status, run_operation, run_organization
 │   │   │   └── command.test.ts
 │   │   │
-│   │   └── mentor/                  # MENTOR · Education — ⬜ NOT WRITTEN YET (see GAPS.md)
-│   │       ├── plan.ts              #   [planned] load + validate a Lumina plan graph
-│   │       ├── drift.ts             #   [planned] align plan ↔ build, locate the divergence
-│   │       ├── mentor.adapter.ts    #   [planned] DomainAdapter whose submit REFUSES to patch
-│   │       ├── mentor.module.ts     #   [planned] Tool: explain_drift + @Widget('causal-timeline')
-│   │       └── mentor.test.ts       #   [planned]
+│   │   └── mentor/                  # MENTOR · Education — ⭐ THE SUBMISSION
+│   │       ├── plan.ts              #   parse lumina.plan/v1 + graph queries (dependencyPath)
+│   │       ├── build.ts             #   parse mentor.build/v1 + first-touch actual order
+│   │       ├── drift.ts             #   ⭐ the algorithm: locate the origin + score confidence
+│   │       ├── fixtures.ts          #   the bundled pricing demo (plan + build + source)
+│   │       ├── mentor.adapter.ts    #   DomainAdapter whose deploy() explains and never patches
+│   │       ├── mentor.module.ts     #   Tools: explain_drift (+widget), withhold_fix, mentor_status
+│   │       ├── drift.test.ts        #   18 tests — the origin rule, and refusing to over-claim
+│   │       └── mentor.test.ts       #   15 tests — end-to-end + the refusal as an invariant
 │   │
 │   ├── health/system.health.ts      # NitroStack health check (from the scaffold)
 │   └── widgets/                     # React widgets (glass-box UI, Next.js)
 │       ├── app/layout.tsx           #   Widget shell
 │       ├── app/mission-trace/page.tsx  # ⭐ The MissionTrace widget (renders any run)
-│       ├── app/causal-timeline/page.tsx # ⬜ [planned] MENTOR's plan-vs-build timeline
-│       └── widget-manifest.json     #   Registers the widget + an example
+│       ├── app/causal-timeline/page.tsx # ⭐ MENTOR's plan-vs-build timeline + the refusal
+│       └── widget-manifest.json     #   Registers both widgets + an example each
 │
 ├── README.md                        # Quick overview + status
 ├── package.json                     # deps + scripts (dev/build/test)
@@ -398,9 +403,64 @@ MCP tools. They all reuse `core/` + `confidence.ts` + `aegisGuard`.
 
 ### AEGIS · Trust — see the next section (it's special).
 
+### 7.6 MENTOR · Education (`modules/mentor/`) — the one that inverts the engine
+
+The other five resolve an incident by **changing something**. MENTOR's entire product
+thesis is that it must not (`MENTOR-CONCEPT.md` §2 — "the tool that refuses to hand you the
+patch"). Running that on an engine whose only successful exit is `deploy()` needed the
+lifecycle **re-read**, not rewritten:
+
+| Engine concept | MENTOR's meaning |
+|---|---|
+| the "system" | two artifacts: `lumina.plan/v1` (intent) + `mentor.build/v1` (what happened) |
+| the "fix" | the causal explanation — never a code change |
+| `verifyTool` | `check_grounding` — is the claim supported by *both* artifacts? |
+| `mutationTools` | `load_plan` / `load_build` — new inputs invalidate the grounding |
+| `submitTool` | emit the explanation |
+| `deploy(ctx)` | hand the timeline to the student. Touches nothing. |
+| `awaitRecovery(ctx)` | assert the student's source is **byte-identical** |
+| `blastRadius(ctx)` | **inverted** — confidence in the origin claim |
+
+Two of those are load-bearing and worth reading twice.
+
+**`awaitRecovery` is the refusal, enforced.** Elsewhere it asks "did the system come back
+up?" Here nothing was deployed, so it asks the question that matters for this domain: *is
+the student's code exactly as they left it?* If MENTOR ever modified the build, recovery
+fails and the incident ESCALATES. The refusal is a runtime invariant with a test on it, not
+a promise in a prompt. (There is also no tool on the adapter that *can* write — `executeTool`
+has no such case to reach.)
+
+**`blastRadius` is inverted.** For SENTINEL risk means "how much code changed". MENTOR
+changes none — but it is about to point a student at a specific line, and §10 of the concept
+doc is explicit that a confidently wrong line is worse than useless in education. So the
+risk *is* the claim's uncertainty. Feeding drift confidence into this slot means an
+ambiguous plan drives the gate **below** threshold and pauses for a human instead of
+misleading a student. Same gate, same formula, opposite meaning.
+
+**The algorithm (`drift.ts`).** Both artifacts are ordered, so drift is an ordering
+comparison — but naively "find a mismatch" reports *two* components in the demo (tax moved
+early, discount moved late) and leaves the student guessing. The asymmetry that resolves it:
+
+> The origin is the earliest component, in **build** order, that was implemented before
+> something the **plan** says should have come first.
+
+`tax` jumped the queue; `discount` was merely displaced by it. And if the plan never drew a
+path between the two, MENTOR **declines to claim drift at all** — otherwise it would be
+pointing at a line because of where a box sits on a canvas.
+
+**Confidence is computed, not asserted.** Five real properties of the two artifacts:
+`dependency` (0.40 — did the plan order this pair directly, transitively, or never?),
+`coverage` (0.20), `determinism` (0.15 — does the plan commit to an order at all?),
+`provenance` (0.15 — was the history observed from git or hand-authored?), `failureLink`
+(0.10). A cyclic plan caps the whole thing at 0.35. The demo's 0.91 falls out of those
+terms — its history is authored rather than git-derived, which is the one genuine weakness
+in the demo, surfaced by the product instead of buried in a footnote.
+
 **Why deterministic planners?** Each adapter ships a rule-based planner (`devopsPlanner`,
-`ledgerPlanner`, etc.) so the one-click Task and the tests are 100% reproducible with no
-model. In the live client-driven flow, the *model* replaces the planner.
+`ledgerPlanner`, `mentorPlanner`, etc.) so the one-click Task and the tests are 100%
+reproducible with no model. In the live client-driven flow, the *model* replaces the planner.
+`mentorPlanner` notably never plans `request_fix` — that tool exists for a *client model* to
+stumble into, so the refusal shows up as a visible tool call in the trace.
 
 ---
 
@@ -531,7 +591,7 @@ cd sentinel
 npm install            # install deps (widget deps install on first build)
 npm run dev            # run locally → open in NitroStudio (App Canvas / AI Chat)
 npm run build          # production bundle → dist/ (compiles TS + bundles the widget)
-npm test               # build, then run all offline tests (32/32)
+npm test               # build, then run all offline tests (65/65)
 ```
 
 From the monorepo root you can use the delegating scripts instead:
@@ -680,7 +740,7 @@ monorepo root has only the first and is correctly rejected.
 > plus a student-facing four-layer loop, and MENTOR is **not written**. So "the code
 > is complete" is true of the platform and false of the submission.
 
-The **platform code is complete and verified** (32/32 tests, full build green, all flows
+The **platform code is complete and verified** (65/65 tests, full build green, all flows
 exercised end-to-end). What remained *for the platform* was mostly **interactive** work
 that can't be done headless.
 

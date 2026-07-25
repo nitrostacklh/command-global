@@ -27,6 +27,8 @@
   "entry": "build/pricing.js",
   "tests": "build/pricing.test.js",
 
+  "provenance": "authored",
+
   "steps": [
     {
       "seq": 1,

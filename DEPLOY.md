@@ -6,7 +6,7 @@ Get the platform live in ~15 minutes. Do this **early** (hackathon rule: deploy 
 - **Node 20.x** (`node -v` → v20.x; 18 is Studio's hard minimum, 20 is what Studio bundles and what the cloud Docker images use — use 20).
 - **NitroStudio** desktop app — nitrostack.ai → Product → Studio. The **desktop app is required**: STDIO spawns a local process and HTTP needs a CORS bypass, so neither works in a browser.
 - **NitroCloud account** — use the **organizer-provided** account (submissions must go through it). API keys are `nsk_live_` + 64 chars.
-- **ChatGPT Plus or Pro** — Developer mode is gated behind a paid plan. Confirm someone on the team has one *before* demo day; without it §6 is impossible.
+- **An MCP client to demo in.** See §6 — **NitroStudio's own AI Chat is the default** and needs only NitroCloud sign-in. ChatGPT is optional and its Developer mode requires a paid plan.
 - A **GitHub** repo you can push to — only needed for deploy path C.
 
 ### Signing in to Studio
@@ -46,7 +46,7 @@ and cloud deploy all require being signed in.** Two ways: *Continue with NitroCl
 cd sentinel
 npm install
 npm run build      # ✓ Widgets bundled + TypeScript compiled
-npm test           # ✓ 32/32
+npm test           # ✓ 65/65
 ```
 
 From the monorepo root, `npm run sentinel:build` and `npm test` do the same thing.
@@ -74,7 +74,7 @@ From the monorepo root, `npm run sentinel:build` and `npm test` do the same thin
 > launch — which fails on a flaky network or a locked npm cache (seen here: `EPERM` on
 > cache cleanup, server never started, no output). It is now a `devDependency`, so the
 > launch is deterministic and offline. **Verified:** `npx tsx src/index.ts` serves
-> `initialize` + `tools/list` over stdio and registers all 20 tools.
+> `initialize` + `tools/list` over stdio and registers all 23 tools.
 >
 > If Studio ever says *"Dependencies not installed or out of date…"* or *"tsx is not
 > available…"*, run `npm install` inside `sentinel/` manually.
@@ -143,31 +143,69 @@ https://nitrocloud.ai → `/home` or `/home/apps` → **Create Nitrostack App** 
 > `git subtree push` recomputes history each time and slows down as the repo grows. If it
 > gets painful: ``git push sentinel-origin `git subtree split --prefix sentinel main`:main --force``.
 
-## 6. Connect to ChatGPT
+## 6. Connect a client
+
+You need *something* with a model in it to drive the tools. Two options, and the first
+costs nothing beyond the NitroCloud account you already need.
+
+### 6a. NitroStudio AI Chat — the default, no paid plan
+
+Studio's **AI Chat** (sidebar → AGENT → Chat) is a full MCP client: it has a model picker,
+it calls your tools automatically, it shows a tool-approval modal, and it renders your
+widgets live. It is gated on **NitroCloud sign-in**, not on any ChatGPT subscription.
+
+1. Sign in to NitroCloud (Studio footer → **Connect to NitroCloud**).
+2. Open **AI Chat**, pick a model, and ask: *"a student's pricing test is failing — when did
+   they go wrong?"*
+3. **Allow** the `explain_drift` tool call. The **causal-timeline** widget renders in-chat.
+4. Then ask it to fix the bug, and watch `withhold_fix` decline.
+
+> ⚠️ **Confirm this satisfies the submission rules.** Notes from the official handbook and
+> Do's & Don'ts record a requirement to connect to ChatGPT at `{serviceUrl}/sse`. If that is
+> a hard criterion, a Studio demo will not substitute — **ask the organizers**, and if they
+> insist, borrow *one* teammate's Plus account for the ten minutes §6b takes. Don't buy five.
+
+### 6b. ChatGPT — optional, needs Plus or Pro
 
 The MCP URL is **`{serviceUrl}/sse`** — the base Service URL is on the deployment details
 page, and the full URL has a copy button in the **Deploy to ChatGPT** step.
 
 1. NitroCloud → live app **Overview** → the **MCP** module → **Deploy to ChatGPT** → copy the **MCP URL**.
-2. ChatGPT (**Plus or Pro required**) → **Settings → Plugins (Apps)** → **Developer mode**.
-3. Plugins page → **＋** → New Plugin dialog: leave **Connection = Server URL**, set
-   **Authentication = No Auth**, paste `{serviceUrl}/sse`, give it a Name, tick
-   *"I understand and want to continue"* → **Create**.
+2. ChatGPT → **Settings → Plugins (Apps)** → **Developer mode**.
+3. Plugins page → **＋** → leave **Connection = Server URL**, set **Authentication = No Auth**,
+   paste `{serviceUrl}/sse`, name it, tick *"I understand and want to continue"* → **Create**.
 4. On *"Add {app} to ChatGPT"* → **Connect**. ChatGPT loads the tools.
-5. New chat → run the demo below.
+
+### 6c. Any local MCP client (fully offline)
+
+Nothing in `sentinel/` calls an LLM — zero API keys, zero outbound requests, and the whole
+suite runs with no model. So any MCP client works, including ones backed by a local Ollama
+model: Claude Code (`claude mcp add`), Open WebUI, LibreChat, Continue, Cline.
+
+Point them at the **stdio** transport rather than the deployed URL:
+
+```bash
+cd sentinel && npx tsx src/index.ts
+```
+
+Small local models are unreliable multi-step tool planners, but that barely matters here:
+`explain_drift` is one call with no arguments, so the model only has to decide *which tool*,
+not plan a loop.
 
 > **Widgets blank?** Disconnect and reconnect the MCP server to force a widget reload
 > (Studio: *Retry Connection* in Compose, or remove and re-add the project on App Canvas).
 
-## 7a. Demo script — MENTOR (the submission) ⬜ *tool not built yet, see `GAPS.md`*
-This is the video to record once `explain_drift` exists. It is the Education & Research
-submission; §7b is the platform demo and is the backup if MENTOR isn't finished.
+## 7a. Demo script — MENTOR (the submission) ✅ *built and verified*
+Record this one. It is the Education & Research submission; §7b is the platform demo, now
+the backup and the "it also runs five other domains" beat.
 
 1. Show the student's Lumina canvas: `validate → discount → tax → total`. *"This is the plan they drew before writing code."*
 2. Show the failing test: `test 3 ✗`, error points at **line 40**.
-3. *"When did I go wrong?"* → `explain_drift` → **causal-timeline** widget: plan row on top, build row below, the drift arrow landing on **line 12** — tax implemented before discount — with **confidence 91%**.
-4. Ask it to fix the bug. **It refuses**, and says why. ← *this is the whole pitch; do not cut this beat*
-5. Student edits the Lumina graph, re-runs → drift resolved.
+3. *"When did I go wrong?"* → `explain_drift` (**no arguments** — it runs the bundled demo) → the **causal-timeline** widget: plan row on top, build row below, `tax` highlighted in both, the drift arrow landing on **line 12**, and **confidence 0.91** broken into five signals each with its reason.
+4. Point at the `provenance` bar — 40%. *"It tells you where it's guessing."* ← cheap, and it makes §3's uncertainty claim concrete.
+5. **Ask it to fix the bug.** → `withhold_fix` declines and says why. ← *this is the whole pitch; do not cut this beat*
+6. Click **"Ask instead → Why does tax have to come after discount?"** — the refusal hands the student the next question instead of a patch.
+7. (If time) call `explain_drift` with a *different* project's plan + build, to show it isn't one hardcoded demo.
 
 ## 7b. Demo script — the platform (≤3-min video, backup)
 1. *"What can this platform do?"* → `platform_status` (five commanders + AEGIS).

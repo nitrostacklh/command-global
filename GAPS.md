@@ -9,32 +9,33 @@
 
 ## The one-paragraph summary
 
-The **platform is done** — 32/32 tests green in the new location, full build clean, and
-Studio's own launch path verified. The **submission is not started**: MENTOR is 0 lines of
-code, and MENTOR is the submission. Two things turned out structurally harder than
-`MENTOR-CONCEPT.md` assumes: Lumina cannot currently draw a software architecture
-(Gap 2), and the engine's lifecycle cannot terminate without deploying a fix, which is the
-one thing MENTOR must never do (Gap 3b). Neither is fatal; both change what "one adapter +
-one module" costs. **The deploy is no longer the blocker** — the Studio handbook shows
-Studio deploys the connected *folder*, so the monorepo layout is irrelevant (Gap 1). What's
-left of Gap 1 is procurement, not engineering: the organizer NitroCloud account and a
-**ChatGPT Plus/Pro plan**, which Developer mode requires and nothing here can work around.
+**MENTOR is built** (Gap 3) **and so is its widget** (Gap 4). 65/65 tests green, verified
+end-to-end over real MCP: `explain_drift` returns the exact claim the concept doc promises —
+origin `pricing.js:12`, error surfaced at `pricing.test.js:40`, confidence 0.91 computed
+rather than hardcoded — and the causal-timeline widget renders it with the fix withheld and
+a follow-up question wired to chat. The engine reframe worked, so the §6 Research claim
+holds: **one engine, six unrelated domains, the sixth of which inverts it.**
+
+What's left is no longer engineering. It is: **deploy it** (a solved procedure — Gap 1),
+**decide whether a student can really draw a software architecture in Lumina** (Gap 2, the
+one open design question), **run the n=5 study** (Gap 7, the cheapest unclaimed points in a
+Research track), and **name the product** (Gap 8 — it is still `[[PRODUCT NAME]]`).
 
 | # | Gap | Severity | Who unblocks it |
 |---|---|---|---|
-| 3 | **MENTOR doesn't exist; engine can't "not fix"** | 🟠 **the actual build** | ~1–2 days |
-| 2 | Lumina can't express a software architecture | 🟠 design decision | you (one call, then ~2h) |
-| 4 | `causal-timeline` widget doesn't exist | 🟡 demo-critical | ~half a day |
-| 6 | Plan can't reach a deployed MENTOR | 🟡 shapes the tool signature | ~1h once decided |
-| 1 | ~~Subdirectory deploy~~ → **ChatGPT Plus/Pro + organizer account** | 🟡 was 🔴 | you, before demo day |
-| 5 | Build history is authored, not derived | 🟡 fine for demo | scope decision |
+| 1 | Deploy to NitroCloud + connect a client | 🟠 **do this next** | you, ~30 min |
+| 2 | Lumina can't express a software architecture | 🟠 the open design call | you (one call, then ~2h) |
 | 7 | Evidence study (n=5) not run | 🟡 free points, Research track | ~2h with classmates |
 | 8 | Open `[[placeholders]]` incl. product name | 🟡 submission hygiene | you |
+| 5 | Build history is authored, not derived | 🟡 fine for the demo, by design | scope decision |
+| 6 | ~~Plan can't reach a deployed MENTOR~~ | ✅ **resolved** — tool argument | done |
 | 9 | Six official tracks never confirmed | 🟡 submission hygiene | organizers |
 | 10 | Lumina hygiene (uncommitted work, no CI) | 🟢 low | ~1h |
+| 3 | ~~MENTOR doesn't exist~~ | ✅ **built** | done |
+| 4 | ~~`causal-timeline` widget~~ | ✅ **built** | done |
 
-*Reordered 2026-07-25 after the Studio handbook downgraded Gap 1. **Gap 3 is now the
-critical path** — the deploy is a solved problem and MENTOR is the thing that doesn't exist.*
+*Reordered 2026-07-25 (twice): first after the Studio handbook downgraded Gap 1, then after
+MENTOR shipped. **Gap 1 is now the critical path** — the code exists and isn't live yet.*
 
 ---
 
@@ -61,15 +62,38 @@ isn't there, `DEPLOY.md` §5 mirrors `sentinel/`'s contents to a second repo via
 **What genuinely remains a hard prerequisite** (and is a *people* problem, not a code one):
 
 - **The organizer-provided NitroCloud account** — submissions must go through it.
-- **ChatGPT Plus or Pro.** Developer mode is paywalled. Nothing in this repo can work
-  around it. **Confirm someone on the team has a paid plan before demo day** — this is
-  the likeliest way to lose the submission now that the deploy is de-risked.
 - **The NitroStudio desktop app.** Not optional and not a web app: STDIO spawns a local
   process and HTTP needs a CORS bypass.
 
-> **Verified:** `sentinel/` builds and passes 32/32 from its new path, and
+### The ChatGPT question — resolved in favour of local (2026-07-25)
+
+The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost nothing:
+
+- **`sentinel/` calls no LLM at all.** Verified: zero LLM references in its own source, zero
+  outbound HTTP, four dependencies (`@nitrostack/core`, `@modelcontextprotocol/ext-apps`,
+  `dotenv`, `zod`), and 65/65 tests pass with no key and no network. In MCP the *client* model
+  is the agent (`ARCHITECTURE.md` §2, Idea 2), and MENTOR needs one least of all six
+  commanders — drift detection is an ordering comparison, the confidence is a formula, the
+  refusal is hardcoded. **There is nothing to generate.**
+- **NitroStudio's AI Chat is a full MCP client** with a model picker, gated on NitroCloud
+  sign-in rather than a ChatGPT subscription. That is the demo surface — `DEPLOY.md` §6a.
+- **Any local MCP client also works** (`DEPLOY.md` §6c) — Claude Code, Open WebUI, LibreChat,
+  Continue — including ones backed by local Ollama models. Small models are poor multi-step
+  planners, but `explain_drift` is one argument-free call, so the model only picks a tool.
+
+> ⚠️ **The one thing to verify with a human.** Notes from the official handbook and Do's &
+> Don'ts record a submission requirement to connect to ChatGPT at `{serviceUrl}/sse`. If that
+> is a hard criterion then it's a *rules* problem no amount of local inference solves —
+> **ask the organizers whether a NitroStudio AI Chat demo satisfies it.** If they insist,
+> borrow one teammate's Plus account for the ten minutes it takes to connect and record.
+
+**Turn this into a pitch line rather than an apology:** *runs offline, no API key, no
+per-student cost.* Schools cannot buy Copilot seats for every student, and that argument
+lands with an education judge while reinforcing the §5 incentive moat.
+
+> **Verified:** `sentinel/` builds and passes 65/65 from its new path, and
 > `npx tsx src/index.ts` — Studio's actual launch command — serves `initialize` +
-> `tools/list` over stdio with all 20 tools registered. Also fixed along the way: **`tsx`
+> `tools/list` over stdio with all 23 tools registered. Also fixed along the way: **`tsx`
 > was not a declared dependency**, so Studio's launch relied on `npx` fetching it and
 > failed here with an `EPERM` npm-cache error, server never starting. It's a
 > `devDependency` now. That would have presented on the day as Studio's
@@ -128,114 +152,67 @@ Lumina is actually for. **Costs** re-authoring the fixture and the §3 diagram.
 
 ---
 
-## Gap 3 — MENTOR doesn't exist, and the engine can't terminate without fixing 🟠
+## Gap 3 — ~~MENTOR doesn't exist~~ ✅ **BUILT** (2026-07-25)
 
-**Verified.** Two parts. The second is the one that will surprise you.
+`sentinel/src/modules/mentor/` — 8 files, registered in `app.module.ts`, 33 new tests.
 
-### 3a — Zero lines of MENTOR
-
-`sentinel/src/modules/` has six modules (sentinel, ledger, verdict, relay, aegis,
-command). There is no `mentor/`. Per `ARCHITECTURE.md` §14 the shape is:
-
-```
-sentinel/src/modules/mentor/
-├── plan.ts             # load + validate a lumina.plan/v1 artifact
-├── drift.ts            # align plan.order ↔ build steps; find the earliest divergence
-├── mentor.adapter.ts   # DomainAdapter — the one whose submit refuses to patch
-├── mentor.module.ts    # @Tool explain_drift + @Widget('causal-timeline')
-└── mentor.test.ts      # assert against fixtures/pricing/build.history.json → expectedDrift
-```
-plus registration in `sentinel/src/app.module.ts` (`imports: [...]`).
-
-The inputs are ready and tested: `fixtures/pricing/plan.lumina.json` (intent, with
-`order`) and `fixtures/pricing/build.history.json` (actuals, with `expectedDrift` as the
-assertion to test against). `drift.ts` is a small algorithm — compare each component's
-index in `plan.order` against its `seq` in `steps`, take the earliest mismatch, report
-its `file:line`.
-
-### 3b — The engine has no "explain but don't fix" exit ⚠️
-
-`ARCHITECTURE.md` §14 promises a new commander is "one adapter + one module". **That
-claim is weaker for MENTOR than for the other five,** and it's better to know now.
-
-Reading `sentinel/src/core/engine.ts`: the loop blocks `submitTool` unless the last
-verify passed (line ~244, `"... blocked — not verified"`), and every successful path
-then runs confidence gate → AEGIS → **`adapter.deploy()`** → `awaitRecovery()` →
-`RESOLVED`. The only alternative terminal state is `ESCALATED`, which means *failure*.
-
-**There is no path where the engine succeeds without deploying a fix** — and not
-deploying a fix is MENTOR's entire product thesis (§2: "the tool that refuses to hand
-you the patch").
-
-Two options, and the trade is not cosmetic:
-
-**Reframe MENTOR onto the engine** (recommended). Map the lifecycle onto explanation
-rather than repair:
-
-| Engine concept | MENTOR's meaning |
+| File | What it does |
 |---|---|
-| `verifyTool` | the drift claim is *grounded* — the origin component exists in both plan and build |
-| `mutationTools` | re-reading the plan / re-parsing the build |
-| `submitTool` | emit the causal timeline |
-| `deploy(ctx)` | **hand the explanation to the student** — returns the timeline, changes no code |
-| `awaitRecovery` | trivially true (nothing was deployed, so nothing can regress) |
-| `blastRadius` | inverted — how *confident* the origin claim is |
+| `plan.ts` | parse `lumina.plan/v1`; `dependencyPath()` and `orderDeterminism()` graph queries |
+| `build.ts` | parse `mentor.build/v1`; first-touch `actualOrder()`; the lenient join key |
+| `drift.ts` | the algorithm + the five-signal confidence score |
+| `fixtures.ts` | the bundled pricing demo (plan + build + source), sync-checked against disk |
+| `mentor.adapter.ts` | `DomainAdapter` — explains, refuses, and proves it changed nothing |
+| `mentor.module.ts` | `explain_drift` (+widget), `withhold_fix`, `mentor_status`, `debugging_tutor` prompt |
+| `drift.test.ts` / `mentor.test.ts` | 18 + 15 tests |
 
-Slightly contorted, and it **preserves the Research claim in §6** ("the engine
-generalizes… one lifecycle, five skins"). A sixth skin on a genuinely unrelated domain
-is what makes that a systems result instead of an assertion. That claim is one of only
-two research claims in the submission.
+**Verified over real MCP** (`node dist/index.js`, stdio): 23 tools registered, `explain_drift`
+returns origin `tax @ build/pricing.js:12` (planned 3rd, built 2nd), failure at
+`pricing.test.js:40`, drift confidence **0.91**, engine gate **0.964 autonomous**,
+`fix_withheld: true`.
 
-**Or bypass the engine** — make `explain_drift` a plain `@Tool` with no `Engine`.
-Half the work, honest, and **forfeits the §6 generalization claim** for the commander
-where it would count most.
+### 3b — the engine reframe, and how it landed ✅
 
-> Whichever you pick, AEGIS should still gate the explanation text — MENTOR's output
-> goes to a student, so it is exactly the sort of thing the trust layer exists for.
+The concern was real: `core/engine.ts` has no successful exit that skips `deploy()`, and not
+deploying is MENTOR's whole point. Resolved by **re-reading the lifecycle rather than
+bypassing it** — full mapping table in `ARCHITECTURE.md` §7.6. The two decisions that made it
+work rather than merely compile:
 
----
+- **`awaitRecovery` asserts the student's source is byte-identical.** The vestigial "did it
+  come back up?" hook becomes the refusal's enforcement point: if MENTOR ever modifies the
+  build, recovery fails and the incident ESCALATES. There is a test that mutates the source
+  and asserts recovery goes false.
+- **`blastRadius` carries claim confidence, inverted.** An ambiguous plan now pushes the gate
+  *below* threshold and pauses for a human, instead of showing a student a guessed line.
 
-## Gap 4 — The `causal-timeline` widget doesn't exist 🟡
+This preserves the §6 Research claim — one engine, six unrelated domains — which was the
+reason to take the harder path. A plain `@Tool` would have been half the work and forfeited it.
 
-**Verified.** `sentinel/src/widgets/` has one widget, `mission-trace`, registered in
-`widget-manifest.json`. It renders status badge / confidence bars / trace / diff.
+> **Also caught by writing the tests:** the `failureLink` confidence signal was comparing the
+> failure's file against `implement` steps only. Failures surface in *test* files, which are
+> recorded as `verify` steps, so the signal could never fire. Fixed to compare against all
+> steps — the demo's confidence went 0.81 → 0.91, which is where the arithmetic always said
+> it should be.
 
-MENTOR needs the four-panel artwork from `MENTOR-CONCEPT.md` §3 Layer 4: a **plan row**,
-a **build row**, a **labelled drift arrow** between them, and a **confidence badge**.
-`mission-trace` has the confidence-bar component worth reusing, but no two-row layout
-and no concept of an arrow between rows.
 
-This is **demo-critical**: §5 lists "a causal graph you can point at" (vs Copilot's
-"prose in a chat panel") as the differentiator, and §8 lists the widget as shipping
-scope. A judge watching the video sees this widget or they see nothing.
+## Gap 4 — ~~`causal-timeline` widget~~ ✅ **BUILT** (2026-07-25)
 
-Mechanically: add `src/widgets/app/causal-timeline/page.tsx`, add the entry to
-`widget-manifest.json` (its existing `examples` block is a good template — Studio renders
-those in the Resources preview via *Select Preview Case*), decorate `explain_drift` with
-`@Widget('causal-timeline')`.
+`sentinel/src/widgets/app/causal-timeline/page.tsx`, registered in `widget-manifest.json`
+with a worked example, attached to `explain_drift` via `@Widget('causal-timeline')`.
+`npm run build` reports **2 widgets bundled**.
 
-### Four widget-SDK capabilities worth designing around
+Renders: the claim in one sentence · the plan row · a labelled drift connector · the build row
+(with the drifted component highlighted in **both** rows) · the failing test · the five
+confidence bars each with its reason · a "where I'm less sure" line · and the refusal.
 
-From `sentinel/.claude/skills/ui-widgets/SKILL.md` — the authoritative SDK reference the
-CLI dropped in the repo. Two of these turn MENTOR's refusal from a dead end into a
-teaching move, which is worth more than the diagram itself:
+**The refusal is not a dead end.** `sendFollowUpMessage()` powers an *"Ask instead → Why does
+tax have to come after discount?"* button, so declining the patch still moves the student
+forward. Also wired: `requestFullscreen()` (the timeline is wide) and `displayMode`.
 
-- **`sendFollowUpMessage(prompt)`** — injects a message into the chat and submits it to the
-  model. **This is how the refusal stays pedagogical.** Instead of "fix it" the widget
-  offers *"Ask: why must tax come after discount?"* or *"Ask: what else would this design
-  break?"* MENTOR still refuses to write the patch (§2), but the student gets somewhere.
-  Design this beat deliberately — it's the difference between a tool that says no and a
-  tool that teaches.
-- **`callTool(name, args)`** — the widget can invoke MCP tools directly. Clicking a node on
-  the plan row could call a tool for that component's detail without a chat round-trip.
-- **`requestFullscreen()`** — the timeline is a wide two-row diagram with an arrow between
-  rows. It will be cramped inline. Offer fullscreen; it matters on video.
-- **`useWidgetState`** — persists selection (which drift node is open) across re-renders.
+**Verified in a browser** against the manifest's example payload: all sections render, `tax`
+highlights in both rows, no console errors, no horizontal body scroll, and clicking the button
+really does call `sendFollowUpMessage({prompt: 'Why does tax have to come after discount?'})`.
 
-Also: `prefersReducedMotion()` / `isPrimarilyTouchDevice()` / `prefersDarkColorScheme()`
-exist, and an education judge may well be on a tablet.
-
----
 
 ## Gap 5 — The build history is authored, not derived 🟡
 
@@ -250,6 +227,12 @@ have "a time axis" (§5) rests on a history it did not observe.
 Deriving `mentor.build/v1` from `git log -p` on a single file is tractable — walk the
 commits, attribute each hunk to a component by line range, take first-touch as `seq`.
 
+**MENTOR already discounts itself for this.** `provenance` is a field on
+`mentor.build/v1` and one of the five confidence signals (weight 0.15, `authored` scores
+0.4 against `git`'s 1.0). It is why the demo reports **0.91** and not 0.97 — the gap is
+this gap, priced in and shown to the student rather than hidden. Building the deriver
+raises the score honestly, and there's a test asserting exactly that.
+
 **Recommendation: don't build this for the submission.** Ship the authored fixture, and
 say plainly on the roadmap slide that history derivation is next. An honest authored
 fixture reads better than a half-working deriver that mis-attributes a line — and §10
@@ -258,30 +241,26 @@ useless in education.
 
 ---
 
-## Gap 6 — A deployed MENTOR cannot read the student's plan file 🟡
+## Gap 6 — ~~A deployed MENTOR cannot read the student's plan file~~ ✅ **resolved**
 
-**Inferred from the deployment model; not yet a bug because MENTOR doesn't exist.**
+Settled the way this file recommended: **the plan and build are tool arguments**, with the
+bundled fixture as the default.
 
-I added the export (Gap-2 note): Lumina's **Plan** button downloads `plan.lumina.json`
-to the student's machine. But MENTOR runs as an MCP server **on NitroCloud**, so it has
-no access to their filesystem. Same constraint `ARCHITECTURE.md` §15 already documents
-for the broken service ("bundled inside the app because NitroCloud can't run a separate
-live service for us to patch").
+```
+explain_drift({})                      -> runs the bundled pricing demo (stage-safe, one click)
+explain_drift({plan, build, symptom})  -> runs a real student's project
+```
 
-So decide the tool signature before writing `mentor.module.ts`:
+Both accept a JSON string or an already-parsed object (`z.union([z.string(), z.record(...)])`),
+because clients differ on which they send. There is a test that drives a completely different
+project (a three-step scraper) through the same tool and gets the right origin.
 
-- **Bundled** — the fixture's plan is compiled into the app, `explain_drift` takes no
-  plan argument. Simplest, reliable on stage, one project only.
-- **Argument** — `explain_drift(plan, build)` takes the JSON as a Zod-validated tool
-  input; the student pastes or uploads their export. Generalizes to any project, and
-  the demo just passes the fixture. **Recommended** — it costs nothing extra now and
-  is the difference between a demo and a product.
-- **Fetched** — MENTOR pulls from a URL. Most flexible, most to go wrong live.
+The fixture is embedded in `mentor/fixtures.ts` rather than read from `fixtures/pricing/`,
+because on NitroCloud this app can't see the monorepo — same constraint that bundled
+SENTINEL's broken service. `npm run fixture:check` compares the embedded copies against the
+on-disk files so they can't silently diverge. (It immediately earned its keep: it caught a
+single character — `^` where the file had `↑`.)
 
-`export_plan.py`'s artifact is plain JSON with no Lumina types precisely so the
-argument route stays open.
-
----
 
 ## Gap 7 — The evidence study has not been run 🟡
 
@@ -345,15 +324,23 @@ README, and each commander's framing text.
 
 | Check | Result |
 |---|---|
-| `cd sentinel && npm install && npm test` | ✅ **32/32 pass** in the new location |
-| `npx tsx src/index.ts` — **Studio's real launch command** | ✅ serves `initialize` + `tools/list` over stdio, **20 tools** registered |
-| Studio project validity (`package.json` + `src/index.ts` + `@nitrostack/core`) | ✅ `sentinel/` valid · root correctly **invalid** (point Studio at the subfolder) |
+| `cd sentinel && npm test` | ✅ **65/65 pass** (32 platform + 33 MENTOR) |
+| `explain_drift` over real MCP (`node dist/index.js`, stdio) | ✅ origin `tax @ build/pricing.js:12`, planned 3rd / built 2nd |
+| … its confidence | ✅ **0.91**, computed from 5 signals; engine gate **0.964 autonomous** |
+| … its refusal | ✅ `fix_withheld: true` + a follow-up question, not a patch |
+| `tools/list` | ✅ **23 tools**, incl. `explain_drift`, `withhold_fix`, `mentor_status` |
+| `npx tsx src/index.ts` — Studio's real launch command | ✅ serves the full tool list over stdio |
+| Studio project validity | ✅ `sentinel/` valid · monorepo root correctly **invalid** |
 | `sentinel/` zipped for the upload path | ✅ **0.21 MB** vs the 100 MB limit |
-| `sentinel` widget bundle | ✅ `src/widgets/out/mission-trace.html` regenerates; widget URI `ui://widget/next-mission-trace.html` |
-| `cd lumina && npx tsc --noEmit` | ✅ **clean**, including the new export |
+| `npm run build` | ✅ **2 widgets bundled** (mission-trace + causal-timeline) |
+| causal-timeline in a browser, real payload | ✅ renders; `tax` highlighted in both rows; 0 console errors; no h-scroll |
+| … the "Ask instead" button | ✅ actually calls `sendFollowUpMessage({prompt})` |
+| MENTOR refuses to be given a write tool | ✅ 6 plausible tool names all return `unknown tool` |
+| `awaitRecovery` with a mutated source | ✅ returns **false** → incident ESCALATES |
+| `cd lumina && npx tsc --noEmit` | ✅ **clean**, including the plan export |
 | `cd lumina && python -m pytest test_export_plan.py` | ✅ **15/15 pass** |
 | `npm run fixture:plan` twice → `git diff` | ✅ byte-identical (deterministic) |
-| `npm run fixture:check` | ✅ **2 pass, 1 fail** — the intended state, and guarded |
+| `npm run fixture:check` | ✅ 2 pass / 1 fail as designed, **and** embedded copies match disk |
 | Failing test location | ✅ `pricing.test.js:40`, `80 !== 72` |
 | Drift origin location | ✅ `pricing.js:12`, `const tax = subtotal * taxRate;` |
 | Lumina `POST /api/export/plan` from a real browser | ✅ 200, no console errors |
@@ -362,5 +349,7 @@ The line numbers in `MENTOR-CONCEPT.md` §3 ("broke on line 40… went wrong on 
 are now literally true of `fixtures/pricing/`, not illustrative.
 
 **Not verified:** whether NitroCloud's *Connect Repository* dialog has a Root Directory
-field (needs the account — and it no longer matters much, see Gap 1), and Gap 6, which
-follows from the deployment model rather than from something I ran.
+field (needs the account — and it no longer matters much, see Gap 1), and anything that
+requires actually deploying. A screenshot of the widget was not possible in this
+environment; it was verified through the DOM and the SDK call instead, which is stronger
+evidence than a picture but does not prove it looks *good*. **Put eyes on it in Studio.**

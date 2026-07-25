@@ -103,9 +103,16 @@ confidence         0.91
 **And then MENTOR stops.** It names the origin and declines to write the fix.
 That refusal is the product (`../../MENTOR-CONCEPT.md` §2), not a limitation.
 
-`build.history.json` also carries an **`expectedDrift`** block — the assertion a
-correct MENTOR run must reproduce. Wire `mentor.test.ts` to it so the demo is
+**This all runs today.** `explain_drift` in `../../sentinel/src/modules/mentor/` produces
+exactly the numbers above, and `mentor.test.ts` asserts them — `cd ../../sentinel && npm test`.
+
+`build.history.json` also carries an **`expectedDrift`** block — the assertion a correct
+MENTOR run must reproduce. `drift.test.ts` asserts every field of it, so the demo is
 regression-tested rather than eyeballed.
+
+Its `provenance: "authored"` is why confidence is **0.91** and not 0.97: MENTOR discounts a
+hand-written history against a git-derived one. The demo's weakest link is priced into the
+number it shows the student, rather than hidden in a footnote.
 
 ---
 

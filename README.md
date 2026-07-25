@@ -26,7 +26,7 @@ summary. That tells you the state of things faster than anything else here.
 
 ```
 command-global/
-├── sentinel/           ⭐ the deliverable — TS NitroStack MCP app, 6 modules, 32/32 tests
+├── sentinel/           ⭐ the deliverable — TS NitroStack MCP app, 7 modules, 65/65 tests
 ├── lumina/                Layer 3 — the canvas the student designs in (Next.js + FastAPI)
 ├── fixtures/pricing/      the one demo project: the plan, the build, the drift
 └── reference/python/      the original Python prototype (frozen, still useful)
@@ -66,7 +66,7 @@ npm run verify           # sentinel build + 32 tests + regenerate the fixture pl
 
 ```bash
 npm run sentinel:dev     # then open the sentinel/ folder in NitroStudio
-npm test                 # 32/32, fully offline — no API key, no network, no model
+npm test                 # 65/65, fully offline — no API key, no network, no model
 ```
 
 Point NitroStudio at the **`sentinel/` subfolder**, not the repo root.
@@ -119,21 +119,30 @@ working human-approval UI.
 
 | | |
 |---|---|
-| Platform (5 commanders + coordinator + trust layer) | ✅ complete, 32/32 |
-| Studio launch path (`npx tsx src/index.ts`) | ✅ verified — 20 tools over stdio |
-| Lumina → MENTOR plan contract | ✅ built + tested (15/15) |
+| Platform (5 commanders + coordinator + trust layer) | ✅ complete |
+| **MENTOR — the submission** | ✅ **built** — 33 tests, verified over real MCP |
+| **`causal-timeline` widget** | ✅ **built** — renders the drift, withholds the fix |
+| Lumina → MENTOR plan contract | ✅ built + tested |
 | The demo fixture, all inputs | ✅ complete, verified, and guarded |
-| **MENTOR itself** | ⬜ **not started** — `GAPS.md` Gap 3 ← **critical path** |
-| `causal-timeline` widget | ⬜ not started — Gap 4 |
-| Deployed to NitroCloud | ⬜ not done, but **de-risked** — `DEPLOY.md` path A ignores the monorepo layout |
-| ChatGPT Plus/Pro on the team | ❓ **confirm this** — Developer mode is paywalled, Gap 1 |
+| Whole suite | ✅ **65/65**, offline, no API key, no model |
+| Deployed to NitroCloud | ⬜ **next** — `DEPLOY.md` path A, ~30 min |
+| Can a student really draw this in Lumina? | ❓ the open design call — `GAPS.md` Gap 2 |
 | Evidence study (n=5) | ⬜ not run — Gap 7 |
+| Product name | ❓ still `[[PRODUCT NAME]]` — Gap 8 |
 
-**Next action:** build MENTOR (Gap 3). The deploy turned out not to be the blocker —
-Studio deploys the connected *folder*, so `sentinel/` ships regardless of the repo shape.
-Two things to settle first because they change the code you'd write: **Gap 2** (Lumina
-can't draw a software architecture yet) and **Gap 3b** (the engine can't finish without
-deploying a fix, which is the one thing MENTOR must never do).
+**Next action: deploy it.** The code exists and works; it just isn't live. Follow
+`DEPLOY.md` path A — Studio's **Deploy** button bundles the connected `sentinel/` folder, so
+the monorepo layout is irrelevant. Then connect a client and record the ≤3-min demo
+(script in `DEPLOY.md` §7a).
 
-Alongside that, make sure someone on the team has **ChatGPT Plus or Pro** — Developer mode
-requires it and nothing in this repo can route around it.
+Two things worth settling while that runs:
+
+- **Gap 2** — Lumina has no generic software-component node, so the fixture's plan uses
+  `script` nodes as stand-ins. ~2h to add one, or re-aim the demo at an AI pipeline Lumina
+  already fits. Your call; it changes nothing in the plan artifact either way.
+- **Gap 8** — the product is still called `[[PRODUCT NAME]]`, and the deployable is literally
+  `command-platform`. That's a judged surface on an education submission.
+
+You do **not** need ChatGPT Plus: NitroStudio's own AI Chat is an MCP client with a model
+picker, gated on NitroCloud sign-in rather than a ChatGPT plan. Confirm with the organizers
+that a Studio demo satisfies the submission rules.
