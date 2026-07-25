@@ -91,12 +91,33 @@ secret sent as a bearer header between the services when set. Leave it unset unl
 the services already admit anonymous callers by design, so it buys little here. Redeploy,
 then confirm with `roster_status` that every peer reports reachable.
 
-**A1b — `npm run verify:live` is wrong and will fail all three.** Its `EXPECTED_TOOLS` is the
-pre-split **13-tool single-server** list, from when this was one app. Either retire it in
-favour of `scripts/verify-fleet.mjs`, or teach it to resolve its expectation from
-`serverInfo.name` the way the fleet checker does. Do not "fix" it by widening the expected
-list until it passes — the point of that assertion is to catch an app serving another app's
-verbs.
+**A1b — `npm run verify:live` is structurally single-server, not merely stale.** Read all 178
+lines of `scripts/verify-deployed.mjs` before planning this; the fix is bigger than its
+`EXPECTED_TOOLS` constant suggests. It drives, against **one** URL:
+
+| Call | Now lives in |
+|---|---|
+| `explain_drift` | MCP-2 `sentinel` |
+| `browse_catalog` | **nowhere** — the tool no longer exists; roster has `list_roles` + `projects_for_role` |
+| `open_brief` | MCP-1 `mcp-roster` |
+| `flashcard` | MCP-3 `mcp-profile` |
+| `whoami`, `class_progress`, `record_progress` | MCP-3 `mcp-profile` |
+
+So no single service can pass it, and it cannot be repaired by editing a list.
+
+**Do not delete it.** Its assertions are the most valuable in the repo and
+`scripts/verify-fleet.mjs` does not replace them — it checks surfaces, this checks
+*behaviour*: that the answer string appears nowhere in a live payload, that `flashcard`
+withholds with the field **absent** rather than flagged, that an unauthenticated caller is
+admitted as anonymous but `class_progress` refuses them, that anonymous progress is not
+persisted (or one visitor's run leaks into the next), and that `mission-trace` is not served
+because it leaked the fix.
+
+Rewrite it to take the three URLs, resolve each service by `serverInfo.name`, and route every
+call to the app that owns that tool — keeping every assertion. Replace `browse_catalog` with
+whatever the catalog journey is now. Where an assertion spans two apps (a brief from MCP-1
+carrying no answer that only MCP-3 holds), that is not a problem to work around — it is the
+most valuable thing in the file, because it is the invariant the whole split exists to create.
 
 **Deliverable:** `roster_status` reporting all peers reachable, and one verify command that
 tells the truth about all three.
