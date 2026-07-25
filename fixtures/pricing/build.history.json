@@ -1,0 +1,102 @@
+{
+  "$comment": [
+    "schema mentor.build/v1 — the BUILD half of MENTOR's input, the counterpart",
+    "to plan.lumina.json. The plan says what the student intended and in what",
+    "order; this says what they actually did and in what order. MENTOR's drift",
+    "detection is the diff between the two, joined on `component`.",
+    "",
+    "`seq` is the actual order of work. The plan's `order` array is the intended",
+    "order. When a component's position differs between the two, that is drift —",
+    "and the earliest such component is the ORIGIN, which is the one thing MENTOR",
+    "reports. `line` is where the drifted decision lives, which is what makes",
+    "'your code broke on line 40, it went wrong on line 12' a computed claim",
+    "rather than a narrated one.",
+    "",
+    "`at` values are relative offsets from the start of the session, not",
+    "wall-clock times: this is an authored fixture, and a fake timestamp would",
+    "read as captured telemetry.",
+    "",
+    "See GAPS.md Gap 4 — for real student projects this file must be DERIVED from",
+    "a git history, not authored. It is hand-written here so the demo project is",
+    "complete and MENTOR has something to run against on day one."
+  ],
+
+  "schema": "mentor.build/v1",
+  "project": "pricing",
+  "planRef": "plan.lumina.json",
+  "entry": "build/pricing.js",
+  "tests": "build/pricing.test.js",
+
+  "steps": [
+    {
+      "seq": 1,
+      "at": "T+03m",
+      "component": "validate",
+      "kind": "implement",
+      "file": "build/pricing.js",
+      "line": 8,
+      "summary": "Summed the cart into `subtotal`."
+    },
+    {
+      "seq": 2,
+      "at": "T+11m",
+      "component": "tax",
+      "kind": "implement",
+      "file": "build/pricing.js",
+      "line": 12,
+      "summary": "Computed tax from `subtotal`, before any discount existed.",
+      "note": "Plan puts tax third, after discount. Implemented second. This is the drift."
+    },
+    {
+      "seq": 3,
+      "at": "T+19m",
+      "component": "discount",
+      "kind": "implement",
+      "file": "build/pricing.js",
+      "line": 14,
+      "summary": "Added the discount — but tax had already been fixed against the undiscounted subtotal."
+    },
+    {
+      "seq": 4,
+      "at": "T+24m",
+      "component": "total",
+      "kind": "implement",
+      "file": "build/pricing.js",
+      "line": 17,
+      "summary": "Summed `taxable + tax` and rounded to 2dp."
+    },
+    {
+      "seq": 5,
+      "at": "T+38m",
+      "component": "tests",
+      "kind": "verify",
+      "file": "build/pricing.test.js",
+      "line": 40,
+      "summary": "Ran the golden tests: tests 1 and 2 green, test 3 red."
+    }
+  ],
+
+  "failure": {
+    "test": "test 3 — 40% discount, 20% tax",
+    "file": "build/pricing.test.js",
+    "line": 40,
+    "expected": 72.0,
+    "actual": 80.0,
+    "message": "80 !== 72",
+    "whyItHidUntilNow": "Tests 1 and 2 both use discountRate = 0, where taxing the subtotal and taxing the discounted amount produce the same number. Test 3 is the first case that distinguishes them."
+  },
+
+  "expectedDrift": {
+    "$comment": "What a correct MENTOR run must produce. This is the fixture's assertion — mentor.test.ts should compare against it.",
+    "originComponent": "tax",
+    "originFile": "build/pricing.js",
+    "originLine": 12,
+    "surfacedAtFile": "build/pricing.test.js",
+    "surfacedAtLine": 40,
+    "plannedPosition": 3,
+    "actualPosition": 2,
+    "explanation": "You designed tax as the step after discount. You implemented it before discount.",
+    "confidence": 0.91,
+    "refusesToFix": true
+  }
+}

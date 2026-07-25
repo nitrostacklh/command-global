@@ -1,0 +1,302 @@
+[
+  {
+    "id": "0d446283",
+    "type": "tab",
+    "label": "Lumina Export",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "df72ec98",
+    "type": "inject",
+    "z": "0d446283",
+    "name": "Camera Trigger",
+    "x": -165,
+    "y": 300,
+    "wires": [
+      [
+        "d4653e61"
+      ]
+    ],
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "25",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 3,
+    "topic": "",
+    "payload": "{\"source\": \"camera\", \"fps\": 0.04}",
+    "payloadType": "json"
+  },
+  {
+    "id": "d4653e61",
+    "type": "http request",
+    "z": "0d446283",
+    "name": "Camera",
+    "x": 75,
+    "y": 300,
+    "wires": [
+      [
+        "e7d8bf14"
+      ]
+    ],
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://localhost:8000/api/capture",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": []
+  },
+  {
+    "id": "e7d8bf14",
+    "type": "function",
+    "z": "0d446283",
+    "name": "Object Detect Prep",
+    "x": 630,
+    "y": 300,
+    "wires": [
+      [
+        "931b307c"
+      ]
+    ],
+    "func": "// Preserve image so downstream VLM nodes can use it\nmsg.lumina_image = msg.payload.image || msg.payload.output || msg.lumina_image || '';\nmsg.payload = Object.assign({}, msg.payload, {confidence: 30});\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": []
+  },
+  {
+    "id": "931b307c",
+    "type": "http request",
+    "z": "0d446283",
+    "name": "Object Detect",
+    "x": 750,
+    "y": 300,
+    "wires": [
+      [
+        "save_det_01",
+        "e14ba6e2"
+      ]
+    ],
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://localhost:8000/api/detect",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": []
+  },
+  {
+    "id": "e14ba6e2",
+    "type": "switch",
+    "z": "0d446283",
+    "name": "Switch",
+    "x": 1350,
+    "y": 300,
+    "wires": [
+      [
+        "76fd7592"
+      ],
+      [
+        "6640edad"
+      ]
+    ],
+    "property": "payload.output",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "cont",
+        "vt": "str",
+        "v": ""
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "false",
+    "repair": false,
+    "outputs": 2
+  },
+  {
+    "id": "76fd7592",
+    "type": "delay",
+    "z": "0d446283",
+    "name": "Visual LLM Rate Limit",
+    "x": 1710,
+    "y": 195,
+    "wires": [
+      [
+        "8a4c1d1f"
+      ]
+    ],
+    "pauseType": "rate",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "10",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": true,
+    "allowrate": false,
+    "outputs": 1
+  },
+  {
+    "id": "8a4c1d1f",
+    "type": "function",
+    "z": "0d446283",
+    "name": "Visual LLM Prep",
+    "x": 1830,
+    "y": 195,
+    "wires": [
+      [
+        "94427525"
+      ]
+    ],
+    "func": "// Restore original captured image (detect/other nodes overwrite msg.payload)\nvar img = msg.lumina_image || msg.payload.image || msg.payload.output || '';\nmsg.payload = {image: img, prompt: \"What objects and people do you see? Be very brief.\"};\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": []
+  },
+  {
+    "id": "94427525",
+    "type": "http request",
+    "z": "0d446283",
+    "name": "Visual LLM",
+    "x": 1950,
+    "y": 195,
+    "wires": [
+      [
+        "37896e05",
+        "build_result_01"
+      ]
+    ],
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://localhost:8000/api/vlm",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": []
+  },
+  {
+    "id": "37896e05",
+    "type": "debug",
+    "z": "0d446283",
+    "name": "Log",
+    "x": 2625,
+    "y": 195,
+    "wires": [
+      []
+    ],
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto"
+  },
+  {
+    "id": "6640edad",
+    "type": "debug",
+    "z": "0d446283",
+    "name": "Log 2",
+    "x": 1950,
+    "y": 450,
+    "wires": [
+      []
+    ],
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto"
+  },
+  {
+    "id": "save_det_01",
+    "type": "function",
+    "z": "fcb1c9a7",
+    "name": "Save Detect Result",
+    "x": 830,
+    "y": 360,
+    "func": "msg.lumina_detect_output = msg.payload.output || msg.payload.detections ? JSON.stringify(msg.payload.detections) : \"\";\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "build_result_01",
+    "type": "function",
+    "z": "fcb1c9a7",
+    "name": "Build Lumina Payload",
+    "x": 1980,
+    "y": 130,
+    "func": "var det = msg.lumina_detect_output || \"\";\nvar img = msg.lumina_image || \"\";\nmsg.payload = {\n  vlm_analysis: msg.payload.analysis || msg.payload.output || \"\",\n  detection_output: det,\n  image: img,\n  latency_ms: msg.payload.latency_ms || 0,\n  source: \"node-red\"\n};\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "wires": [
+      [
+        "lumina_cb_01"
+      ]
+    ]
+  },
+  {
+    "id": "lumina_cb_01",
+    "type": "http request",
+    "z": "fcb1c9a7",
+    "name": "Lumina Live Panel",
+    "x": 2200,
+    "y": 130,
+    "method": "POST",
+    "ret": "txt",
+    "paytoqs": "ignore",
+    "url": "http://localhost:8000/api/pipeline-result",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "wires": [
+      []
+    ]
+  }
+]

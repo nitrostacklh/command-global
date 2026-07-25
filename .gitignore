@@ -1,0 +1,53 @@
+# ── Secrets — NEVER commit (hackathon hard rule) ──────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# ── Dependencies ──────────────────────────────────────────────────────────
+node_modules/
+
+# ── Build output ──────────────────────────────────────────────────────────
+dist/
+.next/
+out/
+*.tsbuildinfo
+release/
+sentinel/src/widgets/out/
+lumina/next-env.d.ts
+
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+# Lumina's venv (`npm run backend` expects it at lumina/v/)
+lumina/v/
+.venv/
+venv/
+
+# ── Runtime / generated ───────────────────────────────────────────────────
+*.log
+logs/
+uploads/
+lumina/lumina.db
+lumina/s/
+reference/python/.sentinel_sandbox/
+
+# ONNX models — 26 MB of weights, fetched not committed. See lumina/README.md.
+lumina/m/
+
+# ── Local agent config ────────────────────────────────────────────────────
+# Root-level and Lumina's only — anchored with a leading slash so the NitroStack
+# skill packs under sentinel/.claude/skills/ (and its .cursor/, .codex/, … peers)
+# stay tracked. Those ship with the scaffold and are project content.
+/.claude/
+lumina/.claude/
+CLAUDE.md
+
+# ── OS / editor ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

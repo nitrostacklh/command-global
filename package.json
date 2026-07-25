@@ -1,0 +1,28 @@
+{
+  "name": "command-global",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MENTOR — you didn't just write the bug, you designed it. Built on the COMMAND platform (NitroStack MCP app) + the Lumina design canvas.",
+  "scripts": {
+    "sentinel:dev": "npm --prefix sentinel run dev",
+    "sentinel:build": "npm --prefix sentinel run build",
+    "sentinel:install": "npm --prefix sentinel install",
+    "test": "npm --prefix sentinel test",
+
+    "lumina:dev": "npm --prefix lumina run dev",
+    "lumina:build": "npm --prefix lumina run build",
+    "lumina:backend": "npm --prefix lumina run backend",
+    "lumina:full": "npm --prefix lumina run full-dev",
+    "lumina:install": "npm --prefix lumina install",
+
+    "fixture:test": "node --test fixtures/pricing/build",
+    "fixture:plan": "python scripts/regen_fixture_plan.py",
+
+    "push:sentinel": "git subtree push --prefix sentinel sentinel-origin main",
+
+    "install:all": "npm run sentinel:install && npm run lumina:install",
+    "verify": "npm run sentinel:build && npm test && npm run fixture:plan"
+  },
+  "author": "Team COMMAND",
+  "license": "UNLICENSED"
+}

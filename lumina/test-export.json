@@ -1,0 +1,266 @@
+﻿[
+  {
+    "id": "62971a60",
+    "type": "tab",
+    "label": "Lumina Export",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "94ef4c17",
+    "type": "inject",
+    "z": "62971a60",
+    "name": "Camera Trigger",
+    "x": -165,
+    "y": 300,
+    "wires": [
+      [
+        "bb1d5ff8"
+      ]
+    ],
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "10",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"source\": \"camera\", \"fps\": 1.0}",
+    "payloadType": "json"
+  },
+  {
+    "id": "bb1d5ff8",
+    "type": "http request",
+    "z": "62971a60",
+    "name": "Camera",
+    "x": 75,
+    "y": 300,
+    "wires": [
+      [
+        "e035571a",
+        "66758fdd"
+      ]
+    ],
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://localhost:8000/api/capture",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": []
+  },
+  {
+    "id": "e035571a",
+    "type": "function",
+    "z": "62971a60",
+    "name": "Object Detect Prep",
+    "x": 480,
+    "y": 300,
+    "wires": [
+      [
+        "511aa2ea"
+      ]
+    ],
+    "func": "// Preserve image so downstream VLM nodes can use it\nmsg.lumina_image = msg.payload.image || msg.payload.output || msg.lumina_image || '';\nmsg.payload = Object.assign({}, msg.payload, {confidence: 45});\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": []
+  },
+  {
+    "id": "511aa2ea",
+    "type": "http request",
+    "z": "62971a60",
+    "name": "Object Detect",
+    "x": 600,
+    "y": 300,
+    "wires": [
+      [
+        "66758fdd"
+      ]
+    ],
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://localhost:8000/api/detect",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": []
+  },
+  {
+    "id": "66758fdd",
+    "type": "delay",
+    "z": "62971a60",
+    "name": "Visual LLM Rate Limit",
+    "x": 885,
+    "y": 300,
+    "wires": [
+      [
+        "6d013321"
+      ]
+    ],
+    "pauseType": "rate",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "10",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": true,
+    "allowrate": false,
+    "outputs": 1
+  },
+  {
+    "id": "6d013321",
+    "type": "function",
+    "z": "62971a60",
+    "name": "Visual LLM Prep",
+    "x": 1005,
+    "y": 300,
+    "wires": [
+      [
+        "d05720b6"
+      ]
+    ],
+    "func": "// Restore original captured image (detect/other nodes overwrite msg.payload)\nvar img = msg.lumina_image || msg.payload.image || msg.payload.output || '';\nmsg.payload = {image: img, prompt: \"What do you see?\"};\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": []
+  },
+  {
+    "id": "d05720b6",
+    "type": "http request",
+    "z": "62971a60",
+    "name": "Visual LLM",
+    "x": 1125,
+    "y": 300,
+    "wires": [
+      [
+        "fd1f04c3"
+      ]
+    ],
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://localhost:8000/api/vlm",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": []
+  },
+  {
+    "id": "fd1f04c3",
+    "type": "switch",
+    "z": "62971a60",
+    "name": "Switch",
+    "x": 1650,
+    "y": 300,
+    "wires": [
+      [
+        "f8b3283e"
+      ],
+      [
+        "fc75fb4d"
+      ]
+    ],
+    "property": "payload.output",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "cont",
+        "vt": "str",
+        "v": "person"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "false",
+    "repair": false,
+    "outputs": 2
+  },
+  {
+    "id": "f8b3283e",
+    "type": "debug",
+    "z": "62971a60",
+    "name": "Log",
+    "x": 2175,
+    "y": 225,
+    "wires": [
+      []
+    ],
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto"
+  },
+  {
+    "id": "fc75fb4d",
+    "type": "function",
+    "z": "62971a60",
+    "name": "Notify Prep",
+    "x": 2055,
+    "y": 450,
+    "wires": [
+      [
+        "fbe5dfae"
+      ]
+    ],
+    "func": "return msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": []
+  },
+  {
+    "id": "fbe5dfae",
+    "type": "http request",
+    "z": "62971a60",
+    "name": "Notify",
+    "x": 2175,
+    "y": 450,
+    "wires": [
+      []
+    ],
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://localhost:8000/api/notify",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": []
+  }
+]

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SENTINEL — Autonomous Incident Commander</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">◉</span>
+      <span class="brand-name">SENTINEL</span>
+      <span class="brand-sub">Autonomous Incident Commander</span>
+    </div>
+    <div class="topbar-right">
+      <div class="pill" id="pill-domain" title="Active domain adapter (pluggable core)">domain: —</div>
+      <div class="pill" id="pill-model" title="Reasoning model">model: —</div>
+      <div class="pill" id="pill-connectors" title="Connector modes">connectors: —</div>
+      <div class="health-pill" id="health-pill">
+        <span class="dot" id="health-dot"></span>
+        <span id="health-text">probing…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- left: incidents -->
+    <aside class="panel incidents-panel">
+      <h2>Incidents</h2>
+      <div id="incident-list" class="incident-list">
+        <div class="empty">No incidents yet.<br/>All systems nominal.</div>
+      </div>
+    </aside>
+
+    <!-- center: live trace -->
+    <section class="panel trace-panel">
+      <div class="trace-header">
+        <h2>Mission Trace <span class="live-badge" id="live-badge">● LIVE</span></h2>
+        <span class="trace-incident" id="trace-incident-id"></span>
+      </div>
+      <div id="trace" class="trace">
+        <div class="empty">Waiting for activity…<br/>Break the service to watch SENTINEL work.</div>
+      </div>
+    </section>
+
+    <!-- right: control + confidence -->
+    <aside class="panel side-panel">
+      <h2>Chaos Console</h2>
+      <p class="hint">Inject a real regression into the live service. SENTINEL will detect, diagnose, fix, verify and report — on its own.</p>
+      <div class="chaos-buttons">
+        <button class="chaos" data-bug="tax-before-discount">💸 Tax-before-discount bug</button>
+        <button class="chaos" data-bug="flipped-validation">🔁 Flipped validation bug</button>
+        <button class="chaos" data-bug="region-keyerror">💥 Region crash bug</button>
+        <button class="chaos restore" id="btn-restore">✨ Restore pristine code</button>
+      </div>
+
+      <h2 style="margin-top:22px">Autonomy Gate</h2>
+      <div id="confidence-panel" class="confidence-panel">
+        <div class="empty small">No verdict yet.</div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- HITL approval modal -->
+  <div class="modal-backdrop hidden" id="approval-modal">
+    <div class="modal">
+      <h2>⏸ Human approval required</h2>
+      <p class="modal-sub">Confidence fell below the autonomy threshold. Review the proposed fix.</p>
+      <div class="modal-grid">
+        <div>
+          <h3>Proposed patch</h3>
+          <pre class="diff" id="modal-diff"></pre>
+        </div>
+        <div>
+          <h3>Why the gate fired</h3>
+          <div id="modal-confidence"></div>
+        </div>
+      </div>
+      <input type="text" id="modal-note" placeholder="Optional note for the audit trail…" />
+      <div class="modal-actions">
+        <button class="btn reject" id="btn-reject">Reject &amp; escalate</button>
+        <button class="btn approve" id="btn-approve">Approve deploy</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
