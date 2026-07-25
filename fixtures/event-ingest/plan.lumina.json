@@ -1,0 +1,100 @@
+{
+  "schema": "lumina.plan/v1",
+  "name": "Idempotent event ingest",
+  "planId": "wf-event-ingest-fixture",
+  "nodes": [
+    {
+      "id": "n-receive",
+      "type": "component",
+      "label": "receive",
+      "position": {
+        "x": 0,
+        "y": 160
+      },
+      "data": {
+        "label": "receive",
+        "component": "receive",
+        "intent": "The webhook hands me the event as it arrived. Platform owns this — my boundary."
+      }
+    },
+    {
+      "id": "n-dedupe",
+      "type": "component",
+      "label": "deduplicate",
+      "position": {
+        "x": 260,
+        "y": 160
+      },
+      "data": {
+        "label": "deduplicate",
+        "component": "deduplicate",
+        "intent": "Have I seen this id before? Must run on the event AS SENT, before anything reshapes it."
+      }
+    },
+    {
+      "id": "n-normalise",
+      "type": "component",
+      "label": "normalise",
+      "position": {
+        "x": 520,
+        "y": 160
+      },
+      "data": {
+        "label": "normalise",
+        "component": "normalise",
+        "intent": "Map a known-new event onto the table's columns and fill in defaults."
+      }
+    },
+    {
+      "id": "n-persist",
+      "type": "component",
+      "label": "persist",
+      "position": {
+        "x": 780,
+        "y": 160
+      },
+      "data": {
+        "label": "persist",
+        "component": "persist",
+        "intent": "One row, written idempotently so a crash cannot duplicate it."
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "n-receive",
+      "target": "n-dedupe",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "id": "e2",
+      "source": "n-dedupe",
+      "target": "n-normalise",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "id": "e3",
+      "source": "n-normalise",
+      "target": "n-persist",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    }
+  ],
+  "order": [
+    "n-receive",
+    "n-dedupe",
+    "n-normalise",
+    "n-persist"
+  ],
+  "entry": [
+    "n-receive"
+  ],
+  "terminal": [
+    "n-persist"
+  ],
+  "cyclic": false,
+  "warnings": []
+}
