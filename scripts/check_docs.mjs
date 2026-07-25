@@ -157,8 +157,15 @@ if (existsSync(studyPath)) {
     for (const rel of docs()) {
       if (rel === 'STUDY.md') continue;
       const text = read(rel);
+      const lines = text.split('\n');
+      // A doc is allowed to QUOTE the overclaim in order to disown it — Gap 15 does
+      // exactly that, and the first run of this check flagged my own correction.
+      // Distinguish making the claim from criticising it.
+      const DISOWNED = /previously said|overclaim|must never|never say|rather than|instead of|was removed|is gone|do not say|NOT evidence|which was a|used to say/i;
       for (const m of text.matchAll(/\bwe measured it\b|\bwe measured\b|\bthe study (?:found|showed)\b/gi)) {
         const line = lineOf(text, m.index);
+        const context = lines.slice(Math.max(0, line - 4), line + 3).join(' ');
+        if (DISOWNED.test(context)) continue;
         problems.push(
           `${rel}:${line} claims a measurement ("${m[0]}") but STUDY.md has no results yet — ` +
             'say "designed", not "done"',

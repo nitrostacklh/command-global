@@ -305,6 +305,7 @@ working human-approval UI.
 | **`causal-timeline` widget** | ✅ **built** — renders the drift, withholds the fix |
 | The two demo projects, all inputs | ✅ complete, verified, and guarded |
 | Whole suite | ✅ **109/109**, offline, no API key, no model |
+| Docs agree with the code | ✅ guarded — `npm run check:docs` reads the live tool list |
 | Deployed to NitroCloud | ⬜ **next** — `DEPLOY.md` path A, ~30 min |
 | Can a student really draw this in Lumina? | ✅ **yes** — real `component` node, verified in-browser end to end |
 | Layer 2 · the lesson panels | ⬜ roadmap — the one stage of the loop still missing |

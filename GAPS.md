@@ -43,7 +43,7 @@ the lesson panels, is now the only stage of the loop with nothing behind it** (G
 |---|---|---|---|
 | 1 | Deploy to NitroCloud + connect a client | 🟠 **do this next** | you, ~30 min |
 | 13 | Layer 2 (lesson panels) is the only unbuilt stage | 🟡 the loop's one visible hole | scope decision |
-| 7 | Evidence study (n=5) not run | 🟡 free points, Research track | ~2h with classmates |
+| 7 | Evidence study (n=5) not run — **protocol ready** in `STUDY.md` | 🟡 free points, Research track | ~2h with classmates |
 | 8 | Open `[[placeholders]]` incl. product name | 🟡 submission hygiene | you |
 | 9 | Six official tracks never confirmed | 🟡 submission hygiene | organizers |
 | 14 | Only 2 of 5 catalog roles are playable | 🟢 honest, and reported as such | ~1h per brief |
@@ -55,10 +55,11 @@ the lesson panels, is now the only stage of the loop with nothing behind it** (G
 | 3 | ~~MENTOR doesn't exist~~ | ✅ **built** | done |
 | 4 | ~~`causal-timeline` widget~~ | ✅ **built** | done |
 | 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 → 3, now 10 on one story | done |
+| 15 | ~~Docs asserted counts the code owns, and drifted~~ | ✅ **fixed** — `npm run check:docs` | done |
 
-*Reordered 2026-07-25 (four times): after the Studio handbook downgraded Gap 1, after MENTOR
-shipped, after Gaps 2 and 11 closed, and after Gap 12 closed the bridges. **Gap 1 is still
-the critical path** — the code exists and isn't live yet.*
+*Reordered 2026-07-25 (five times): after the Studio handbook downgraded Gap 1, after MENTOR
+shipped, after Gaps 2 and 11 closed, after Gap 12 closed the bridges, and after a review
+found Gap 15. **Gap 1 is still the critical path** — the code exists and isn't live yet.*
 
 ---
 
@@ -336,7 +337,25 @@ measurement. Two hours with five classmates produces a number, and reporting it 
 — stated sample size, mixed result if that's the result — reads as research where a
 confident unsupported claim reads as marketing.
 
-It does need Gap 3 finished first, since group A needs a working MENTOR.
+**The protocol is now written and ready to run: [`STUDY.md`](STUDY.md).** That closes the
+half of this gap that was a design problem. What remains is purely logistical — five people
+and two hours.
+
+`STUDY.md` pre-commits the analysis *before* the data exists, which matters more than it
+sounds: with n=5 it is trivially easy to find a flattering comparison afterwards, and a judge
+who suspects you did discounts the whole result. It also fixes the outcome measure at
+**time-to-locate the origin** rather than time-to-fix (fixing adds typing speed as noise) and
+rules out a significance test, because n=5 cannot support one and a p-value would be the
+fastest way to lose a research-minded judge.
+
+> **What this measurement is not.** The confidence score (`0.91` / `0.97`) is the tool's own
+> stated certainty about a drift claim. It is a transparency feature, and it is **not evidence
+> that MENTOR helps a human debug better.** Raised in review 2026-07-25 and the distinction is
+> correct — `MENTOR-CONCEPT.md` §6 previously said "We measured it. See §7" while §7 was an
+> unrun plan, which was a straight overclaim. Fixed, and `npm run check:docs` now fails the
+> build if any doc claims a measurement while `STUDY.md` has no results.
+
+Gap 3 is done, so nothing blocks this but scheduling.
 
 ---
 
@@ -580,3 +599,61 @@ make the catalog honest in a way that was less useful.
 
 Each additional brief is roughly an hour: `owns`, `given`, three acceptance criteria, and a
 concept whose answer is a principle rather than code (`assertNoFix` enforces the last part).
+
+---
+
+## Gap 15 — ~~Documentation asserted numbers the code owns~~ ✅ **FIXED** (2026-07-25)
+
+**Found by review, not by me, and it would have been found live by a judge.**
+
+`DEPLOY.md`'s pre-flight table asserted two incompatible things side by side: `109/109` tests
+(the state *after* the loop was built) next to `tools/list → exactly explain_drift,
+withhold_fix, mentor_status` (the state *before* it). Its own §7a demo script, two pages
+later, called five tools that the three-tool world does not contain.
+
+The review understated it. There were three defects, not two:
+
+1. the pre-flight table row above;
+2. **§2's gotcha box** — *"returns exactly 3 tools… If you see twenty-three, the platform
+   modules got re-registered"*. So a reader who saw the **correct** 10 would conclude
+   something was broken;
+3. that same row said `node dist/index.js`, which I had *already proved* cannot start from
+   the repo root (see the `start-mcp.mjs` header).
+
+`TESTING.md` and `MENTOR-CONCEPT.md` §8 carried the same stale count.
+
+### Why it happened, and why it would have happened again
+
+The counts are **facts the code owns and the prose copies.** When the tool surface went 3 →
+10 and the suite went 67 → 109, I updated the test counts with a bulk replace across four
+files and never swept the tool counts. Nothing anywhere connected the two, so the docs and
+the server were free to disagree indefinitely — and the person most likely to notice was a
+judge running `tools/list` after reading our own pre-flight.
+
+### The fix, and two mistakes made building it
+
+`scripts/check_docs.mjs` (`npm run check:docs`, in `npm run verify`) starts the built server,
+reads the real tool list, and fails on any doc that asserts a different count. It also fails
+if a doc claims a measurement while `STUDY.md` has no results.
+
+Both mistakes are worth recording, because both are the kind that make a guard useless:
+
+- **The first version was too broad.** It flagged every mention of an unregistered tool and
+  produced 25 findings that were *all correct behaviour* — `ARCHITECTURE.md` documents the
+  platform, so of course it names `self_heal`; `DEPLOY.md` §7b is a backup script explicitly
+  headed *"not runnable as shipped"*. A guard that fires on a document doing its job gets
+  switched off within a week, and then it protects nothing. Narrowed to asserted counts, plus
+  retired tool names in the two docs that are purely reader instructions.
+- **The second version did not catch the original bug.** I reintroduced the exact defect to
+  test it and it passed clean: the bare `→` exemption, meant for *"the surface went 23 → 3"*,
+  excused the literal string `tools/list → exactly 3 tools`. It now requires
+  digit-arrow-digit. **Breaking the thing a guard exists to catch is the only way that
+  surfaces** — asserting the guard works on a clean tree proves nothing.
+
+### The general lesson
+
+Any number in prose that the code also knows is a latent contradiction. Either derive it or
+check it. This repo now checks tool counts, fixture state (`fixture:check`), embedded-copy
+sync (`embed_learn_fixtures --check`), and the student journey (`walk`) — four different
+places where docs and code could previously have drifted apart silently.
+
