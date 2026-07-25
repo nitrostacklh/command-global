@@ -176,6 +176,40 @@ irrelevant on this path.
 
 Then **§6** to connect a client.
 
+## 3b. What can and cannot be automated — checked, not assumed
+
+**There is no `deploy` command in the NitroStack CLI.** Verified against
+`nitrostack-cli --help` (v1.0.15): `init`, `dev`, `build`, `start`, `generate`, `upgrade`,
+`install`, `cursor`, `pack`, `help`. Nothing else. Deployment happens in the **NitroStudio
+desktop app** or the **NitroCloud web console**, both of which need a signed-in
+organizer account — so the deploy itself is a human step, and not because nobody looked.
+
+**What is automated:** the artifact. `nitrostack pack` is the official packer, and the
+`.zip` for path B is now one command:
+
+```bash
+npm run pack
+```
+
+Writes `sentinel/mentor-deploy.zip` — **104 files, 300.5 KB** against a 100 MB limit.
+Audited: contains `src/index.ts`, `package.json`, the widgets and all of
+`src/modules/learn/`; excludes `node_modules/`, `dist/`, `src/widgets/out/`; the only
+env-shaped file is `.env.example`, which is a template with no secrets. Gitignored, since
+it is a build artifact.
+
+> ⚠️ **`pack --dry-run` is not read-only.** It rewrote `sentinel/.gitignore`, adding 19
+> canonical rules, on a *dry run*. They are sensible (`.env.local`, `tokens.json`,
+> `coverage/`, `*.tsbuildinfo`) and improve secret hygiene, so they were kept and
+> committed — and nothing already tracked became ignored, which was checked with
+> `git ls-files | git check-ignore --stdin`. Pass `--no-sync-gitignore` if you want it to
+> keep its hands off your tree.
+
+**Once path C is wired, deploys stop being a human step.** Connecting the GitHub repo in
+the NitroCloud console is a one-time authenticated action; after that every `git push`
+auto-redeploys, and pushing is already automated. So the honest split is: **the one-time
+setup is yours, the ongoing deploys are not.** That is the strongest reason to spend ten
+minutes on path C rather than treating it as optional convenience.
+
 ## 4. Deploy path B — upload a .zip
 
 NitroCloud → app → **MCP** ("Ship your MCP server") → **Upload a code package** → drag a

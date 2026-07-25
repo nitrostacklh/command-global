@@ -6,6 +6,7 @@
   "scripts": {
     "sentinel:dev": "npm --prefix sentinel run dev",
     "sentinel:build": "npm --prefix sentinel run build",
+    "pack": "npm --prefix sentinel exec -- nitrostack-cli pack --cwd sentinel -o mentor-deploy.zip",
     "sentinel:install": "npm --prefix sentinel install",
     "test": "npm --prefix sentinel test",
     "lumina:dev": "npm --prefix lumina run dev",
