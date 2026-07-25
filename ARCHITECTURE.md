@@ -17,6 +17,15 @@
 > Read **`MENTOR-CONCEPT.md`** first for *why* — the student-facing four-layer
 > learning product. Read this file for *how* — the engine every layer is built
 > on. Read **`GAPS.md`** for what is not done yet and in what order to do it.
+>
+> ⚠️ **This file describes all six commanders. The submission deploys one.**
+> `app.module.ts` registers only `MentorModule`; SENTINEL, LEDGER, VERDICT, RELAY,
+> AEGIS and the COMMAND coordinator are present and tested but **unregistered**, so
+> none of their tools appear over MCP. That is deliberate — `self_heal` runs on the
+> same pricing service and the same `tax-before-discount` bug as MENTOR's fixture and
+> offers to *patch* it, which is the opposite of what the product claims to do. Read
+> `GAPS.md` Gap 11 before re-enabling them. Everything below is still accurate about
+> the code; treat "the platform" as the engine's evidence base, not as what ships.
 
 ---
 

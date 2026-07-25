@@ -12,7 +12,7 @@
 | | |
 |---|---|
 | **[`MENTOR-CONCEPT.md`](MENTOR-CONCEPT.md)** | **Start here.** *Why* — the product, the four-layer learning loop, and why it survives "isn't this Copilot?" |
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | *How* — the one engine all six commanders run on. Long, and worth it. |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | *How* — the one engine all six commanders run on (only MENTOR ships registered). Long, and worth it. |
 | **[`GAPS.md`](GAPS.md)** | *What's left* — prioritized, honest, and the file to open if you're picking this up. |
 | [`DEPLOY.md`](DEPLOY.md) | The NitroCloud → ChatGPT runbook. Contains the only true blocker. |
 | [`fixtures/pricing/README.md`](fixtures/pricing/README.md) | The one demo project, all four layers. |
@@ -119,14 +119,14 @@ working human-approval UI.
 
 | | |
 |---|---|
-| Platform (5 commanders + coordinator + trust layer) | ✅ complete |
+| Platform (5 commanders + coordinator + trust layer) | ✅ complete, ⚪ **unregistered on purpose** — `GAPS.md` Gap 11 |
 | **MENTOR — the submission** | ✅ **built** — 33 tests, verified over real MCP |
 | **`causal-timeline` widget** | ✅ **built** — renders the drift, withholds the fix |
 | Lumina → MENTOR plan contract | ✅ built + tested |
 | The demo fixture, all inputs | ✅ complete, verified, and guarded |
 | Whole suite | ✅ **65/65**, offline, no API key, no model |
 | Deployed to NitroCloud | ⬜ **next** — `DEPLOY.md` path A, ~30 min |
-| Can a student really draw this in Lumina? | ❓ the open design call — `GAPS.md` Gap 2 |
+| Can a student really draw this in Lumina? | ✅ **yes** — real `component` node, verified in-browser end to end |
 | Evidence study (n=5) | ⬜ not run — Gap 7 |
 | Product name | ❓ still `[[PRODUCT NAME]]` — Gap 8 |
 
@@ -137,11 +137,16 @@ the monorepo layout is irrelevant. Then connect a client and record the ≤3-min
 
 Two things worth settling while that runs:
 
-- **Gap 2** — Lumina has no generic software-component node, so the fixture's plan uses
-  `script` nodes as stand-ins. ~2h to add one, or re-aim the demo at an AI pipeline Lumina
-  already fits. Your call; it changes nothing in the plan artifact either way.
-- **Gap 8** — the product is still called `[[PRODUCT NAME]]`, and the deployable is literally
-  `command-platform`. That's a judged surface on an education submission.
+- **Gap 7** — the n=5 evidence study. Two hours with five classmates, and it is the cheapest
+  unclaimed points in a track called *Research*. Report the number even if it's mixed.
+- **Gap 8** — the product is still called `[[PRODUCT NAME]]`. The two surfaces a judge's
+  client shows are fixed (server and package are both `mentor` now), but the name in the
+  concept doc's own title isn't.
+
+Closed since the last pass: **Gap 2** — Lumina now has a real `design` → `component` node,
+and the fixture's plan is a byte-identical export from the canvas rather than a stand-in.
+**Gap 11** — the tool surface went 23 → 3, so the deployed server no longer offers to
+autonomously patch the bug MENTOR refuses to patch. See `GAPS.md`.
 
 You do **not** need ChatGPT Plus: NitroStudio's own AI Chat is an MCP client with a model
 picker, gated on NitroCloud sign-in rather than a ChatGPT plan. Confirm with the organizers

@@ -123,11 +123,18 @@ Plain JSON, no Lumina types — MENTOR (TypeScript) and Lumina (Python + React) 
 this one file shape and nothing else. **Integration cost for §8: small.** Built and tested
 (`lumina/export_plan.py`, 15 tests); the student produces one with the **Plan** button.
 
-> ⚠️ **But see `GAPS.md` Gap 2.** Lumina's 34 node types are all *vision/audio pipeline*
-> primitives — camera, detection, whisper, pose. There is **no generic software-component
-> node**, so a student cannot really draw `validate → discount → tax → total` today; the
-> fixture uses `script` nodes as stand-ins. That is a ~2-hour fix, *or* a reason to move
-> the demo project to an AI pipeline Lumina already expresses. It needs a decision.
+> ✅ **RESOLVED (2026-07-25) — `GAPS.md` Gap 2 is closed.** Lumina's 34 node types were all
+> *vision/audio pipeline* primitives — camera, detection, whisper, pose — with no generic
+> software-component node, so a student could not actually draw
+> `validate → discount → tax → total`; the fixture used `script` nodes as stand-ins.
+>
+> Lumina now has a **`design`** palette category whose first member is a `component` node
+> (`lumina/c/nodes/ComponentNode.tsx`): a named box with a responsibility, no runtime, and
+> the two fields MENTOR joins on. Verified in a browser against the real backend — four of
+> them wired left-to-right export to a `lumina.plan/v1` that is **byte-identical to the
+> checked-in fixture.** The fixture is now a real student export rather than a shape that
+> resembles one, and MENTOR's finding did not change (still `tax @ pricing.js:12`, still
+> 0.91).
 
 ### Layer 4 — MENTOR: debugging as the lesson
 
@@ -224,6 +231,14 @@ directly addresses the anxiety every education judge has about AI in the classro
 1. **The engine generalizes.** MENTOR is one `DomainAdapter` on an explainability engine
    that already runs four unrelated domains — DevOps, FinOps, Legal, Civic
    (`ARCHITECTURE.md` §7). One lifecycle, five skins. That's a systems result, not a demo.
+
+   > **Say it as code, not as tools.** The submission deploys **only MENTOR's three tools**.
+   > The other five adapters ship in the repo with their tests passing but unregistered —
+   > because one of them (`self_heal`) offers to autonomously patch the exact bug MENTOR
+   > refuses to patch, and a judge's model would pick it. The claim is about the *engine*,
+   > and five adapters against one lifecycle with green tests evidences it without putting
+   > twenty contradictory tools in front of the judge. Show the adapter table on a slide.
+   > Reasoning: `GAPS.md` Gap 11.
 2. **We measured it.** See §7. Almost no hackathon submission contains a real measurement.
    In a track called *Research*, that scarcity is worth more than another feature.
 
@@ -270,6 +285,13 @@ This document describes the full vision. The submission is a subset, deliberatel
       `sendFollowUpMessage` so the refusal doesn't dead-end the student.
 - [x] Lumina graph as the plan input — **integration cost was small**, and it's done:
       `lumina.plan/v1` + the **Plan** button. See §3 Layer 3.
+- [x] **A student can actually draw the design** — Lumina's `design` → `component` node,
+      verified in-browser end to end. The fixture's plan is now a byte-identical real
+      export, not a stand-in. Closes `GAPS.md` Gap 2.
+- [x] **Only MENTOR is exposed.** The tool surface went 23 → 3. The five platform
+      commanders stay in the repo, tests green, unregistered — `GAPS.md` Gap 11 for why
+      shipping `self_heal` next to `explain_drift` would have contradicted §2's pitch on
+      stage. The server now identifies itself as `mentor`, not `command-platform`.
 - [x] The refusal: **built and enforced.** `withhold_fix` and `request_fix` exist only to
       decline; no tool on the adapter can write to the build; and `awaitRecovery` fails the
       incident if the source ever changes. Tested by trying six plausible write-tool names.

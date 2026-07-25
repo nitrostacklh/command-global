@@ -31,6 +31,7 @@ import SlackNode from "@/c/nodes/SlackNode";
 import GoogleSheetsNode from "@/c/nodes/GoogleSheetsNode";
 import GeminiLiveNode from "@/c/nodes/GeminiLiveNode";
 import ToolUseNode from "@/c/nodes/ToolUseNode";
+import ComponentNode from "@/c/nodes/ComponentNode";
 
 export const NODE_TYPES = {
   camera: CameraNode,
@@ -67,4 +68,6 @@ export const NODE_TYPES = {
   // Hackathon additions
   geminiLive: GeminiLiveNode,
   toolUse: ToolUseNode,
+  // Design-time (not runnable) — see ComponentNode.tsx
+  component: ComponentNode,
 };

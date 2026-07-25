@@ -63,8 +63,13 @@ What the student drew in Lumina before writing any code:
 validate ──▶ discount ──▶ tax ──▶ total
 ```
 
+Four **Component** nodes (Lumina's `design` palette group), wired left to right.
+
 `plan.lumina.json` was produced by the real exporter (`lumina/export_plan.py`),
-not hand-written, so it is exactly the shape a student's export produces. The
+not hand-written, so it is exactly the shape a student's export produces — and
+since 2026-07-25 that is literally true rather than approximately: dragging four
+`component` nodes onto the canvas, naming them, wiring them and hitting **Plan**
+produces a file **byte-identical to this one**, edge handle names included. The
 field MENTOR actually needs is **`order`**:
 
 ```json

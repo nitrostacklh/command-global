@@ -16,26 +16,33 @@ rather than hardcoded — and the causal-timeline widget renders it with the fix
 a follow-up question wired to chat. The engine reframe worked, so the §6 Research claim
 holds: **one engine, six unrelated domains, the sixth of which inverts it.**
 
+Gap 2 is now closed too: Lumina has a real **`component`** node, and the fixture's plan is
+no longer a stand-in shape but a byte-identical **real export** from the canvas. Gap 11 —
+found and fixed the same day — was the most dangerous of the lot: the deployed server was
+exposing 23 tools, 20 of which belonged to a different product and one of which offered to
+*autonomously patch the very bug MENTOR refuses to patch.*
+
 What's left is no longer engineering. It is: **deploy it** (a solved procedure — Gap 1),
-**decide whether a student can really draw a software architecture in Lumina** (Gap 2, the
-one open design question), **run the n=5 study** (Gap 7, the cheapest unclaimed points in a
-Research track), and **name the product** (Gap 8 — it is still `[[PRODUCT NAME]]`).
+**run the n=5 study** (Gap 7, the cheapest unclaimed points in a Research track), and
+**name the product** (Gap 8 — it is still `[[PRODUCT NAME]]`).
 
 | # | Gap | Severity | Who unblocks it |
 |---|---|---|---|
 | 1 | Deploy to NitroCloud + connect a client | 🟠 **do this next** | you, ~30 min |
-| 2 | Lumina can't express a software architecture | 🟠 the open design call | you (one call, then ~2h) |
 | 7 | Evidence study (n=5) not run | 🟡 free points, Research track | ~2h with classmates |
 | 8 | Open `[[placeholders]]` incl. product name | 🟡 submission hygiene | you |
 | 5 | Build history is authored, not derived | 🟡 fine for the demo, by design | scope decision |
-| 6 | ~~Plan can't reach a deployed MENTOR~~ | ✅ **resolved** — tool argument | done |
 | 9 | Six official tracks never confirmed | 🟡 submission hygiene | organizers |
 | 10 | Lumina hygiene (uncommitted work, no CI) | 🟢 low | ~1h |
+| 2 | ~~Lumina can't express a software architecture~~ | ✅ **closed** — `component` node | done |
+| 6 | ~~Plan can't reach a deployed MENTOR~~ | ✅ **resolved** — tool argument | done |
 | 3 | ~~MENTOR doesn't exist~~ | ✅ **built** | done |
 | 4 | ~~`causal-timeline` widget~~ | ✅ **built** | done |
+| 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 tools → 3 | done |
 
-*Reordered 2026-07-25 (twice): first after the Studio handbook downgraded Gap 1, then after
-MENTOR shipped. **Gap 1 is now the critical path** — the code exists and isn't live yet.*
+*Reordered 2026-07-25 (three times): after the Studio handbook downgraded Gap 1, after
+MENTOR shipped, and after Gaps 2 and 11 closed. **Gap 1 is now the critical path** — the
+code exists and isn't live yet.*
 
 ---
 
@@ -93,7 +100,7 @@ lands with an education judge while reinforcing the §5 incentive moat.
 
 > **Verified:** `sentinel/` builds and passes 65/65 from its new path, and
 > `npx tsx src/index.ts` — Studio's actual launch command — serves `initialize` +
-> `tools/list` over stdio with all 23 tools registered. Also fixed along the way: **`tsx`
+> `tools/list` over stdio with every tool registered. Also fixed along the way: **`tsx`
 > was not a declared dependency**, so Studio's launch relied on `npx` fetching it and
 > failed here with an `EPERM` npm-cache error, server never starting. It's a
 > `devDependency` now. That would have presented on the day as Studio's
@@ -101,14 +108,46 @@ lands with an education judge while reinforcing the §5 incentive moat.
 
 ---
 
-## Gap 2 — Lumina cannot express a software architecture 🟠
+## Gap 2 — ~~Lumina cannot express a software architecture~~ ✅ **CLOSED** (2026-07-25)
 
-**Verified.** This is the most substantive thing the consolidation turned up, and it
-contradicts an assumption in `MENTOR-CONCEPT.md` §3 Layer 3.
+**Resolved via option A below.** Lumina now has a `design` category whose first member is
+a generic **`component`** node — `lumina/c/nodes/ComponentNode.tsx`, registered in
+`l/reactFlowTypes.ts`, catalogued in `l/types.ts`, grouped first in the palette because
+designing before building is the entire point of Layer 3.
+
+It is the one node in the catalog with **no runtime**: no backend handler, no upstream
+trigger, no output. Two fields, and both are the contract with MENTOR — `component`
+(joins to a build step) and `intent` (quoted back when the build drifts). It writes
+`label` alongside `component` because `export_plan._label_for()` reads `label` first.
+
+**Verified end to end in a browser**, against the real Next.js app and the real FastAPI
+backend — not unit tests:
+
+| Step | Evidence |
+|---|---|
+| Palette | `DESIGN → Component` is the first group; 35 catalog entries |
+| Node created | `react-flow__node[data-id=node-100]` type `component`, both handles, violet accent |
+| Fields write the contract | typing produced `{label: "tax", component: "tax", intent: "Tax the DISCOUNTED amount…"}` in canvas state |
+| Real export | `POST :8000/api/export/plan` on a 4-component graph → `lumina.plan/v1`, order `validate → discount → tax → total`, `cyclic: false`, `warnings: []`, intent preserved |
+| Fixture is now a real export | that graph compiles **byte-identical** to the checked-in `fixtures/pricing/plan.lumina.json` — no normalisation |
+
+That last row is the one that matters: the fixture is no longer a hand-made shape that
+merely resembles a student export, it **is** one. `scripts/regen_fixture_plan.py` now
+builds it from `component` nodes with named edge handles (`output` → `input`), exactly
+what a wired canvas produces.
+
+**MENTOR's finding did not change** — origin still `tax @ build/pricing.js:12`,
+confidence still **0.91**, failure still `pricing.test.js:40`. That was the prediction
+when this gap was opened ("switching to A requires no change to the plan artifact"), and
+it held: 65/65 tests pass untouched, and `fixture:check` confirms the embedded copies
+still match disk.
+
+<details>
+<summary>The original analysis, kept for the record</summary>
 
 Layer 3 says the student "builds the **architecture** in Lumina: components as nodes,
-data flow as edges." Lumina's node catalog (`lumina/l/types.ts`, `NODE_CATALOG`) has
-**34 node types and not one of them is a generic software component**:
+data flow as edges." Lumina's node catalog (`lumina/l/types.ts`, `NODE_CATALOG`) had
+**34 node types and not one of them was a generic software component**:
 
 | Category | Count | What they are |
 |---|---|---|
@@ -142,13 +181,20 @@ fixture]]` — a placeholder, so this is permitted. **More coherent**: Lumina's 
 become an asset instead of a liability, and the student is designing the kind of system
 Lumina is actually for. **Costs** re-authoring the fixture and the §3 diagram.
 
-**C. Keep `script` nodes as stand-ins.** Zero work — this is what
-`fixtures/pricing/plan.lumina.json` does today. But the student sees four boxes labelled
-"Script", and a judge sees a canvas that clearly wasn't built for this.
+**C. Keep `script` nodes as stand-ins.** Zero work. But the student sees four boxes
+labelled "Script", and a judge sees a canvas that clearly wasn't built for this.
 
-> Today's state is **C**. The fixture is honest about it — `data.label` carries
-> `validate`/`discount`/`tax`/`total` and `export_plan.py` prefers the student's label
-> over the node type, so **switching to A requires no change to the plan artifact.**
+> The state at the time of writing was **C**. The fixture was honest about it —
+> `data.label` carried `validate`/`discount`/`tax`/`total` and `export_plan.py` prefers
+> the student's label over the node type, so **switching to A required no change to the
+> plan artifact.** It didn't.
+
+**Chose A.** B looked cheaper but wasn't: re-aiming the demo would have invalidated the
+already-verified fixture, the drift tests, and §2's own headline ("broke on line 40, went
+wrong on line 12"). A is additive and widens Lumina instead of narrowing the demo to fit
+the nodes Lumina happened to already have.
+
+</details>
 
 ---
 
@@ -166,7 +212,7 @@ Lumina is actually for. **Costs** re-authoring the fixture and the §3 diagram.
 | `mentor.module.ts` | `explain_drift` (+widget), `withhold_fix`, `mentor_status`, `debugging_tutor` prompt |
 | `drift.test.ts` / `mentor.test.ts` | 18 + 15 tests |
 
-**Verified over real MCP** (`node dist/index.js`, stdio): 23 tools registered, `explain_drift`
+**Verified over real MCP** (`node dist/index.js`, stdio): `explain_drift`
 returns origin `tax @ build/pricing.js:12` (planned 3rd, built 2nd), failure at
 `pricing.test.js:40`, drift confidence **0.91**, engine gate **0.964 autonomous**,
 `fix_withheld: true`.
@@ -284,10 +330,11 @@ Still open in `MENTOR-CONCEPT.md`:
 
 - **`[[PRODUCT NAME]]`** — the doc's own title. §9 says the student-facing product may
   need a name separate from MENTOR, and that COMMAND/SENTINEL/AEGIS is
-  "military-enterprise vocabulary… wrong for a student-facing education product." Note
-  the deployable is still literally named `command-platform` in
-  `sentinel/src/app.module.ts`, and this repo is `command-global`. **If the submission
-  is an education product, its name is a judged surface.**
+  "military-enterprise vocabulary… wrong for a student-facing education product."
+  **Partly done (Gap 11):** the MCP server now identifies itself as `mentor` and the
+  package is `mentor`, so the two surfaces a judge's client actually shows are no longer
+  `command-platform` / `sentinel-mcp`. Still open: the *product* name in this doc's title,
+  and this repo is still `command-global`.
 - **§3 Layer 1: role-based or project-based?** Changes §3. `fixtures/pricing/README.md`
   is written role-based (§3's stated assumption) — if that's wrong, that file changes.
 - **§3 Layer 2: how many panels per lesson?** Doc suggests 4–6. Roadmap anyway (§8).
@@ -302,6 +349,58 @@ Carried over from `ARCHITECTURE.md` §16.2 and still open. The commanders were m
 RELAY→Civic) and `MENTOR-CONCEPT.md` §6 asks to confirm "Education & Research" is the
 real printed track name. Get the list from the organizers; it affects the slide, the
 README, and each commander's framing text.
+
+## Gap 11 — The tool surface contradicted the thesis ✅ **FIXED** (2026-07-25)
+
+**Found by asking "does RELAY actually help?" and following the answer.** It doesn't — but
+it turned out not to be the problem either. The problem was the whole platform surface.
+
+The deployed server registered **23 MCP tools. Three were MENTOR.** In an MCP app the tool
+list *is* the interface: the client's model picks from it. The other twenty cost us three
+ways, in ascending order of severity:
+
+1. **RELAY earns nothing.** It appears in `MENTOR-CONCEPT.md` exactly once — the word
+   "Civic" in §6's Research claim. Drop it and the claim still reads "four unrelated
+   domains" (DevOps, FinOps, Legal, Education). 262 lines for zero marginal argument. It
+   also autofills a masked Aadhaar and files a mock government application — not a
+   question worth spending demo time on in an education submission.
+2. **Write-to-source tools weaken the refusal.** `propose_patch`, `run_tests`,
+   `resolve_incident` rewrite source. MENTOR *proves* it cannot modify a student's build
+   (`awaitRecovery` asserts byte-identity). That proof is much weaker on a server that
+   also ships tools which do exactly that.
+3. **`self_heal` directly contradicts the pitch.** This is the real one.
+   `sentinel.tools.ts` describes it as running on *the bundled pricing service* — reads
+   the logs, *patches it*, proves it, deploys — and its default argument is
+   **`'tax-before-discount'`**. That is MENTOR's fixture bug. Two tools, one server, same
+   bug, opposite theses, and `self_heal`'s description is far more actionable. Ask a model
+   *"the pricing test is failing, help"* and it picks the tool that promises a fix. The
+   product would contradict its own thesis live, on stage, on its own demo bug.
+
+**Fixed by unregistering, not deleting.** `app.module.ts` now imports only `MentorModule`;
+the other five commanders and the coordinator stay in `modules/` with their tests green,
+one uncommented line from returning. Deleting would have cascaded into 5 sites in
+`command.module.ts`, a test assertion, `sentinel.tools.ts`'s hardcoded `domains:` array
+and three docs — and destroyed the generalization evidence for no gain.
+
+**The §6 Research claim survives intact**, because it is a claim about the *engine*: five
+adapters against one lifecycle, evidenced by code and passing tests. It never required the
+tools to be live in the judge's client.
+
+Also fixed here: the server identified itself as **`command-platform`** and the package as
+`sentinel-mcp`. Both are judged surfaces on an education submission (Gap 8's actual
+complaint). Now `mentor`, with a description that states the pitch.
+
+**Verified over real stdio MCP** — `initialize` reports `mentor 1.0.0`, `tools/list`
+returns exactly `explain_drift`, `withhold_fix`, `mentor_status`, and an assertion for
+fifteen platform tool names finds none of them.
+
+> **The irony, recorded deliberately:** we built the tool that detects "your build stopped
+> matching your design" and shipped it inside a repo doing exactly that. The four layers
+> that *are* the product were 1/4 built while a one-word footnote was 100% built with a
+> widget. Worth keeping on the slide — it is a better demonstration of the thesis than the
+> fixture is.
+
+---
 
 ## Gap 10 — Lumina hygiene 🟢
 
@@ -328,7 +427,7 @@ README, and each commander's framing text.
 | `explain_drift` over real MCP (`node dist/index.js`, stdio) | ✅ origin `tax @ build/pricing.js:12`, planned 3rd / built 2nd |
 | … its confidence | ✅ **0.91**, computed from 5 signals; engine gate **0.964 autonomous** |
 | … its refusal | ✅ `fix_withheld: true` + a follow-up question, not a patch |
-| `tools/list` | ✅ **23 tools**, incl. `explain_drift`, `withhold_fix`, `mentor_status` |
+| `tools/list` | ✅ **exactly 3 tools** — `explain_drift`, `withhold_fix`, `mentor_status` (Gap 11) |
 | `npx tsx src/index.ts` — Studio's real launch command | ✅ serves the full tool list over stdio |
 | Studio project validity | ✅ `sentinel/` valid · monorepo root correctly **invalid** |
 | `sentinel/` zipped for the upload path | ✅ **0.21 MB** vs the 100 MB limit |

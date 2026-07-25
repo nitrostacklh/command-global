@@ -24,60 +24,67 @@ from export_plan import compile_to_plan  # noqa: E402  (needs the path above)
 
 # The architecture the student drew before writing code:
 #     validate ──▶ discount ──▶ tax ──▶ total
-# `script` is the stand-in for a generic software component — see GAPS.md Gap 2.
+#
+# `component` is Lumina's design-time node (c/nodes/ComponentNode.tsx) — a named box
+# with a responsibility and no runtime. This graph is exactly what dragging four of
+# them onto the canvas and wiring them left-to-right produces, which is the point:
+# the fixture is a real export, not a shape MENTOR will never see in production.
+# It writes `label`, `component` and `intent` and nothing else — so neither does this.
 GRAPH = {
     "name": "Pricing service",
     "planId": "wf-pricing-fixture",
     "nodes": [
         {
             "id": "n-validate",
-            "type": "script",
+            "type": "component",
             "position": {"x": 0, "y": 160},
             "data": {
                 "label": "validate",
                 "component": "validate",
                 "intent": "Reject malformed carts before any money is computed.",
-                "code": "assertItems(items); assertRate(discountRate); assertRate(taxRate);",
             },
         },
         {
             "id": "n-discount",
-            "type": "script",
+            "type": "component",
             "position": {"x": 260, "y": 160},
             "data": {
                 "label": "discount",
                 "component": "discount",
                 "intent": "Apply the discount code to the subtotal.",
-                "code": "discount = subtotal * discountRate",
             },
         },
         {
             "id": "n-tax",
-            "type": "script",
+            "type": "component",
             "position": {"x": 520, "y": 160},
             "data": {
                 "label": "tax",
                 "component": "tax",
                 "intent": "Tax the DISCOUNTED amount. Must run after discount.",
-                "code": "tax = taxable * taxRate",
             },
         },
         {
             "id": "n-total",
-            "type": "script",
+            "type": "component",
             "position": {"x": 780, "y": 160},
             "data": {
                 "label": "total",
                 "component": "total",
                 "intent": "Sum and round to 2dp.",
-                "code": "return round(taxable + tax, 2)",
             },
         },
     ],
+    # Handle ids are spelled out because ComponentNode's handles are named
+    # "output" (right) and "input" (left) — a real canvas export carries them, so
+    # omitting them here would leave nulls MENTOR never sees in production.
     "edges": [
-        {"id": "e1", "source": "n-validate", "target": "n-discount"},
-        {"id": "e2", "source": "n-discount", "target": "n-tax"},
-        {"id": "e3", "source": "n-tax", "target": "n-total"},
+        {"id": "e1", "source": "n-validate", "target": "n-discount",
+         "sourceHandle": "output", "targetHandle": "input"},
+        {"id": "e2", "source": "n-discount", "target": "n-tax",
+         "sourceHandle": "output", "targetHandle": "input"},
+        {"id": "e3", "source": "n-tax", "target": "n-total",
+         "sourceHandle": "output", "targetHandle": "input"},
     ],
 }
 

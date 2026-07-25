@@ -4,7 +4,9 @@ export interface BackendStatus {
   npu_active: boolean;
 }
 
-export type NodeCategory = "input" | "ai" | "logic" | "output";
+// "design" nodes are architecture boxes, not runnable primitives — they exist so a
+// student can draw a software design before coding it (MENTOR-CONCEPT.md §3 Layer 3).
+export type NodeCategory = "design" | "input" | "ai" | "logic" | "output";
 
 export interface NodeTypeInfo {
   type: string;
@@ -33,9 +35,24 @@ export interface WorkflowNodeData {
   emailSubject?: string;
   smsTo?: string;
   code?: string;
+  // Design-time components (type: "component"). `component` and `intent` are the
+  // contract with MENTOR — see c/nodes/ComponentNode.tsx.
+  label?: string;
+  component?: string;
+  intent?: string;
 }
 
 export const NODE_CATALOG: NodeTypeInfo[] = [
+  // Listed first so "Design" is the top group in the palette — the point of Layer 3
+  // is that the student designs before they build.
+  {
+    type: "component",
+    label: "Component",
+    description: "A part of your design — name it, say what it owns",
+    category: "design",
+    accent: "#8B5CF6", // Violet
+    icon: "Box",
+  },
   {
     type: "camera",
     label: "Camera",

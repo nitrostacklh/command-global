@@ -74,7 +74,9 @@ From the monorepo root, `npm run sentinel:build` and `npm test` do the same thin
 > launch — which fails on a flaky network or a locked npm cache (seen here: `EPERM` on
 > cache cleanup, server never started, no output). It is now a `devDependency`, so the
 > launch is deterministic and offline. **Verified:** `npx tsx src/index.ts` serves
-> `initialize` + `tools/list` over stdio and registers all 23 tools.
+> `initialize` as `mentor 1.0.0` and returns exactly 3 tools — `explain_drift`,
+> `withhold_fix`, `mentor_status`. If you see twenty-three, the platform modules got
+> re-registered in `app.module.ts`; see `GAPS.md` Gap 11 for why that breaks the demo.
 >
 > If Studio ever says *"Dependencies not installed or out of date…"* or *"tsx is not
 > available…"*, run `npm install` inside `sentinel/` manually.
@@ -199,7 +201,7 @@ not plan a loop.
 Record this one. It is the Education & Research submission; §7b is the platform demo, now
 the backup and the "it also runs five other domains" beat.
 
-1. Show the student's Lumina canvas: `validate → discount → tax → total`. *"This is the plan they drew before writing code."*
+1. Show the student's Lumina canvas: four **Component** nodes, `validate → discount → tax → total`. *"This is the plan they drew before writing code."* — hit **Plan** to export it live if you want the beat; the checked-in fixture is byte-identical to what that button produces (`GAPS.md` Gap 2).
 2. Show the failing test: `test 3 ✗`, error points at **line 40**.
 3. *"When did I go wrong?"* → `explain_drift` (**no arguments** — it runs the bundled demo) → the **causal-timeline** widget: plan row on top, build row below, `tax` highlighted in both, the drift arrow landing on **line 12**, and **confidence 0.91** broken into five signals each with its reason.
 4. Point at the `provenance` bar — 40%. *"It tells you where it's guessing."* ← cheap, and it makes §3's uncertainty claim concrete.
@@ -207,7 +209,15 @@ the backup and the "it also runs five other domains" beat.
 6. Click **"Ask instead → Why does tax have to come after discount?"** — the refusal hands the student the next question instead of a patch.
 7. (If time) call `explain_drift` with a *different* project's plan + build, to show it isn't one hardcoded demo.
 
-## 7b. Demo script — the platform (≤3-min video, backup)
+## 7b. Demo script — the platform (backup only, and **not runnable as shipped**)
+
+> ⚠️ **Requires re-enabling the platform modules first.** `app.module.ts` registers only
+> `MentorModule`; every tool below is unregistered, deliberately — `self_heal` runs on the
+> same pricing service and the same `tax-before-discount` bug as MENTOR's fixture and
+> offers to patch it, which contradicts the submission's whole thesis in front of a judge.
+> Full reasoning in `GAPS.md` Gap 11. To record this demo, uncomment the six imports and
+> the `imports:` entries, and **re-comment them before deploying the submission.**
+
 1. *"What can this platform do?"* → `platform_status` (five commanders + AEGIS).
 2. *"The pricing service is overcharging discounted orders — fix it."* → `self_heal` → mission-trace widget shows diagnose → patch → tests green → confidence 0.93 → **AEGIS cleared** → resolved.
 3. *"Our cloud bill spiked — optimize it."* → `optimize_spend` → money saved, SLA-safe.

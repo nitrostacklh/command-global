@@ -40,6 +40,7 @@ import {
   Zap,
   Wrench,
   Search,
+  Box,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -47,6 +48,7 @@ import { NODE_CATALOG, type NodeTypeInfo } from "@/l/types";
 import { useState } from "react";
 
 const iconMap: Record<string, React.ReactNode> = {
+  Box: <Box size={16} />,
   Camera: <Camera size={16} />,
   ScanSearch: <ScanSearch size={16} />,
   Eye: <Eye size={16} />,
@@ -79,6 +81,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 const categoryLabels: Record<string, string> = {
+  design: "Design",
   input: "Inputs",
   ai: "AI Models",
   logic: "Logic",
