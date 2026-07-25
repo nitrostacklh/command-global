@@ -600,7 +600,7 @@ cd sentinel
 npm install            # install deps (widget deps install on first build)
 npm run dev            # run locally → open in NitroStudio (App Canvas / AI Chat)
 npm run build          # production bundle → dist/ (compiles TS + bundles the widget)
-npm test               # build, then run all offline tests (65/65)
+npm test               # build, then run all offline tests (67/67)
 ```
 
 From the monorepo root you can use the delegating scripts instead:
@@ -749,7 +749,7 @@ monorepo root has only the first and is correctly rejected.
 > plus a student-facing four-layer loop, and MENTOR is **not written**. So "the code
 > is complete" is true of the platform and false of the submission.
 
-The **platform code is complete and verified** (65/65 tests, full build green, all flows
+The **platform code is complete and verified** (67/67 tests, full build green, all flows
 exercised end-to-end). What remained *for the platform* was mostly **interactive** work
 that can't be done headless.
 

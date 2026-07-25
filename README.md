@@ -32,7 +32,7 @@ its own.
 > fixture is green. `npm run fixture:check` asserts the failure is still exactly where it
 > should be (`pricing.test.js:40`, `80 !== 72`) and **fails loudly if someone "fixes" it.**
 >
-> The project's own test suite is **65/65 passing** — `npm test`. Those are separate: run
+> The project's own test suite is **67/67 passing** — `npm test`. Those are separate: run
 > `npm test` to judge the code, `npm run fixture:test` to see the student's bug.
 
 ---
@@ -56,7 +56,7 @@ summary. That tells you the state of things faster than anything else here.
 
 ```
 command-global/
-├── sentinel/           ⭐ the deliverable — TS NitroStack MCP app, 7 modules, 65/65 tests
+├── sentinel/           ⭐ the deliverable — TS NitroStack MCP app, 7 modules, 67/67 tests
 ├── lumina/                Layer 3 — the canvas the student designs in (Next.js + FastAPI)
 ├── fixtures/pricing/      the one demo project: the plan, the build, the drift
 └── reference/python/      the original Python prototype (frozen, still useful)
@@ -95,11 +95,23 @@ want the `lumina/` companion tool — the submission itself does not need Python
 git clone https://github.com/nitrostacklh/command-global.git
 cd command-global
 npm run install:all      # deps for sentinel/ and lumina/
-npm run verify           # sentinel build + 65 tests + fixture guard + plan regen
+npm run verify           # sentinel build + 67 tests + the fixture guard
 ```
 
 `npm run verify` is the one command that tells you the repo is healthy. It should end with
-`65/65 pass` and four `ok` lines from the fixture guard.
+`67/67 pass` and four `ok` lines from the fixture guard. **It needs only Node** — no Python,
+no network, no key. Verified from a clean `git clone` on a machine with nothing installed.
+
+`npm run verify:all` additionally re-derives the fixture's plan through Lumina's exporter and
+proves the output is byte-stable. That one shells out to **Python**, which is why it is a
+separate script rather than part of `verify`.
+
+> **`npm audit` reports 3 moderate advisories, and they are not ours to fix.** The chain is
+> `@modelcontextprotocol/ext-apps` → `@modelcontextprotocol/sdk` → `@hono/node-server`, and
+> `ext-apps@1.7.5` is already the newest release. The advisory (a Windows path-traversal in
+> `serve-static`) is fixed in `@hono/node-server ≥2.0.5`, but the MCP SDK still pins
+> `1.19.15`. `npm audit fix` correctly changes nothing. Nothing in our `package.json`
+> controls it, and MENTOR serves no static user-supplied paths.
 
 ## Environment setup
 
@@ -122,7 +134,7 @@ the Python reference's connectors. `.env` is gitignored and no secrets are commi
 
 ```bash
 npm run sentinel:dev     # then open the sentinel/ folder in NitroStudio
-npm test                 # 65/65, fully offline — no API key, no network, no model
+npm test                 # 67/67, fully offline — no API key, no network, no model
 ```
 
 Point NitroStudio at the **`sentinel/` subfolder**, not the repo root — Studio validates a
@@ -197,7 +209,7 @@ working human-approval UI.
 | **`causal-timeline` widget** | ✅ **built** — renders the drift, withholds the fix |
 | Lumina → MENTOR plan contract | ✅ built + tested |
 | The demo fixture, all inputs | ✅ complete, verified, and guarded |
-| Whole suite | ✅ **65/65**, offline, no API key, no model |
+| Whole suite | ✅ **67/67**, offline, no API key, no model |
 | Deployed to NitroCloud | ⬜ **next** — `DEPLOY.md` path A, ~30 min |
 | Can a student really draw this in Lumina? | ✅ **yes** — real `component` node, verified in-browser end to end |
 | Evidence study (n=5) | ⬜ not run — Gap 7 |

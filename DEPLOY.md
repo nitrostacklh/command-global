@@ -12,7 +12,10 @@ hour"*). **Read the box below first** — the fastest path is Studio's Deploy bu
 > |---|---|
 > | `git push origin main` | ✅ **pushed** — MENTOR is on GitHub, `main` green |
 > | `npm run build` in `sentinel/` | ✅ clean — `dist` + `src/widgets/out/` |
-> | `npm run verify` at root | ✅ 65/65, fixture guard green, plan deterministic |
+> | `npm run verify` at root | ✅ 67/67 + fixture guard (Node-only) · `verify:all` adds the plan-determinism check |
+> | **clean `git clone` → `install:all` → `verify`** | ✅ passes with nothing pre-installed — the judge's path |
+> | `npm run build` in `lumina/` | ✅ Next.js production build clean, 6 routes |
+> | `prompts/get debugging_tutor` | ✅ **fixed** — every `@Prompt` returned the wrong shape and had never worked |
 > | **built** `node dist/index.js` over stdio | ✅ `initialize` → **`mentor 1.0.0`**; `tools/list` → exactly `explain_drift`, `withhold_fix`, `mentor_status` |
 > | `explain_drift` on the built artifact | ✅ origin `tax @ build/pricing.js:12`, confidence **0.91**, `fix_withheld: true` |
 > | `resources/list` | ✅ advertises **only** `causal-timeline` (+ health, examples) — `mission-trace` removed |
@@ -86,7 +89,7 @@ and cloud deploy all require being signed in.** Two ways: *Continue with NitroCl
 cd sentinel
 npm install
 npm run build      # ✓ Widgets bundled + TypeScript compiled
-npm test           # ✓ 65/65
+npm test           # ✓ 67/67
 ```
 
 From the monorepo root, `npm run sentinel:build` and `npm test` do the same thing.
