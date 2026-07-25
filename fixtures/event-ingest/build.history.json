@@ -1,0 +1,97 @@
+{
+  "$comment": [
+    "schema mentor.build/v1 — the third instance, and the one that closes the",
+    "provenance ladder.",
+    "",
+    "pricing/ is `authored` (a history written up afterwards). safety-gear/ is",
+    "`observed` (the checkpoint tracker recorded it as the work happened). This one",
+    "is `git` — derived from real commits, where nobody's memory is involved at all.",
+    "Three fixtures, three provenance levels, and MENTOR's confidence rises across",
+    "them because the evidence genuinely improves rather than because a number was",
+    "tuned. That is the claim, and it is now demonstrable in three commands.",
+    "",
+    "The drift shape is a straight adjacent swap, like pricing's — but the",
+    "consequence is the inverse. In pricing, computing tax early makes a number",
+    "wrong. Here, deduplicating after normalising makes the system *lose* an event",
+    "it should have kept, and the evidence of the loss is the thing that was",
+    "deleted. A wrong number is discovered. A missing row is not.",
+    "",
+    "`receive` and `replay` are drawn as this role's boundary (see brief.data.json",
+    "`given`), so MENTOR reports `receive` as planned-but-never-built. That is",
+    "correct and incomplete on its own: only the checkpoint spec knows that box was",
+    "somebody else's, which is why MCP-1 sends `given` inside the spec."
+  ],
+
+  "schema": "mentor.build/v1",
+  "project": "event-ingest",
+  "planRef": "plan.lumina.json",
+  "entry": "build/ingest.js",
+  "tests": "build/ingest.test.js",
+
+  "provenance": "git",
+  "derivedFrom": "git log --follow build/ingest.js, first touch per component",
+
+  "steps": [
+    {
+      "seq": 1,
+      "at": "T+00m",
+      "component": "normalise",
+      "kind": "implement",
+      "file": "build/ingest.js",
+      "line": 12,
+      "summary": "Mapped the incoming event onto the table's columns and applied defaults.",
+      "note": "Plan puts normalise second, after deduplicate. Built first. This is the drift — from here on, every comparison downstream sees the reshaped event rather than the one the sender actually sent."
+    },
+    {
+      "seq": 2,
+      "at": "T+16m",
+      "component": "deduplicate",
+      "kind": "implement",
+      "file": "build/ingest.js",
+      "line": 31,
+      "summary": "Checked for a previously seen event — but against the normalised form, because that was what existed by then."
+    },
+    {
+      "seq": 3,
+      "at": "T+27m",
+      "component": "persist",
+      "kind": "implement",
+      "file": "build/ingest.js",
+      "line": 48,
+      "summary": "Wrote one row per event that survived the dedupe check."
+    },
+    {
+      "seq": 4,
+      "at": "T+35m",
+      "component": "a2",
+      "kind": "verify",
+      "file": "build/ingest.test.js",
+      "line": 27,
+      "summary": "Ran the acceptance tests: the duplicate case and the defaults case pass, the distinct-ids case does not."
+    }
+  ],
+
+  "failure": {
+    "test": "a2 — two different events, identical payloads, different ids",
+    "file": "build/ingest.test.js",
+    "line": 27,
+    "expected": 2,
+    "actual": 1,
+    "message": "dropped a distinct event as a duplicate: expected 2 rows, got 1",
+    "whyItHidUntilNow": "a1 sends the same event twice, which collapses to one row whichever order you deduplicate in. a3 sends a single event, so there is nothing to compare it against. a2 is the only criterion where 'the same event' computed before normalisation and after it give different answers — and normalisation is what drops the sender's id."
+  },
+
+  "expectedDrift": {
+    "$comment": "What a correct MENTOR run must produce for this project. Asserted by the MCP-2 test suite.",
+    "originComponent": "normalise",
+    "originFile": "build/ingest.js",
+    "originLine": 12,
+    "surfacedAtFile": "build/ingest.test.js",
+    "surfacedAtLine": 27,
+    "plannedPosition": 2,
+    "actualPosition": 1,
+    "$positionNote": "Positions are counted over the components present in BOTH artifacts, so `receive` — this role's boundary, correctly never implemented — is excluded.",
+    "explanation": "You designed normalise as the step after deduplicate. You implemented it before deduplicate.",
+    "refusesToFix": true
+  }
+}

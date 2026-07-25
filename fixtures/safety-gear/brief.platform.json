@@ -1,0 +1,63 @@
+{
+  "schema": "mentor.brief/v1",
+  "project": "safety-gear",
+  "role": "platform",
+  "title": "Platform engineer — capture and audit",
+  "you_are": "You own the frames coming in, the incident log everything is written to, and the screen an auditor opens six weeks later. The CV engineer decides whether someone is compliant; you are the reason anybody can check that decision afterwards.",
+  "stakes": "This is a safety system on a real site. The question it will eventually be asked is not \"is it running\" — it is \"show me what happened on the fourteenth\". If the answer is a notification that has already scrolled away, the system was decorative.",
+  "deliverable": "A camera feed the detector can read frame by frame, an incident log that is durable before anything is notified, and a dashboard that reads only from that log.",
+  "concept": {
+    "key": "record-before-you-notify",
+    "question": "The alert path and the incident log both handle the same event. Which one has to be working first, and what breaks if you wire the alert first?",
+    "answer": "Record before you notify. An alert fired for an incident with no durable record is unauditable, and being able to say afterwards what happened and when is the entire purpose of a safety system — a notification is not a record. Wiring the alert first works flawlessly in a demo, because in a demo somebody is watching the screen; it fails the first time anyone asks about last Tuesday, and by then the frames are gone.",
+    "transfers_to": "Any system where a side effect and its audit trail are separate steps: charge then receipt, send then outbox row, deploy then changelog, delete then tombstone, and every case where a retry has to be able to tell whether the first attempt got through."
+  },
+  "owns": [
+    {
+      "component": "camera feed",
+      "intent": "Deliver frames to the detector at a steady rate, and drop rather than queue when it falls behind.",
+      "why_yours": "Nothing downstream can recover a frame you never captured, and nothing downstream can survive a queue you let grow without bound."
+    },
+    {
+      "component": "incident log",
+      "intent": "Persist one durable record per decision — before anyone is told about it — with the frame reference and the reason.",
+      "why_yours": "You own storage, and the audit trail is the only part of this system that has to still exist in six weeks."
+    },
+    {
+      "component": "dashboard",
+      "intent": "Show incidents by reading the log, and nothing but the log.",
+      "why_yours": "A dashboard that reads from anywhere else is a second source of truth, and the two will disagree exactly when it matters."
+    }
+  ],
+  "given": [
+    {
+      "component": "detect person",
+      "owned_by": "cv",
+      "contract": "Given a frame, returns the people found in it. It will not retry, and it will not persist anything."
+    },
+    {
+      "component": "alert",
+      "owned_by": "cv",
+      "contract": "Called once per established non-compliance. It notifies and returns; it does not write to your log, and it does not know whether you did."
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "a1",
+      "given": "a non-compliance is detected",
+      "must": "a durable incident row exists before the alert call is made"
+    },
+    {
+      "id": "a2",
+      "given": "the process is killed immediately after an alert fires",
+      "must": "the incident is still in the log on restart"
+    },
+    {
+      "id": "a3",
+      "given": "the dashboard is opened with the detector stopped",
+      "must": "every previously recorded incident still renders"
+    }
+  ],
+  "entry": "capture.py",
+  "tests": "test_platform.py"
+}

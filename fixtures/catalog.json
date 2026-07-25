@@ -1,6 +1,38 @@
 {
   "schema": "mentor.catalog/v1",
   "name": "MENTOR curated catalog",
+  "roles": [
+    {
+      "key": "backend",
+      "title": "Backend engineer",
+      "blurb": "You own logic other services call and then trust. Nobody reads your code — they read a number on a screen and decide whether to believe the company. Your failures are quiet, which is what makes them expensive.",
+      "you_tend_to_own": "validation, business rules, and the figures other teams report off"
+    },
+    {
+      "key": "frontend",
+      "title": "Frontend engineer",
+      "blurb": "You own the two edges of the system a human actually touches: what they hand you, and what you show them afterwards. Everything you display is a claim, and you are usually not the one who computed it.",
+      "you_tend_to_own": "input contracts, and the surfaces that render somebody else's output"
+    },
+    {
+      "key": "cv",
+      "title": "Computer-vision engineer",
+      "blurb": "You own a decision made from pixels. The model is rarely the hard part — the hard part is deciding what counts as a detection, and what you do when you are not sure.",
+      "you_tend_to_own": "detection, the confidence threshold, and when to escalate to a human"
+    },
+    {
+      "key": "platform",
+      "title": "Platform engineer",
+      "blurb": "You own the parts nobody thanks you for until they are missing: where the data comes in, where it is kept, and whether anyone can reconstruct afterwards what actually happened.",
+      "you_tend_to_own": "capture, durable storage, and the audit trail"
+    },
+    {
+      "key": "data",
+      "title": "Data engineer",
+      "blurb": "You move data and reshape it, and you have to be able to prove later what it looked like on the way through. Ordering and idempotency are not features of the job — they are the job.",
+      "you_tend_to_own": "ingest, deduplication, normalisation, and the write path"
+    }
+  ],
   "domains": [
     {
       "key": "web-service",
@@ -38,13 +70,15 @@
           "key": "backend",
           "title": "Backend engineer — pricing",
           "one_liner": "You own the four steps between a cart and a number finance reports off.",
-          "briefed": true
+          "briefed": true,
+          "demo": true
         },
         {
           "key": "frontend",
           "title": "Frontend engineer — checkout",
           "one_liner": "You own the cart the pricing service is called with, and the receipt the customer reads.",
-          "briefed": false
+          "briefed": true,
+          "demo": false
         }
       ]
     },
@@ -66,13 +100,15 @@
           "key": "cv",
           "title": "CV engineer — detection and decision",
           "one_liner": "You own who is in frame, whether they are wearing a helmet, and when to raise an alert.",
-          "briefed": true
+          "briefed": true,
+          "demo": true
         },
         {
           "key": "platform",
-          "title": "Platform engineer — capture and storage",
-          "one_liner": "You own the camera feed the detector reads and the incident log it writes to.",
-          "briefed": false
+          "title": "Platform engineer — capture and audit",
+          "one_liner": "You own the camera feed the detector reads, the incident log it writes to, and the screen an auditor opens.",
+          "briefed": true,
+          "demo": false
         }
       ]
     },
@@ -86,8 +122,9 @@
         {
           "key": "data",
           "title": "Data engineer — ingest",
-          "one_liner": "You own everything between the webhook and the table.",
-          "briefed": false
+          "one_liner": "You own everything between the webhook handing you an event and the row that lands in the table.",
+          "briefed": true,
+          "demo": true
         }
       ]
     }

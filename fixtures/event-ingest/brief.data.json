@@ -1,0 +1,63 @@
+{
+  "schema": "mentor.brief/v1",
+  "project": "event-ingest",
+  "role": "data",
+  "title": "Data engineer — ingest",
+  "you_are": "You own everything between the webhook handing you an event and the row that lands in the table. The sender will deliver the same event twice — not as an edge case, as normal operation — and your job is for that to be boring.",
+  "stakes": "A duplicate that gets through is a double charge, a double email, or a metric that is quietly wrong for a quarter. A genuine event you discarded as a duplicate is worse: nobody ever notices, because the evidence of it is the thing you deleted.",
+  "deliverable": "ingest(event) → the row that was written, or the row that already existed. Called twice with the same event, it writes once.",
+  "concept": {
+    "key": "deduplicate-before-you-transform",
+    "question": "Deduplicating and normalising both have to happen. Which one goes first, and how would you find out you had them the wrong way round?",
+    "answer": "Deduplicate on the identity the sender gave you, before you reshape anything. Normalising first changes what \"the same event\" means: two genuinely different events can collapse into one once the only field distinguishing them is a field normalisation dropped, and a retry of an event whose payload you rewrote no longer matches the copy you stored. It stays invisible while every event happens to be unique and while your normalisation happens to be lossless, which is exactly why it survives the first round of tests and ships.",
+    "transfers_to": "Any comparison that happens after a transformation: cache keys computed post-serialisation, diffing after formatting, signature verification after a proxy has rewritten headers, deduplicating log lines after the timestamps were truncated to the second."
+  },
+  "owns": [
+    {
+      "component": "deduplicate",
+      "intent": "Decide whether this event has been seen before, using the id the sender supplied and nothing derived.",
+      "why_yours": "You are the only component that sees the event as it arrived, and once anything reshapes it the sender's identity is no longer recoverable."
+    },
+    {
+      "component": "normalise",
+      "intent": "Reshape a known-new event into the table's column types, applying defaults for absent optional fields.",
+      "why_yours": "The table's shape is yours, so the mapping onto it is yours."
+    },
+    {
+      "component": "persist",
+      "intent": "Write exactly one row, and make the write itself idempotent so a crash between dedupe and write cannot lose or duplicate.",
+      "why_yours": "You own the write path, and idempotency that is only enforced in memory is not enforced."
+    }
+  ],
+  "given": [
+    {
+      "component": "receive",
+      "owned_by": "platform",
+      "contract": "Hands you one event as { id, type, payload, sentAt }. `id` is the sender's identifier and is stable across retries. It will call you again on any non-2xx."
+    },
+    {
+      "component": "replay",
+      "owned_by": "platform",
+      "contract": "Re-delivers historical events through the same entry point you already handle. It assumes your ingest is idempotent; it does not check."
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "a1",
+      "given": "the same event delivered twice",
+      "must": "exactly one row"
+    },
+    {
+      "id": "a2",
+      "given": "two different events whose payloads are identical but whose ids differ",
+      "must": "two rows"
+    },
+    {
+      "id": "a3",
+      "given": "an event with its optional fields absent",
+      "must": "one row, with defaults applied and the sender's id preserved"
+    }
+  ],
+  "entry": "build/ingest.js",
+  "tests": "build/ingest.test.js"
+}
