@@ -259,28 +259,46 @@ automatically redeploy."*
 > | `package.json` has an `@nitrostack/*` dependency | ❌ **no** |
 > | `src/index.ts` exists | ❌ no |
 > | any config file declaring a root/sub directory | ❌ **none exists anywhere in the repo** |
-> | Root Directory field in the Connect Repository dialog | ❓ **unverified** — handbook documents repo + branch only |
+> | Root Directory field in the Connect Repository dialog | ✅ **CONFIRMED ABSENT** — checked in the real console, 2026-07-25 |
 >
 > Studio validates a project by `package.json` + `src/index.ts` + `@nitrostack/core`, and the
-> root fails all three. So unless that dialog has a Root Directory field, **C fails outright
-> here** — which is why it is worth 5 minutes on path B first (§4) to get *"successfully
-> deployed on NitroCloud"* ticked, and then C as the follow-up.
+> root fails all three.
 >
-> **The mirror fallback is verified to work.** `git subtree split --prefix sentinel` produces
-> a tree whose root is a valid project — checked at commit `3f1c1e6`: `name: mentor`,
-> `@nitrostack/core: ^1.0.14`, `src/index.ts` present. So step 3's second branch is a real
-> option, not a hopeful one.
+> Studio validates a project by `package.json` + `src/index.ts` + `@nitrostack/core`, and the
+> root fails all three. This was the last open question in `GAPS.md` Gap 1, held open for three
+> doc revisions on the strength of *"the handbook doesn't document one"* — now answered in the
+> live console. **So the subtree mirror is not a fallback. It is the only way to have path C.**
 >
-> **The one thing to look at while you are in the dialog:** does a Root Directory field exist?
-> That single answer decides whether C is two minutes or twenty, and it closes `GAPS.md`
-> Gap 1's last open question.
+> **The mirror is verified to produce a valid project.** `git subtree split --prefix sentinel`
+> → commit `3f1c1e6`, whose root is `name: mentor`, `@nitrostack/core: ^1.0.14`, with
+> `src/index.ts` present. 10 commits of `sentinel/`'s own history come with it.
+>
+> **The build is not a risk either — simulated end to end.** `mentor-deploy.zip` extracted to a
+> clean directory, then exactly what the platform runs:
+>
+> | Step | Result |
+> |---|---|
+> | `npm install` | ✅ 330 packages — **including `src/widgets/node_modules`**, so the nested widget deps need no separate step |
+> | `npm run build` | ✅ 5.7s — `src/widgets/out/` (2 widgets) + `dist` |
+> | `node dist/index.js` over stdio | ✅ `mentor 1.0.0`, **10 tools** |
+>
+> The cwd trap that `scripts/start-mcp.mjs` exists to work around does **not** affect a
+> deployment: the platform runs the app from its own project root, which is the condition the
+> launcher fakes locally.
 >
 > **Unknown worth knowing before it annoys you:** whether an app first deployed by zip can
 > later be switched to GitHub auto-deploy. Probably yes — same app, different source — but it
 > is not documented and I could not test it. If it can't, make a second app; either is cheap.
 
+> ⚠️ **The handbook's URL does not resolve.** Both `https://nitrocloud.ai` and
+> `https://nitrocloud.ai/home/api-keys` appear verbatim in `NitroStack_Studio_Handbook.pdf`
+> (confirmed by extracting the PDF), and **nitrocloud.ai did not exist** when we tried it. The
+> CLI only ever prints `nitrostack.ai`, `docs.nitrostack.ai` and `nitrostack.ai/studio`, so
+> start from **`nitrostack.ai`** and find the cloud console from there. Do not trust the
+> handbook's domain.
+
 **First, create the cloud app** (any path needs this):
-https://nitrocloud.ai → `/home` or `/home/apps` → **Create Nitrostack App** → name it
+`nitrostack.ai` → the cloud console → **Create Nitrostack App** → name it
 (min 2 chars) → **Create App**. You land on `/apps/:id` with an **MCP** sidebar
 (Deployments, Integrations, Logs, Monitoring, Domains, Settings).
 
@@ -291,20 +309,27 @@ https://nitrocloud.ai → `/home` or `/home/apps` → **Create Nitrostack App** 
    authorise NitroStack for your org.
 2. **Connect Repository** → search + select the repo → choose the branch (`main`) →
    **Link Repository & Enable Auto-Deploy**.
-3. **Look for a Root Directory field here.** The handbook documents repo + branch only.
-   - **Field exists** → set it to `sentinel`. Push the monorepo and you're done:
-     ```bash
-     git add -A && git commit -m "COMMAND platform + MENTOR" && git push -u origin main
-     ```
-   - **No field** → mirror `sentinel/`'s *contents* to the root of a second repo, so
-     NitroCloud sees a plain NitroStack project. The monorepo stays the source of truth;
-     this is a one-way mirror:
-     ```bash
-     git remote add sentinel-origin https://github.com/<you>/command-sentinel.git
-     npm run push:sentinel
-     ```
-     Then link `command-sentinel` instead, and re-run `npm run push:sentinel` after every
-     change to `sentinel/`.
+3. **There is no Root Directory field** (checked — see the box above), so the repo you link
+   must be one whose *root* is the MCP app. Create an **empty, public** repo in the org —
+   no README, no `.gitignore`, no licence, or the first subtree push collides with a commit
+   you did not make — then mirror `sentinel/`'s contents into it:
+
+   ```bash
+   git remote add sentinel-origin https://github.com/nitrostacklh/mentor-mcp.git
+   ```
+
+   ```bash
+   npm run push:sentinel
+   ```
+
+   `command-global` stays the source of truth; this is a **one-way mirror**, so never commit
+   into `mentor-mcp` directly — the next push would conflict and you would be resolving a
+   merge in a repo nobody edits. Re-run `npm run push:sentinel` after any change under
+   `sentinel/`, and NitroCloud redeploys itself.
+
+   > **Why `mentor-mcp` and not `command-sentinel`:** the server, the package and the product
+   > are all called `mentor`, and a judge reading the org should be able to tell which repo is
+   > the deployable without opening it. Also chips away at `GAPS.md` Gap 8.
 4. **Deploy from GitHub** → the Deployment Details page streams
    Pending → Building → Deploying → **Live**, with build logs. Copy the **Service URL**.
 
