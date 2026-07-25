@@ -81,7 +81,9 @@ const urlFor = (t) => {
 // A mirror built from a dirty tree is a lie in the most expensive way: the deployed
 // service would match neither the repo nor your editor, and the difference is invisible
 // until something behaves oddly in the cloud.
-const dirty = git('status', '--porcelain');
+// Tracked changes only: an untracked file is in nobody's history, so it cannot make a
+// mirror disagree with what you pushed. Uncommitted *edits* to tracked files can.
+const dirty = git('status', '--porcelain', '--untracked-files=no');
 if (dirty && !DRY) {
   console.error(R('\nWorking tree is not clean. The mirrors would not match what you pushed.\n'));
   console.error(dirty.split('\n').slice(0, 12).join('\n'));

@@ -51,3 +51,6 @@ CLAUDE.md
 Thumbs.db
 .vscode/
 .idea/
+
+# claude-flow / ruflo local daemon state — machine-specific, never shared
+.claude-flow/
