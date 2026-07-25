@@ -5,12 +5,25 @@
 > Copilot finishes your code. This one makes you finish it — it shows you the exact
 > moment your build stopped matching your plan, and then it stops.
 
-**The submission is `sentinel/` — an MCP app built entirely with the official NitroStack
-TypeScript SDK.** It runs standalone: `explain_drift` takes no arguments and answers from a
-bundled demo project, with no network, no API key and no model. Everything else in this
-repo supports it. `lumina/` is a **companion design tool**, not part of the deployed app —
-it exists to produce one plain-JSON file (`lumina.plan/v1`) that MENTOR can also be handed
-directly.
+**The submission is this whole repository — a four-layer learning loop, not a single tool.**
+A student is given a role, learns the concept, **designs the architecture in Lumina**, builds
+it, and when it breaks **MENTOR shows them the exact decision that broke it — and refuses to
+write the fix.** Take any layer away and the pitch collapses: without the design canvas there
+is no record of what the student *intended*, and without that, MENTOR is just another AI
+explaining a stack trace. The loop is the product.
+
+| Layer | Lives in | Does |
+|---|---|---|
+| 1 · Role | `fixtures/pricing/` | the brief, the deliverables, and a failure planted on purpose |
+| 2 · Lesson | *roadmap* | the concept as interactive panels, not documentation |
+| **3 · Design** | **`lumina/`** | the student draws components + data flow, then exports `lumina.plan/v1` — **the machine-readable record of intent, and the thing no comparable tool has** |
+| **4 · Drift** | **`sentinel/`** | MENTOR diffs intent against what was built, names the origin, states its confidence, and stops |
+
+**What deploys to NitroCloud is `sentinel/` — built entirely with the official NitroStack
+TypeScript SDK**, and it runs with no network, no API key and no model. `lumina/` is the
+Layer 3 half of the same product, run locally by the student; the two halves meet at exactly
+one plain-JSON file, which is also why MENTOR can be handed a plan directly and demoed on
+its own.
 
 > ### 🟢 One failing test in this repo is deliberate — please read before judging
 >
@@ -124,10 +137,14 @@ the product, not a missing feature.
 ordering comparison, a weighted formula, and a refusal — there is nothing to generate. So
 it runs offline, with no API key and no per-student cost.
 
-### The design canvas — `lumina/` *(companion tool, not part of the submission)*
+### The design canvas — `lumina/` *(Layer 3 — where the student designs)*
 
-Next.js + FastAPI, so it is deliberately **outside** the deployed MCP app. Its only contract
-with MENTOR is one plain-JSON file. You can judge the submission without ever running it.
+Next.js + FastAPI, run locally by the student. It sits outside the deployed MCP app on
+purpose: the two halves agree on one plain-JSON file and nothing else, which is what lets
+MENTOR be demoed standalone *and* lets the canvas evolve without touching the server.
+
+Drag **Component** nodes from the `design` palette group, wire them in the order you intend
+to build, then hit **Plan**.
 
 ```bash
 cd lumina

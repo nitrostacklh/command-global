@@ -4,13 +4,13 @@ Get it live in ~15 minutes. Do this **early** — an explicit rule (*"Deploy you
 NitroStack Cloud as soon as you have a working prototype"* / *"Don't wait until the last
 hour"*). **Read the box below first** — the fastest path is Studio's Deploy button, not GitHub.
 
-> ### ✅ Pre-flight — already done for you (2026-07-25, commit `98f30b9`)
+> ### ✅ Pre-flight — already done for you (2026-07-25)
 >
 > Everything in §1 has been run and passed, so start at §2 unless you've changed code.
 >
 > | Check | Result |
 > |---|---|
-> | `git push origin main` | ✅ **pushed** — `origin/main` at `98f30b9`; MENTOR is on GitHub |
+> | `git push origin main` | ✅ **pushed** — MENTOR is on GitHub, `main` green |
 > | `npm run build` in `sentinel/` | ✅ clean — `dist` + `src/widgets/out/` |
 > | `npm run verify` at root | ✅ 65/65, fixture guard green, plan deterministic |
 > | **built** `node dist/index.js` over stdio | ✅ `initialize` → **`mentor 1.0.0`**; `tools/list` → exactly `explain_drift`, `withhold_fix`, `mentor_status` |
@@ -48,7 +48,7 @@ and cloud deploy all require being signed in.** Two ways: *Continue with NitroCl
 > |---|---|---|
 > | **A. Deploy from Studio** (App Canvas / Compose) | the **connected project folder** — bundles and uploads it | ✅ **yes** |
 > | **B. Upload a code package** (`.zip`, ≤100 MB) | whatever you zip | ✅ yes — `sentinel/` zips to **0.21 MB** |
-> | **C. Connect GitHub** (auto-deploy on push) | the linked repo **at its root** | ⚠️ the open question |
+> | **C. Connect GitHub** (auto-deploy on push) | the linked repo **at its root** | ⚠️ needs a root-dir field or the §5 mirror — **and is optional, see below** |
 >
 > **Use A to get live today.** Studio deploys the folder you connected, so the
 > subdirectory question never comes up.
@@ -61,8 +61,8 @@ and cloud deploy all require being signed in.** Two ways: *Continue with NitroCl
 > **C is a convenience — get live with A, then wire C if you have time.**
 >
 > The rules *do* independently require the code on GitHub with a stable, deployable default
-> branch and a public repo through judging. That is already satisfied: `origin/main` is at
-> `98f30b9` and green.
+> branch and a public repo through judging. That is already satisfied: `origin/main` carries the full
+> project and is green.
 >
 > The handbook documents no Root Directory field for path C (§9 "Connect Repository"
 > is repo + branch only), so if you wire C:
@@ -101,13 +101,14 @@ From the monorepo root, `npm run sentinel:build` and `npm test` do the same thin
   A valid folder shows a **NitroStack badge**.
 - **Open Project** → choose **Studio App Canvas** (inspect tools/resources/widgets)
   rather than **Vibe Code**.
-- **Tools** (sidebar → App) → pick `self_heal` → **Execute Tool**. Inputs are generated
-  from the tool's `inputSchema`; the **mission-trace** widget renders under
-  *Widget Preview* (Mobile/Tablet/Desktop). **Run as Task** exercises the async path.
+- **Tools** (sidebar → App) → pick **`explain_drift`** → **Execute Tool**. It takes no
+  required arguments, so just run it; the **causal-timeline** widget renders under
+  *Widget Preview* (Mobile/Tablet/Desktop). Then run **`withhold_fix`** and read what it
+  refuses to do — that beat is the pitch.
 - **Logs** (sidebar → SYSTEM) → *Server Logs* / *Traffic* tabs show MCP traffic; expand
   a row for params/result/error. This is where to look when a tool misbehaves.
-- Sign in to NitroCloud to unlock **AI Chat**, then ask *"heal the pricing service"* and
-  **Allow** the tool-approval modal.
+- Sign in to NitroCloud to unlock **AI Chat**, then ask *"a student's pricing test is
+  failing — when did they go wrong?"* and **Allow** the tool-approval modal.
 
 > **Gotcha — `tsx` must be a declared dependency.** Studio's launch command is
 > `npx tsx src/index.ts`. `tsx` was *not* in `package.json`, so `npx` had to fetch it at
