@@ -1,0 +1,22 @@
+{
+  "$comment": [
+    "Project-scoped MCP config. Open this folder in Claude Code (or any client that",
+    "reads .mcp.json) and MENTOR is connected — that is the fastest way to use this",
+    "product the way a student does, with a real model choosing the tools.",
+    "",
+    "It goes through scripts/start-mcp.mjs rather than straight to",
+    "sentinel/dist/index.js on purpose: @nitrostack/core resolves widget HTML from",
+    "process.cwd(), so launching the entry point directly from the repo root fails",
+    "at startup with an error about a missing HTML file. The launcher chdirs first.",
+    "",
+    "Requires a build: npm run sentinel:build",
+    "",
+    "See WALKTHROUGH.md for what to actually say once it is connected."
+  ],
+  "mcpServers": {
+    "mentor": {
+      "command": "node",
+      "args": ["scripts/start-mcp.mjs"]
+    }
+  }
+}

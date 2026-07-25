@@ -21,7 +21,8 @@
     "install:all": "npm run sentinel:install && npm run lumina:install",
     "verify": "npm test && npm run fixture:check",
     "verify:all": "npm run verify && npm run fixture:plan",
-    "probe": "node scripts/probe-mcp.mjs"
+    "probe": "node scripts/probe-mcp.mjs",
+    "mcp": "node scripts/start-mcp.mjs"
   },
   "author": "Team COMMAND",
   "license": "UNLICENSED"
