@@ -139,6 +139,34 @@ try {
   check(red.earned === false && !('back' in red), 'flashcard withholds, and the field is ABSENT');
   check(!JSON.stringify(red).includes(ANSWER), 'answer appears nowhere in the live payload');
 
+  // ── REGISTRAR, checked as an unauthenticated caller ────────────────────────
+  // This script never presents a token, which is exactly the interesting case: it
+  // is the position anyone who finds the URL is in. These assert that the boundary
+  // holds in production, not just in unit tests against a mocked context.
+  const me = await call('whoami', {});
+  check(me.you?.authenticated === false, 'an unauthenticated caller is anonymous, not rejected',
+    `${me.you?.id} / ${me.you?.role}`);
+  check(me.can_read_other_students === false, 'anonymous cannot read other students');
+  check(
+    typeof me.storage?.durable === 'boolean' && !!me.storage?.why_this_backend,
+    'storage durability is reported, not assumed',
+    `${me.storage?.backend}, durable=${me.storage?.durable}`,
+  );
+
+  const klass = await call('class_progress', {});
+  check(klass.refused === true, "class_progress REFUSES an anonymous caller — the boundary holds live",
+    klass.refused ? '' : `returned ${JSON.stringify(klass).slice(0, 120)}`);
+
+  const anon = await call('record_progress', {
+    project: 'pricing',
+    role: 'backend',
+    reached: [{ checkpoint: 'cp-1', file: 'build/pricing.js', line: 8 }],
+  });
+  // Anonymous must stay stateless: every anonymous caller shares one identity, so
+  // saving would leak one visitor's run into the next one's session.
+  check(anon.saved?.saved === false, 'anonymous progress is NOT persisted (no cross-caller leak)');
+  check(Array.isArray(anon.log?.events), 'and the log still comes back in full, so nothing is lost');
+
   console.log(`\n${failures === 0 ? G('DEPLOYMENT VERIFIED') : R(failures + ' CHECK(S) FAILED')}`);
   if (failures === 0) {
     console.log('\nSame claims as the local build, over the wire, on the deployed service.');

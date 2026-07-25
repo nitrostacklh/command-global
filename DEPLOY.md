@@ -349,14 +349,27 @@ every redeploy, and once immediately before the demo:
 npm run verify:live -- https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai
 ```
 
-**16/16 against the live service**: `mentor 1.0.0` · exactly 13 tools, all six stages, nothing
+**21/21 against the live service**: `mentor 1.0.0` · exactly 13 tools, all six stages, nothing
 extra · **no tool that can modify a student's build** · `causal-timeline` served and
 `mission-trace` not · `explain_drift` → `tax @ build/pricing.js:12`, confidence **0.91**,
 `fix_withheld` · catalog and brief bundled · **the flashcard's answer appears nowhere in a
 live withheld payload.**
 
-That last group is the one worth re-running before you present: it proves the bundled fixtures
+Plus REGISTRAR's boundary, checked **as an unauthenticated caller** — which is the position
+anyone who finds the URL is in: anonymous is admitted rather than rejected, `class_progress`
+**refuses** it, and anonymous progress is not persisted so one visitor's run cannot leak into
+the next one's session.
+
+That group is the one worth re-running before you present: it proves the bundled fixtures
 travelled inside the image, so the app has something to talk about with nothing uploaded.
+
+> **Storage on the live service is `memory, durable=false`**, and `whoami` says so. Note the
+> reason it gives is *"MENTOR_STORE is not set to sqlite"* — the flag was never set on the
+> deployment, so **the Node 20 fallback path is still untested in production.** If you want to
+> know which runtime NitroCloud actually gives us, set `MENTOR_STORE=sqlite` in the app's
+> environment and call `whoami`: either it reports `sqlite, durable=true` (Node 22.5+, and we
+> get durable storage for free) or it reports the fallback with the Node version in the
+> reason. One env var, and it settles the question.
 
 > **Transport note.** The script drives **`{serviceUrl}/mcp`** (streamable HTTP), not the
 > `/sse` URL the handbook quotes for ChatGPT. Both are served. `/mcp` is request/response with
