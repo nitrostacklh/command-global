@@ -216,9 +216,42 @@ NitroCloud → app → **MCP** ("Ship your MCP server") → **Upload a code pack
 `.zip` (max **100 MB**). `sentinel/` without `node_modules`/`dist` zips to **0.21 MB**, so
 the limit is not a concern. Useful when Studio can't reach the network but a browser can.
 
-## 5. Deploy path C — GitHub auto-deploy (optional; the monorepo-sensitive one)
+## 5. Deploy path C — GitHub auto-deploy (**the right steady state**, and the monorepo-sensitive one)
 
-Nice to have, not required. Once linked, every push to the branch redeploys.
+Once linked, every push to the branch redeploys — so **this is the only path where deploying
+stops being a human step.** Everything else needs somebody at a GUI every single time. The
+rules also ask for it directly: *"continue pushing updates to GitHub so NitroStack Cloud can
+automatically redeploy."*
+
+> ### ⚠️ But it cannot be your *first* deploy, and here is the measured reason
+>
+> **Path C reads the repo root, and this repo's root is not a NitroStack project.** Verified,
+> not assumed:
+>
+> | Check at `command-global/` root | Result |
+> |---|---|
+> | `package.json` has an `@nitrostack/*` dependency | ❌ **no** |
+> | `src/index.ts` exists | ❌ no |
+> | any config file declaring a root/sub directory | ❌ **none exists anywhere in the repo** |
+> | Root Directory field in the Connect Repository dialog | ❓ **unverified** — handbook documents repo + branch only |
+>
+> Studio validates a project by `package.json` + `src/index.ts` + `@nitrostack/core`, and the
+> root fails all three. So unless that dialog has a Root Directory field, **C fails outright
+> here** — which is why it is worth 5 minutes on path B first (§4) to get *"successfully
+> deployed on NitroCloud"* ticked, and then C as the follow-up.
+>
+> **The mirror fallback is verified to work.** `git subtree split --prefix sentinel` produces
+> a tree whose root is a valid project — checked at commit `3f1c1e6`: `name: mentor`,
+> `@nitrostack/core: ^1.0.14`, `src/index.ts` present. So step 3's second branch is a real
+> option, not a hopeful one.
+>
+> **The one thing to look at while you are in the dialog:** does a Root Directory field exist?
+> That single answer decides whether C is two minutes or twenty, and it closes `GAPS.md`
+> Gap 1's last open question.
+>
+> **Unknown worth knowing before it annoys you:** whether an app first deployed by zip can
+> later be switched to GitHub auto-deploy. Probably yes — same app, different source — but it
+> is not documented and I could not test it. If it can't, make a second app; either is cheap.
 
 **First, create the cloud app** (any path needs this):
 https://nitrocloud.ai → `/home` or `/home/apps` → **Create Nitrostack App** → name it
