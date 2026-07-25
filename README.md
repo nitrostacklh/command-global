@@ -45,6 +45,7 @@ its own.
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | *How* — the one engine all six commanders run on (only MENTOR ships registered). Long, and worth it. |
 | **[`GAPS.md`](GAPS.md)** | *What's left* — prioritized, honest, and the file to open if you're picking this up. |
 | [`DEPLOY.md`](DEPLOY.md) | The NitroCloud runbook + the demo-video script. ChatGPT is optional — see below. |
+| **[`TESTING.md`](TESTING.md)** | **Verify it yourself** — a manual checklist with the exact command and exact expected output for every component. |
 | [`fixtures/pricing/README.md`](fixtures/pricing/README.md) | The one demo project, all four layers. |
 
 **If you have five minutes:** read the pitch above, then `GAPS.md`'s one-paragraph

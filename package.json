@@ -19,7 +19,8 @@
     "push:sentinel": "git subtree push --prefix sentinel sentinel-origin main",
     "install:all": "npm run sentinel:install && npm run lumina:install",
     "verify": "npm test && npm run fixture:check",
-    "verify:all": "npm run verify && npm run fixture:plan"
+    "verify:all": "npm run verify && npm run fixture:plan",
+    "probe": "node scripts/probe-mcp.mjs"
   },
   "author": "Team COMMAND",
   "license": "UNLICENSED"
