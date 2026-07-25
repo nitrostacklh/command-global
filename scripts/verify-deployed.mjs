@@ -69,9 +69,21 @@ const call = async (name, args) => {
   return JSON.parse(t);
 };
 
+/**
+ * Written out rather than derived, on purpose. Comparing the deployed list against
+ * the local build would only prove the two agree; naming them here asserts *intent*,
+ * so a module registered by accident — the Gap 11 failure — shows up as an extra
+ * rather than being mirrored into the expectation and hidden.
+ */
 const EXPECTED_TOOLS = [
-  'browse_catalog', 'open_brief', 'check_scope', 'checkpoints', 'record_progress',
-  'is_it_done', 'explain_drift', 'withhold_fix', 'flashcard', 'mentor_status',
+  // REGISTRAR — identity and records
+  'whoami', 'resume', 'class_progress',
+  // ROSTER — path and role
+  'browse_catalog', 'open_brief',
+  // COACH — design, checkpoints, done-ness
+  'check_scope', 'checkpoints', 'record_progress', 'is_it_done',
+  // MENTOR — drift, refusal, card
+  'explain_drift', 'withhold_fix', 'flashcard', 'mentor_status',
 ];
 /** If this string ever leaves the server unearned, the product is broken. */
 const ANSWER = 'Tax is charged on what the customer actually pays';
@@ -91,10 +103,14 @@ try {
 
   const { tools } = await rpc('tools/list', {});
   const names = tools.map((t) => t.name);
-  check(names.length === 10, 'exactly 10 tools', String(names.length));
+  check(
+    names.length === EXPECTED_TOOLS.length,
+    `exactly ${EXPECTED_TOOLS.length} tools`,
+    String(names.length),
+  );
   const missing = EXPECTED_TOOLS.filter((t) => !names.includes(t));
   const extra = names.filter((t) => !EXPECTED_TOOLS.includes(t));
-  check(missing.length === 0, 'all six stages present', missing.length ? 'missing ' + missing.join(', ') : '');
+  check(missing.length === 0, 'every expected tool present', missing.length ? 'missing ' + missing.join(', ') : '');
   check(extra.length === 0, 'nothing unexpected registered', extra.length ? 'extra ' + extra.join(', ') : '');
   // The Gap 11 invariant, checked on the thing a judge actually connects to.
   const writers = names.filter((n) => /patch|write|fix_code|edit|apply|heal/i.test(n));
