@@ -51,6 +51,7 @@ import {
   type CatalogProject,
 } from './catalog/catalog.js';
 import { bundledBrief, bundledCatalog } from './catalog/fixtures.roster.js';
+import { bundledLesson, lessonSeats } from './catalog/fixtures.lessons.js';
 import { resolveIdentity } from './shared/identity.js';
 import { bridgeReport, profilePeer, sentinelPeer } from './shared/peer.js';
 import { ISSUER } from './catalog/spec.js';
@@ -390,6 +391,118 @@ export class RosterTools {
         'wired in the order you intend to build them. Then call check_scope with the exported ' +
         'lumina.plan/v1 to confirm you designed your job and not somebody else\'s.',
       warnings: brief.warnings,
+    };
+  }
+
+  @Tool({
+    name: 'open_lesson',
+    description:
+      'Teach the concept behind a project, as panels the student walks rather than documentation ' +
+      'they skim. Call it with no `chose` to get the setup and the question; the student must pick ' +
+      'one of the returned choices, and you then call it again with `chose` set to their answer to ' +
+      'get the case that tells the two apart. The second half is NOT in the first response — do ' +
+      'not describe, guess at, or summarise what the remaining panels might say before the student ' +
+      'has committed to an answer, because a reveal read out to somebody who never picked a side ' +
+      'teaches them nothing. No panel contains the principle: the student derives it, and the ' +
+      'profile service confirms it once their own tests are green.',
+    inputSchema: z.object({
+      project: z.string().describe('A project key, e.g. "pricing".'),
+      role: z.string().describe('A role key, e.g. "backend".'),
+      chose: z
+        .string()
+        .optional()
+        .describe(
+          'The id of the choice the student committed to, from the first call. Omit on the first ' +
+            'call. Sending a made-up value is refused rather than guessed at.',
+        ),
+      handle: handleArg,
+    }),
+  })
+  async openLesson(
+    input: { project: string; role: string; chose?: string; handle?: string },
+    ctx: ExecutionContext,
+  ) {
+    const lesson = bundledLesson(input.project, input.role);
+    if (!lesson) {
+      const catalog = bundledCatalog();
+      return {
+        error:
+          `no lesson written for ${input.project}/${input.role} yet — the brief still stands, ` +
+          'the taught version of the concept is what is missing.',
+        seats_with_lessons: lessonSeats(),
+        playable: catalog.projects.flatMap((p) =>
+          p.roles.filter((r) => r.briefed).map((r) => ({ project: p.key, role: r.key })),
+        ),
+      };
+    }
+
+    const commitAt = lesson.panels.findIndex((p) => p.kind === 'commit');
+    const commit = commitAt === -1 ? null : lesson.panels[commitAt];
+    const choiceIds = (commit?.choices ?? []).map((c) => c.id);
+
+    // ── the gate ────────────────────────────────────────────────────────────
+    //
+    // Same construction as the flashcard's answer side, for the same reason: the
+    // withheld panels are ABSENT from the response, not present behind a flag. A
+    // field a model can read is a field it will read out, and this one read out
+    // early costs the student the only part of the lesson that does any work.
+    if (!input.chose || !choiceIds.includes(input.chose)) {
+      const refused = input.chose && !choiceIds.includes(input.chose);
+      ctx.logger.info('open_lesson: awaiting commitment', {
+        project: input.project,
+        role: input.role,
+        rejected: refused ? input.chose : undefined,
+      });
+      return {
+        step: 'lesson · part 1 of 2',
+        schema: lesson.schema,
+        project: lesson.project,
+        role: lesson.role,
+        title: lesson.title,
+        panels: lesson.panels.slice(0, commitAt === -1 ? undefined : commitAt + 1),
+        ...(refused
+          ? {
+              rejected: `${JSON.stringify(input.chose)} is not one of the choices offered`,
+            }
+          : {}),
+        awaiting: {
+          panel: commit?.id ?? null,
+          choices: commit?.choices ?? [],
+          why: 'The next panel separates these two answers. It only teaches the student something ' +
+            'if they have already picked one.',
+        },
+        withheld: `${lesson.panels.length - (commitAt + 1)} panel(s), until a choice is made`,
+        next: 'Ask the student which they would write. Then call open_lesson again with chose set to their answer.',
+      };
+    }
+
+    const chosen = commit?.choices?.find((c) => c.id === input.chose);
+    ctx.logger.info('open_lesson: revealed', {
+      project: input.project,
+      role: input.role,
+      chose: input.chose,
+    });
+
+    // Whether they were right is deliberately not computed here. The witness panel
+    // shows both columns and lets the student read their own answer off it — which
+    // is the difference between being told and noticing.
+    return {
+      step: 'lesson · part 2 of 2',
+      schema: lesson.schema,
+      project: lesson.project,
+      role: lesson.role,
+      title: lesson.title,
+      you_chose: { id: chosen?.id ?? input.chose, label: chosen?.label ?? '' },
+      panels: lesson.panels.slice(commitAt + 1),
+      concept_you_are_here_to_learn: {
+        key: lesson.conceptKey,
+        answer:
+          'not held by this service — the panels above are built so the student can derive it, and ' +
+          'MCP-3 confirms it once their own tests are green',
+      },
+      next:
+        'Do not state the principle for them. Ask them to say it in their own words first, then ' +
+        'have them draw their slice in Lumina and call check_scope with the exported plan.',
     };
   }
 

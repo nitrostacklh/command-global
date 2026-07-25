@@ -135,6 +135,13 @@ const json = (value) => JSON.stringify(value, null, 2);
 
 const briefEntries = [];
 const conceptEntries = [];
+const lessonEntries = [];
+
+/** Panel kinds, in the order a student walks them. `commit` must precede `witness`. */
+const PANEL_KINDS = ['setup', 'commit', 'witness', 'generalise'];
+
+/** Kept in step with `LESSON_SCHEMA` in `mcp-roster/src/catalog/lesson.ts`. */
+const LESSON_SCHEMA_LITERAL = 'mentor.lesson/v1';
 
 for (const project of projects) {
   for (const { role, file } of project.briefs) {
@@ -146,17 +153,94 @@ for (const project of projects) {
     if (!concept.question) fail(`${seat}: brief.concept.question is missing`);
     if (!concept.answer) fail(`${seat}: brief.concept.answer is missing — nothing to earn`);
 
+    // The lesson is its own artifact, not part of the brief. Layer 2 is a stage of
+    // the loop in its own right, and every other stage hands over one versioned
+    // document rather than a bigger version of the previous one.
+    const { lesson, ...briefWithoutLesson } = brief;
+
     // The stripped copy MCP-1 gets. `answer` and `transfers_to` both go: the
     // answer is the reward, and transfers_to is the generalisation that makes the
     // answer land, so handing it over early gives away the shape of the lesson.
     const forRoster = {
-      ...brief,
+      ...briefWithoutLesson,
       concept: { key: concept.key, question: concept.question },
     };
 
     const rosterText = json(forRoster);
     if (concept.answer && rosterText.includes(concept.answer.slice(0, 40))) {
       fail(`${seat}: the answer survived stripping into the MCP-1 copy — refusing to write it`);
+    }
+
+    // ── the lesson, and the one rule it has to obey ──────────────────────────
+    //
+    // A lesson that states the principle is not a lesson, it is the flashcard
+    // early. These panels are allowed to set up the problem, make the student
+    // commit to an order, and show the case that separates the two — and that is
+    // where they stop. The student derives the rule; MCP-3 confirms it, once the
+    // tests are green. So the same assertion the brief gets applies here, against
+    // both the answer and the generalisation.
+    if (lesson) {
+      const lessonText = json(lesson);
+
+      if (concept.answer) {
+        // Sentence-wise rather than whole-string: a lesson would never paste the
+        // answer entire, it would paste the sentence that gives it away.
+        for (const sentence of concept.answer.split(/(?<=\.)\s+/)) {
+          const s = sentence.trim();
+          if (s.length > 30 && lessonText.includes(s)) {
+            fail(`${seat}: a lesson panel contains the concept answer — that is the flashcard, early`);
+            break;
+          }
+        }
+      }
+      for (const clause of (concept.transfers_to ?? '').split(/[:;]/)) {
+        const c = clause.trim();
+        if (c.length > 30 && lessonText.includes(c)) {
+          fail(`${seat}: a lesson panel contains transfers_to — the student is meant to generalise, not read it`);
+          break;
+        }
+      }
+
+      const kinds = (lesson.panels ?? []).map((p) => p.kind);
+      if (!lesson.title) fail(`${seat}: lesson.title is missing`);
+      if (kinds.length < 3) fail(`${seat}: a lesson needs at least 3 panels, has ${kinds.length}`);
+      for (const k of kinds) {
+        if (!PANEL_KINDS.includes(k)) fail(`${seat}: unknown panel kind ${JSON.stringify(k)}`);
+      }
+      // The commit panel is the whole pedagogy: the witness case only teaches
+      // anything to a student who already picked a side. Order is load-bearing.
+      if (kinds.indexOf('commit') > kinds.indexOf('witness')) {
+        fail(`${seat}: the witness panel comes before the commit panel — the reveal lands on nobody`);
+      }
+      const commit = (lesson.panels ?? []).find((p) => p.kind === 'commit');
+      const witness = (lesson.panels ?? []).find((p) => p.kind === 'witness');
+      if (commit && witness) {
+        // Every choice the student can make must have a result in every case, or
+        // the student picks an option the reveal has nothing to say about.
+        const choiceIds = (commit.choices ?? []).map((c) => c.id);
+        if (choiceIds.length < 2) fail(`${seat}: the commit panel offers fewer than 2 choices`);
+        for (const kase of witness.cases ?? []) {
+          for (const id of choiceIds) {
+            if (!(id in (kase.results ?? {}))) {
+              fail(`${seat}: witness case ${JSON.stringify(kase.input)} has no result for choice ${JSON.stringify(id)}`);
+            }
+          }
+        }
+        // A lesson whose cases all agree has no discriminating case, and a lesson
+        // whose cases all diverge never shows why the bug hides.
+        const outcomes = new Set((witness.cases ?? []).map((k) => k.outcome));
+        if (!outcomes.has('agree') || !outcomes.has('diverge')) {
+          fail(`${seat}: the witness panel needs both an 'agree' case and a 'diverge' case`);
+        }
+      }
+
+      lessonEntries.push({
+        seat,
+        project: project.key,
+        role,
+        conceptKey: concept.key,
+        text: lessonText,
+      });
     }
 
     briefEntries.push({ seat, text: rosterText });
@@ -184,6 +268,78 @@ for (const c of conceptEntries) {
   }
   byKey.set(c.key, c);
 }
+
+const lessonsModule = `/**
+ * The bundled lessons — GENERATED, do not edit by hand.
+ *
+ * Written by \`scripts/embed_fixtures.mjs\` from the \`lesson\` block of each brief
+ * under \`fixtures/\`, because this app deploys as a lone folder and cannot read that
+ * directory at runtime.
+ *
+ * **No panel below states the principle it is teaching, and the generator asserts
+ * that.** A panel carrying a sentence of \`concept.answer\`, or a clause of
+ * \`concept.transfers_to\`, fails the build — the answer is what the student earns
+ * from MCP-3 against their own green tests, and a lesson that pastes it here would
+ * be the flashcard, early, from the one process that has never held one.
+ *
+ * What the panels do instead: set the problem up, make the student commit to an
+ * order before they are shown anything, then show the single case that tells the
+ * two answers apart. Deriving the rule is the student's job. That is the difference
+ * between a lesson and documentation, and it is the reason this stage exists at all.
+ *
+ * To change any of these, edit the \`lesson\` block in the brief JSON under
+ * \`fixtures/\` and re-run:
+ *
+ *   node scripts/embed_fixtures.mjs
+ */
+
+/* eslint-disable */
+import { parseLesson, type Lesson } from './lesson.js';
+
+/** Keyed \`project/role\`. */
+export const LESSON_JSON: Record<string, string> = {
+${lessonEntries.map((l) => `  ${JSON.stringify(l.seat)}: \`${forTemplate(l.text)}\`,`).join('\n')}
+};
+
+/** The concept each seat's lesson teaches, so a caller can name it without parsing. */
+export const LESSON_CONCEPT: Record<string, string> = {
+${lessonEntries.map((l) => `  ${JSON.stringify(l.seat)}: ${JSON.stringify(l.conceptKey)},`).join('\n')}
+};
+
+const cache = new Map<string, Lesson | null>();
+
+/**
+ * The lesson for one seat, or \`null\` when that seat has none written yet.
+ *
+ * Null is a real answer here, not a failure. Gap 14 is honest that only some of the
+ * catalog's roles are playable, and a seat with a brief but no lesson should say so
+ * rather than invent one.
+ */
+export function bundledLesson(project: string, role: string): Lesson | null {
+  const seat = \`\${project}/\${role}\`;
+  if (cache.has(seat)) return cache.get(seat) ?? null;
+
+  const raw = LESSON_JSON[seat];
+  if (!raw) {
+    cache.set(seat, null);
+    return null;
+  }
+  const parsed = parseLesson({
+    ...JSON.parse(raw),
+    schema: '${LESSON_SCHEMA_LITERAL}',
+    project,
+    role,
+    conceptKey: LESSON_CONCEPT[seat] ?? '',
+  });
+  cache.set(seat, parsed);
+  return parsed;
+}
+
+/** Every seat that has a lesson, as \`project/role\`. */
+export function lessonSeats(): string[] {
+  return Object.keys(LESSON_JSON);
+}
+`;
 
 const rosterModule = `/**
  * The bundled catalog and briefs — GENERATED, do not edit by hand.
@@ -476,6 +632,7 @@ export function projectsWithBundledPlans(): string[] {
 
 const OUTPUTS = [
   { path: join(ROOT, 'mcp-roster', 'src', 'catalog', 'fixtures.roster.ts'), text: rosterModule },
+  { path: join(ROOT, 'mcp-roster', 'src', 'catalog', 'fixtures.lessons.ts'), text: lessonsModule },
   { path: join(ROOT, 'mcp-roster', 'src', 'catalog', 'fixtures.plans.ts'), text: rosterPlansModule },
   { path: join(ROOT, 'mcp-profile', 'src', 'concepts', 'fixtures.concepts.ts'), text: conceptsModule },
   { path: join(ROOT, 'sentinel', 'src', 'modules', 'mentor', 'fixtures.demo.ts'), text: demoModule },

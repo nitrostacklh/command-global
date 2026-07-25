@@ -42,7 +42,8 @@ the lesson panels, is now the only stage of the loop with nothing behind it** (G
 | # | Gap | Severity | Who unblocks it |
 |---|---|---|---|
 | 1 | Deploy to NitroCloud + connect a client | 🟠 **do this next** | you, ~30 min |
-| 13 | Layer 2 (lesson panels) is the only unbuilt stage | 🟡 the loop's one visible hole | scope decision |
+| 16 | **The three-MCP split left `main` broken** — sentinel did not compile; 58 tests deleted, never ported | 🔴 **read this first** | partly fixed below |
+| 13 | ~~Layer 2 (lesson panels)~~ | ✅ **built** — `mentor.lesson/v1`, 5 lessons, 14 tests | widget still open |
 | 7 | Evidence study (n=5) not run — **protocol ready** in `STUDY.md` | 🟡 free points, Research track | ~2h with classmates |
 | 8 | Open `[[placeholders]]` incl. product name | 🟡 submission hygiene | you |
 | 9 | Six official tracks never confirmed | 🟡 submission hygiene | organizers |
@@ -60,6 +61,45 @@ the lesson panels, is now the only stage of the loop with nothing behind it** (G
 *Reordered 2026-07-25 (five times): after the Studio handbook downgraded Gap 1, after MENTOR
 shipped, after Gaps 2 and 11 closed, after Gap 12 closed the bridges, and after a review
 found Gap 15. **Gap 1 is still the critical path** — the code exists and isn't live yet.*
+
+---
+
+## Gap 16 — 🔴 The three-MCP split left `main` broken, and the test count is not what this file says
+
+**Found 2026-07-26, by running the suite rather than reading about it.** PR #1
+(`three-mcp-architecture`, merge `aab534d`) moved `learn/` and `registrar/` out of `sentinel/`
+into the two new apps and left the imports behind. Consequences, all verified:
+
+| | State on `aab534d` | Now |
+|---|---|---|
+| `sentinel` build | ❌ 5 × TS2307 — `npx tsc` fails, so **0 tests ran** | ✅ compiles, **47/47** |
+| `sentinel` tool surface | declared a `flashcard` tool whose code had moved to MCP-3 | ✅ removed |
+| `mcp-roster` tests | **0** | ✅ **14** (this session's, on Gap 13) |
+| `mcp-profile` tests | **0** | ❌ still 0 |
+| `npm run fixture:check` | ❌ red | ❌ still red — see below |
+
+**Fixed here:** the build. `sentinel/src/app.module.ts` no longer imports three modules that
+do not exist in the package, and `mentor.module.ts` no longer carries the pre-split
+`flashcard` tool. That deletion is not tidying — MCP-3 is the only process allowed to hold a
+card answer, so a `flashcard` tool living in MCP-2 contradicts the invariant rather than
+merely duplicating a verb. `mcp-profile/src/cards.module.ts` already has the real one.
+
+**Not fixed, and someone has to decide:**
+
+1. **58 test cases were deleted and never ported** — `learn.test.ts` (42) and
+   `registrar.test.ts` (16), covering ROSTER, COACH, the card gate and REGISTRAR. They were
+   removed with the modules they tested; the modules were recreated in the new apps, the
+   tests were not. **This file's "128/128 green" is no longer true** and neither is
+   `FINAL_README.md`'s. The honest number today is 61 (47 + 14), across two of three apps.
+2. **`scripts/embed_learn_fixtures.mjs` is orphaned** — it writes
+   `sentinel/src/modules/learn/fixtures.learn.ts`, a path deleted in the split, and it is
+   still wired into `npm run fixture:check`, which is why `npm run verify` is red. It was
+   superseded by `embed_fixtures.mjs`, which writes all three apps. Removing it from the
+   `fixture:check` script is probably right, but that is the project's verify gate and not a
+   call to make silently.
+3. **`sentinel/src/modules/verify/`** — `verifyCheckpoints`, `findStuck`, `buildFromEvents`,
+   added by the split as MCP-2's actual job — is **completely unwired**. No `@Module`, no
+   tools, no tests, and nothing imports it.
 
 ---
 
@@ -555,7 +595,38 @@ The number went up because the evidence improved.
 
 ---
 
-## Gap 13 — Layer 2, the lesson panels, is the only unbuilt stage 🟡
+## Gap 13 — ~~Layer 2, the lesson panels~~ ✅ **BUILT** (2026-07-26)
+
+**`mentor.lesson/v1`, five lessons, one tool, 14 tests.** Authored in the `lesson` block of
+each brief under `fixtures/`, embedded into MCP-1 by `scripts/embed_fixtures.mjs`, served by
+`open_lesson` in `mcp-roster`. Four panels per seat — `setup` · `commit` · `witness` ·
+`generalise` — for all five playable seats.
+
+**The design decision that mattered.** A lesson that states the principle is just the
+flashcard, early, delivered by the one service that has never held an answer. So no panel
+states it. The panels set the problem up, make the student **commit to an order before they
+are shown anything**, then show the single case that tells the two answers apart — for
+pricing, the cart with no discount code where both orders return `$120.00`, next to the
+40%-off cart where they return `$72.00` and `$80.00`. The student derives the rule; MCP-3
+still confirms it against their own green tests.
+
+Two enforcement points, because neither is worth trusting:
+
+- `scripts/embed_fixtures.mjs` **fails the build** if a panel contains a sentence of
+  `concept.answer` or a clause of `concept.transfers_to`. Verified by deliberately pasting
+  the answer into a panel: the generator refused and wrote nothing.
+- `open_lesson` **withholds the reveal the same way the flashcard withholds its answer** —
+  the witness and generalise panels are *absent from the first response*, not present behind
+  a flag, because a field a model can read is a field it will read out, and a reveal read to
+  a student who never picked a side teaches nothing. A made-up `chose` value is refused.
+
+⬜ **Still open:** the panels render as structured JSON, not as a widget. `MENTOR-CONCEPT.md`
+§3 asks for authored SVG + text sharing a component with `causal-timeline`; the three-way
+split makes that literal sharing impossible (separate deployments), and `mcp-roster` has no
+widget app at all — only the `widget` npm script, pointing at a `src/widgets` that does not
+exist. The `figure` field on each panel is already the structured shape a widget would draw.
+
+<details><summary>The original gap, for the record</summary>
 
 Every other stage of the loop now has code and tests behind it. This one has a `concept`
 block in each brief — a question, an answer, and what it transfers to — and **nothing that
@@ -577,6 +648,12 @@ Streamlit plus a generative model.
 **Cheapest honest version:** the concept's question, a worked wrong answer, and the
 discriminating case — three static panels per project, sharing the `Panel` component the
 `causal-timeline` widget already has. Build it only if the deploy is already green.
+
+*(Two corrections from building it: `causal-timeline` has no `Panel` component to share — it
+has `chip` and `row` helpers — and the commit panel turned out to be load-bearing rather than
+optional, so it is four panels, not three.)*
+
+</details>
 
 ---
 

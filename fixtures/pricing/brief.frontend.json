@@ -12,6 +12,57 @@
     "answer": "The producer's contract has to be settled before the consumer that reads it. If you build the receipt first, you invent the fields you wish existed, and the cart API then gets shaped to fit a screen rather than to fit the domain — so a field that is present in every fixture you hand-wrote turns out to be optional in production, and the receipt renders undefined for the customers whose carts took the other branch. It feels faster because the screen is the part you can see, and it is the part someone will ask you to demo.",
     "transfers_to": "Any two components where one produces what the other reads: an API and its client, a migration and the query that assumes it ran, an event schema and its consumer, a config file and the code that requires a key from it."
   },
+  "lesson": {
+    "title": "You own both ends of one arrow",
+    "panels": [
+      {
+        "id": "setup",
+        "kind": "setup",
+        "title": "Nobody is going to hand you the interface",
+        "body": "The cart API produces a payload. The receipt renders one. You own both, which means no other engineer is going to hand you a contract and no other engineer is going to stop you starting at whichever end you like.",
+        "figure": { "kind": "unordered", "items": ["the cart API that produces the payload", "the receipt that renders it"] }
+      },
+      {
+        "id": "commit",
+        "kind": "commit",
+        "title": "Choose, and then read on",
+        "body": "Pick where you would start. Be honest about which one you would actually reach for on a Monday, not which one sounds more disciplined.",
+        "choices": [
+          { "id": "producer_first", "label": "Settle what the API returns, then build the receipt against it" },
+          { "id": "consumer_first", "label": "Build the receipt, then make the API return what it needs" }
+        ]
+      },
+      {
+        "id": "witness",
+        "kind": "witness",
+        "title": "Two carts: one you wrote, one a customer wrote",
+        "body": "Same receipt. Same API. Two payloads.",
+        "cases": [
+          {
+            "input": "A cart you hand-wrote as a fixture — every field present, because you typed them all",
+            "results": { "producer_first": "renders", "consumer_first": "renders" },
+            "outcome": "agree"
+          },
+          {
+            "input": "A production cart from a customer who used no discount code, so `discount` was never set",
+            "results": {
+              "producer_first": "renders — the contract said the field was optional, so the receipt was written to handle it",
+              "consumer_first": "renders `undefined` — the field was in every fixture, so nothing ever said it was optional"
+            },
+            "outcome": "diverge"
+          }
+        ],
+        "note": "Every fixture you write yourself is the first cart. You cannot write the second cart, because the whole problem is that you did not think of it."
+      },
+      {
+        "id": "generalise",
+        "kind": "generalise",
+        "title": "Where have you seen this shape before?",
+        "body": "Take the screen out of it. Two components, one arrow between them, and a question about which end you build from.",
+        "prompt": "Before you open the flashcard: name two other pairs in your own code where one side produces what the other reads. For each, say which end you built first — and whether you found out the hard way."
+      }
+    ]
+  },
   "owns": [
     {
       "component": "cart API",

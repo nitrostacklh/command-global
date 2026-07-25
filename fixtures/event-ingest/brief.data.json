@@ -12,6 +12,54 @@
     "answer": "Deduplicate on the identity the sender gave you, before you reshape anything. Normalising first changes what \"the same event\" means: two genuinely different events can collapse into one once the only field distinguishing them is a field normalisation dropped, and a retry of an event whose payload you rewrote no longer matches the copy you stored. It stays invisible while every event happens to be unique and while your normalisation happens to be lossless, which is exactly why it survives the first round of tests and ships.",
     "transfers_to": "Any comparison that happens after a transformation: cache keys computed post-serialisation, diffing after formatting, signature verification after a proxy has rewritten headers, deduplicating log lines after the timestamps were truncated to the second."
   },
+  "lesson": {
+    "title": "Two passes over the same stream",
+    "panels": [
+      {
+        "id": "setup",
+        "kind": "setup",
+        "title": "Both passes have to happen. Neither one announces its turn",
+        "body": "Events arrive with duplicates in them, and they arrive in shapes the warehouse cannot query. So there is a dedupe pass and a normalise pass, and both have to run before anything downstream reads a row.",
+        "figure": { "kind": "unordered", "items": ["drop the duplicates", "normalise the shape"] }
+      },
+      {
+        "id": "commit",
+        "kind": "commit",
+        "title": "Choose, and then read on",
+        "body": "Pick the order you would write. There is a genuine argument for each — deduping clean uniform records really is easier — so commit before you look.",
+        "choices": [
+          { "id": "dedupe_first", "label": "Dedupe first — on the identity the sender gave you" },
+          { "id": "normalise_first", "label": "Normalise first — then dedupe clean, uniform records" }
+        ]
+      },
+      {
+        "id": "witness",
+        "kind": "witness",
+        "title": "Two batches, and a row count that does not raise anything",
+        "body": "1,000 events in, both orders.",
+        "cases": [
+          {
+            "input": "A batch where every event is genuinely distinct, and normalisation touches no field you compare on",
+            "results": { "dedupe_first": "1,000 out", "normalise_first": "1,000 out" },
+            "outcome": "agree"
+          },
+          {
+            "input": "A batch where two real events differ only in a field normalisation rounds — a timestamp truncated to the second",
+            "results": { "dedupe_first": "1,000 out", "normalise_first": "999 out — two real events collapsed into one" },
+            "outcome": "diverge"
+          }
+        ],
+        "note": "There is no error, no warning, and no rejected row. The count is quietly one lower, and the event you dropped was real. Nothing in your pipeline is going to tell you which one it was."
+      },
+      {
+        "id": "generalise",
+        "kind": "generalise",
+        "title": "Where have you seen this shape before?",
+        "body": "Take the pipeline out of it. Something compared two things, and something else had already rewritten them both.",
+        "prompt": "Before you open the flashcard: name two other places in your code where a comparison happens after a transformation. For each, ask what the transformation is allowed to change — and whether anyone wrote that down."
+      }
+    ]
+  },
   "owns": [
     {
       "component": "deduplicate",

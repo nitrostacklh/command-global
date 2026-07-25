@@ -12,6 +12,54 @@
     "answer": "Tax is charged on what the customer actually pays, so it has to be computed after the discount is taken off. Getting it backwards is invisible whenever the discount is zero, because taxing the subtotal and taxing the discounted amount are then the same number — which is exactly why this class of bug survives the first few tests and ships.",
     "transfers_to": "Any calculation where one step reduces the base another step is a percentage of: refunds and partial credits, commission on a net figure, tips after a voucher, interest on a balance after a payment posts."
   },
+  "lesson": {
+    "title": "Two lines, and nothing says which runs first",
+    "panels": [
+      {
+        "id": "setup",
+        "kind": "setup",
+        "title": "The decision hiding inside two lines of arithmetic",
+        "body": "A cart total needs two things done to it: a percentage discount comes off, and tax goes on. Each is one line. Neither line mentions the other, and the code compiles either way — so the order is a decision you are making, not one the language is making for you.",
+        "figure": { "kind": "unordered", "items": ["take the discount off", "add the tax on"] }
+      },
+      {
+        "id": "commit",
+        "kind": "commit",
+        "title": "Choose, and then read on",
+        "body": "Pick the order you would write. Say it out loud, or write it down. The next panel only teaches you anything if you have committed to an answer before you see it.",
+        "choices": [
+          { "id": "discount_first", "label": "Discount first — tax whatever is left" },
+          { "id": "tax_first", "label": "Tax first — then take the discount off" }
+        ]
+      },
+      {
+        "id": "witness",
+        "kind": "witness",
+        "title": "The cart that tells you nothing, and the cart that tells you everything",
+        "body": "Two carts. Both orders. Four numbers.",
+        "cases": [
+          {
+            "input": "$100 of goods · no discount code · 20% tax",
+            "results": { "discount_first": "$120.00", "tax_first": "$120.00" },
+            "outcome": "agree"
+          },
+          {
+            "input": "$100 of goods · 40%-off code · 20% tax",
+            "results": { "discount_first": "$72.00", "tax_first": "$80.00" },
+            "outcome": "diverge"
+          }
+        ],
+        "note": "The first cart cannot tell the two orders apart — and most carts are the first cart. Whichever order you chose, it passed. That is the property worth noticing here, more than the $8."
+      },
+      {
+        "id": "generalise",
+        "kind": "generalise",
+        "title": "Where have you seen this shape before?",
+        "body": "Strip the money out of it. You have just watched one step change the number a later step is a percentage of, and watched that difference stay invisible until one specific input showed up.",
+        "prompt": "Before you open the flashcard: name two other calculations you have written where one step reduces the base another step is a percentage of. The card will tell you whether you found the general shape or two more examples of the same one."
+      }
+    ]
+  },
   "owns": [
     {
       "component": "validate",

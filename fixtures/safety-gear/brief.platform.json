@@ -12,6 +12,57 @@
     "answer": "Record before you notify. An alert fired for an incident with no durable record is unauditable, and being able to say afterwards what happened and when is the entire purpose of a safety system — a notification is not a record. Wiring the alert first works flawlessly in a demo, because in a demo somebody is watching the screen; it fails the first time anyone asks about last Tuesday, and by then the frames are gone.",
     "transfers_to": "Any system where a side effect and its audit trail are separate steps: charge then receipt, send then outbox row, deploy then changelog, delete then tombstone, and every case where a retry has to be able to tell whether the first attempt got through."
   },
+  "lesson": {
+    "title": "One event, two destinations",
+    "panels": [
+      {
+        "id": "setup",
+        "kind": "setup",
+        "title": "The same incident has to reach a person and reach storage",
+        "body": "An incident happens. It has to reach somebody — a notification — and it has to reach durable storage — a record. Two paths off one event, and nothing forces you to build them in a particular order.",
+        "figure": { "kind": "unordered", "items": ["write the incident to storage", "send the notification"] }
+      },
+      {
+        "id": "commit",
+        "kind": "commit",
+        "title": "Choose, and then read on",
+        "body": "Pick which path you would get working first. Notice which one you would be able to show somebody at the end of the day.",
+        "choices": [
+          { "id": "record_first", "label": "Record first — notify off the stored incident" },
+          { "id": "notify_first", "label": "Notify first — add the record once alerting works" }
+        ]
+      },
+      {
+        "id": "witness",
+        "kind": "witness",
+        "title": "The demo, and the question three weeks later",
+        "body": "Same system, two moments.",
+        "cases": [
+          {
+            "input": "A demo: an incident happens while somebody is watching the screen",
+            "results": { "record_first": "the alert appears", "notify_first": "the alert appears" },
+            "outcome": "agree"
+          },
+          {
+            "input": "An auditor asks what happened on the night shift last Tuesday, and when",
+            "results": {
+              "record_first": "the incident, its timestamp, and the frames it was raised from",
+              "notify_first": "a notification nobody kept, and frames that rolled off days ago"
+            },
+            "outcome": "diverge"
+          }
+        ],
+        "note": "In a demo somebody is always watching the screen, which is exactly the condition under which these two designs are indistinguishable."
+      },
+      {
+        "id": "generalise",
+        "kind": "generalise",
+        "title": "Where have you seen this shape before?",
+        "body": "Take the safety system out of it. A side effect happened, and the trail proving it happened was a separate step somebody sequenced second.",
+        "prompt": "Before you open the flashcard: name two other places where a side effect and its audit trail are separate steps. For each, ask whether a retry could tell that the first attempt got through."
+      }
+    ]
+  },
   "owns": [
     {
       "component": "camera feed",
