@@ -1,6 +1,27 @@
-# COMMAND — Deploy Runbook (NitroCloud → ChatGPT)
+# MENTOR — Deploy Runbook (NitroCloud)
 
-Get the platform live in ~15 minutes. Do this **early** (hackathon rule: deploy on day 1). **Read the box below first** — the fastest path is Studio's Deploy button, not GitHub.
+Get it live in ~15 minutes. Do this **early** — an explicit rule (*"Deploy your project to
+NitroStack Cloud as soon as you have a working prototype"* / *"Don't wait until the last
+hour"*). **Read the box below first** — the fastest path is Studio's Deploy button, not GitHub.
+
+> ### ✅ Pre-flight — already done for you (2026-07-25, commit `98f30b9`)
+>
+> Everything in §1 has been run and passed, so start at §2 unless you've changed code.
+>
+> | Check | Result |
+> |---|---|
+> | `git push origin main` | ✅ **pushed** — `origin/main` at `98f30b9`; MENTOR is on GitHub |
+> | `npm run build` in `sentinel/` | ✅ clean — `dist` + `src/widgets/out/` |
+> | `npm run verify` at root | ✅ 65/65, fixture guard green, plan deterministic |
+> | **built** `node dist/index.js` over stdio | ✅ `initialize` → **`mentor 1.0.0`**; `tools/list` → exactly `explain_drift`, `withhold_fix`, `mentor_status` |
+> | `explain_drift` on the built artifact | ✅ origin `tax @ build/pricing.js:12`, confidence **0.91**, `fix_withheld: true` |
+> | `resources/list` | ✅ advertises **only** `causal-timeline` (+ health, examples) — `mission-trace` removed |
+>
+> That last row matters: `mission-trace`'s example payload contained the patch MENTOR
+> exists to withhold, and it was being served one layer below the tool surface. Fixed.
+>
+> **What is left is entirely on the NitroCloud side** — it needs the Studio desktop GUI and
+> a sign-in to the organizer-provided account, so it can't be automated from a terminal.
 
 ## 0. Prerequisites (one-time)
 - **Node 20.x** (`node -v` → v20.x; 18 is Studio's hard minimum, 20 is what Studio bundles and what the cloud Docker images use — use 20).
@@ -30,12 +51,31 @@ and cloud deploy all require being signed in.** Two ways: *Continue with NitroCl
 > | **C. Connect GitHub** (auto-deploy on push) | the linked repo **at its root** | ⚠️ the open question |
 >
 > **Use A to get live today.** Studio deploys the folder you connected, so the
-> subdirectory question never comes up. Then add C later if you want push-to-deploy —
-> that's a convenience, not the blocker it looked like.
+> subdirectory question never comes up.
+>
+> **Do you also need C?** Read the rules carefully — they say two different things at two
+> different strengths. The *Before Submission* **checklist** requires only *"Ensure your
+> project is successfully deployed on NitroStack Cloud"*, which **path A satisfies in full.**
+> Auto-redeploy appears in the Do's as advice (*"continue pushing updates to GitHub so
+> NitroStack Cloud can automatically redeploy your latest changes"*), not as a criterion. So
+> **C is a convenience — get live with A, then wire C if you have time.**
+>
+> The rules *do* independently require the code on GitHub with a stable, deployable default
+> branch and a public repo through judging. That is already satisfied: `origin/main` is at
+> `98f30b9` and green.
 >
 > The handbook documents no Root Directory field for path C (§9 "Connect Repository"
-> is repo + branch only), so assume C needs the `git subtree` mirror in **§5** until
-> someone sees otherwise in the dialog. See `GAPS.md` Gap 1.
+> is repo + branch only), so if you wire C:
+> 1. Look for a Root Directory / subdirectory field in the real dialog. If it exists, point
+>    it at **`sentinel/`** and you're done.
+> 2. If it doesn't, use the `git subtree` mirror in **§5**. Note `npm run push:sentinel`
+>    pushes to a remote named **`sentinel-origin`, which does not exist yet** — create the
+>    second repo first, then
+>    `git remote add sentinel-origin <url>`. `sentinel/` is self-contained and valid on its
+>    own (`name: "mentor"`, has `src/index.ts` and `@nitrostack/core`), so its root is a
+>    legitimate NitroStack project root.
+>
+> See `GAPS.md` Gap 1.
 >
 > **Point Studio at `sentinel/`, never the repo root.** Studio validates a project by
 > looking for `package.json` + `src/index.ts` + the `@nitrostack/core` dependency
