@@ -19,10 +19,11 @@
     "fixture:plan": "python scripts/regen_fixture_plan.py",
     "push:sentinel": "git subtree push --prefix sentinel sentinel-origin main",
     "install:all": "npm run sentinel:install && npm run lumina:install",
-    "verify": "npm test && npm run fixture:check && npm run walk",
+    "verify": "npm test && npm run fixture:check && npm run walk && npm run check:docs",
     "verify:all": "npm run verify && npm run fixture:plan",
     "probe": "node scripts/probe-mcp.mjs",
     "walk": "node scripts/walk-mcp.mjs",
+    "check:docs": "node scripts/check_docs.mjs",
     "mcp": "node scripts/start-mcp.mjs"
   },
   "author": "Team COMMAND",

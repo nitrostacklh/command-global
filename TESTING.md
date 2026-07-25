@@ -107,9 +107,9 @@ Compare against this exactly:
       flashcard        mentor_status                 ← MENTOR  (stages ⑤ ⑥)
 
 - [ ] **No `self_heal`, `propose_patch`, `apply_for_scheme`, `run_organization`, `optimize_spend`, or `verify_output`.**
-      If you see 23 tools, the platform modules got re-registered in `app.module.ts` — read
-      `GAPS.md` Gap 11 before "fixing" that. `self_heal` patches the *same bug* MENTOR
-      refuses to patch.
+      If you see **3**, you are on a pre-Gap-12 build — rebuild. If you see **23**, the
+      platform modules got re-registered in `app.module.ts` — read `GAPS.md` Gap 11 before
+      "fixing" that. `self_heal` patches the *same bug* MENTOR refuses to patch.
 - [ ] `prompts (3)` → `pick_a_project`, `work_the_slice`, `debugging_tutor`
 - [ ] `resources (3)` → `ui://widget/next-causal-timeline.html`, `health://checks`, `widget://examples`
 - [ ] **No `mission-trace` resource.** Its example payload contained the literal fix.

@@ -264,21 +264,58 @@ We can, because we're building for learning outcomes rather than engagement.
 **Education:** the loop, and specifically the refusal to give answers, which
 directly addresses the anxiety every education judge has about AI in the classroom.
 
-**Research:** two claims worth making here.
+**Research:** three claims, in descending order of how well they are evidenced. Make them
+in this order, and do not lead with the third.
 
-1. **The engine generalizes.** MENTOR is one `DomainAdapter` on an explainability engine
-   that already runs four unrelated domains — DevOps, FinOps, Legal, Civic
-   (`ARCHITECTURE.md` §7). One lifecycle, five skins. That's a systems result, not a demo.
+1. **The loop generalizes across project kinds — demonstrated, one command.**
+   `fixtures/safety-gear/` runs every stage against a vision project: **three** owned
+   components instead of four, a boundary component the student draws but does not own, a
+   different class of bug (acting on a condition that does not exist yet, rather than
+   computing from a stale base), and a tracked rather than hand-authored history.
+   `npm run walk` and `npm run probe` execute it in front of the judge.
 
-   > **Say it as code, not as tools.** The submission deploys **only MENTOR's three tools**.
-   > The other five adapters ship in the repo with their tests passing but unregistered —
-   > because one of them (`self_heal`) offers to autonomously patch the exact bug MENTOR
-   > refuses to patch, and a judge's model would pick it. The claim is about the *engine*,
-   > and five adapters against one lifecycle with green tests evidences it without putting
-   > twenty contradictory tools in front of the judge. Show the adapter table on a slide.
-   > Reasoning: `GAPS.md` Gap 11.
-2. **We measured it.** See §7. Almost no hackathon submission contains a real measurement.
-   In a track called *Research*, that scarcity is worth more than another feature.
+   This is the generalization claim that matters here, because it is the one an education
+   judge actually cares about: *does this work on more than one kind of student project?*
+   Yes, and you can watch it.
+
+2. **The artifacts are the contribution.** Five versioned plain-JSON schemas — a role-scoped
+   brief with `owns`/`given`, a design-as-intent export, a checkpoint log that doubles as an
+   observed build history — with no shared types and no RPC between the halves. That is a
+   reusable interface for "compare what a student intended against what they did", and it is
+   independent of our implementation of it.
+
+3. **The engine also runs four unrelated domains** — DevOps, FinOps, Legal, Civic
+   (`ARCHITECTURE.md` §7). One lifecycle, six skins.
+
+   > ⚠️ **Be honest about the strength of claim 3, and consider not making it.** The
+   > submission deploys **10 tools, all of them MENTOR's loop**. The other four adapters ship
+   > unregistered, because one of them (`self_heal`) offers to autonomously patch the exact
+   > bug MENTOR refuses to patch (`GAPS.md` Gap 11). So the evidence a judge can *see* is a
+   > passing test suite and an adapter table on a slide — not a running system.
+   >
+   > A skeptical judge is trained to discount "we built more than we are showing you," and
+   > they are right to: it is the same shape as an unfalsifiable feature claim. It also
+   > invites a worse question — *"why build a FinOps platform for an education submission
+   > instead of hardening the thing I can see?"*
+   >
+   > The truthful answer is that **COMMAND came first and MENTOR is a deliberate pivot away
+   > from it** (see the repo history: the platform arrives at `1e4067a` as a consolidation of
+   > earlier work, MENTOR at `b0531b6`). Killing four working commanders because one of them
+   > contradicted the pitch is a judgment call worth more than the code was — so if the
+   > subject comes up, **tell that story rather than defending the platform.** Claim 1 is
+   > where the generalization argument should live.
+
+4. **A measurement, if you run one.** §7 is a *plan*, and as of now it has **not been run** —
+   `STUDY.md` is the ready-to-run instrument. Almost no hackathon submission contains a real
+   measurement, so in a track called *Research* this is the cheapest large win available. But
+   until the data exists, say "we designed a study and here is the protocol," never "we
+   measured it."
+
+   > **The confidence score is not this.** `0.91` / `0.97` is the tool's own stated certainty
+   > about a drift claim — an honesty feature, and genuinely unusual. It is **not** evidence
+   > that MENTOR helps a human debug better, and it must never be offered as though it were.
+   > Those are different kinds of number and conflating them is the fastest way to lose a
+   > research-minded judge.
 
 `[[CONFIRM which official track name to print on the slide — "Education & Research".]]`
 

@@ -16,7 +16,8 @@ hour"*). **Read the box below first** — the fastest path is Studio's Deploy bu
 > | **clean `git clone` → `install:all` → `verify`** | ✅ passes with nothing pre-installed — the judge's path |
 > | `npm run build` in `lumina/` | ✅ Next.js production build clean, 6 routes |
 > | `prompts/get debugging_tutor` | ✅ **fixed** — every `@Prompt` returned the wrong shape and had never worked |
-> | **built** `node dist/index.js` over stdio | ✅ `initialize` → **`mentor 1.0.0`**; `tools/list` → exactly `explain_drift`, `withhold_fix`, `mentor_status` |
+> | **built** server over stdio, via `npm run mcp` | ✅ `initialize` → **`mentor 1.0.0`**; `tools/list` → **10 tools**, the six stages of the loop |
+> | `npm run walk` | ✅ the nine-turn student journey asserted over real MCP |
 > | `explain_drift` on the built artifact | ✅ origin `tax @ build/pricing.js:12`, confidence **0.91**, `fix_withheld: true` |
 > | `resources/list` | ✅ advertises **only** `causal-timeline` (+ health, examples) — `mission-trace` removed |
 >
@@ -127,9 +128,14 @@ From the monorepo root, `npm run sentinel:build` and `npm test` do the same thin
 > launch — which fails on a flaky network or a locked npm cache (seen here: `EPERM` on
 > cache cleanup, server never started, no output). It is now a `devDependency`, so the
 > launch is deterministic and offline. **Verified:** `npx tsx src/index.ts` serves
-> `initialize` as `mentor 1.0.0` and returns exactly 3 tools — `explain_drift`,
-> `withhold_fix`, `mentor_status`. If you see twenty-three, the platform modules got
-> re-registered in `app.module.ts`; see `GAPS.md` Gap 11 for why that breaks the demo.
+> `initialize` as `mentor 1.0.0` and returns **10 tools** — `browse_catalog`, `open_brief`,
+> `check_scope`, `checkpoints`, `record_progress`, `is_it_done`, `explain_drift`,
+> `withhold_fix`, `flashcard`, `mentor_status`. Those are the six stages of one loop
+> (`GAPS.md` Gap 12).
+>
+> **If you see 3**, you are on a build from before Gap 12 — rebuild. **If you see 23**, the
+> five platform modules got re-registered in `app.module.ts`; see `GAPS.md` Gap 11 for why
+> that breaks the demo, since `self_heal` offers to patch the very bug MENTOR refuses to.
 >
 > If Studio ever says *"Dependencies not installed or out of date…"* or *"tsx is not
 > available…"*, run `npm install` inside `sentinel/` manually.

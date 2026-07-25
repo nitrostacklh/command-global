@@ -40,7 +40,7 @@ file you can print.
 | 2 · Lesson | *roadmap* | the concept as interactive panels, not documentation |
 | **③ Design** | **`lumina/`** | the student draws components + data flow, then exports `lumina.plan/v1` — **the machine-readable record of intent, and the thing no comparable tool has** |
 | **④ Checkpoints** | **`sentinel/src/modules/learn/`** — COACH | checks the design covers your slice, derives checkpoints **from your own plan**, records what you finish, and judges done-ness |
-| **⑤ Drift · ⑥ Card** | **`sentinel/src/modules/mentor/`** — MENTOR | names the origin, states its confidence, stops — then issues the concept as a flashcard, once you fixed it yourself |
+| **⑤ Drift · ⑥ Card** | **`sentinel/src/modules/mentor/`** — MENTOR *(card logic in `learn/card.ts`)* | names the origin, states its confidence, stops — then issues the concept as a flashcard, once you fixed it yourself |
 
 **Two kinds of drift, not one.** `check_scope` catches designing the *wrong set* of
 components — someone else's job, or missing your own. `explain_drift` catches building
@@ -94,6 +94,7 @@ its own.
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | *How* — the one engine all six commanders run on (only MENTOR ships registered). Long, and worth it. |
 | **[`GAPS.md`](GAPS.md)** | *What's left* — prioritized, honest, and the file to open if you're picking this up. |
 | [`DEPLOY.md`](DEPLOY.md) | The NitroCloud runbook + the demo-video script. ChatGPT is optional — see below. |
+| **[`STUDY.md`](STUDY.md)** | **The measurement** — a ready-to-run protocol for the n=5 evidence study. Designed, **not yet run**; nothing here may claim a result until it is. |
 | **[`WALKTHROUGH.md`](WALKTHROUGH.md)** | **Use it as a student** — connect a real MCP client and talk to it in plain English. The only way to find out whether a model picks the right tool. |
 | **[`TESTING.md`](TESTING.md)** | **Verify the parts** — a manual checklist with the exact command and exact expected output for every component. |
 | [`fixtures/pricing/README.md`](fixtures/pricing/README.md) | Demo project 1 — every stage, end to end. |
@@ -109,7 +110,8 @@ summary. That tells you the state of things faster than anything else here.
 ```
 command-global/
 ├── sentinel/                  ⭐ the deliverable — TS NitroStack MCP app, 109/109 tests
-│   └── src/modules/learn/        ROSTER + COACH: the catalog, briefs, checkpoints, card
+│   ├── src/modules/learn/        ROSTER + COACH — and card.ts, whose tool MENTOR exposes
+│   └── src/modules/mentor/       MENTOR: explain_drift, withhold_fix, flashcard
 ├── lumina/                    stage ③ — the canvas the student designs in (Next.js + FastAPI)
 ├── fixtures/
 │   ├── catalog.json             the curated menu: 3 domains, 3 projects, 5 roles
@@ -126,6 +128,33 @@ computing from a stale base), and `provenance: observed` instead of `authored`.
 
 Three previously separate projects, consolidated 2026-07-25. Originals left in place at
 `pranay/sentinel-mcp`, `pranay/agentic_ai_hackton` and `himes/lumina`.
+
+### Why there is code here for DevOps, FinOps, Legal and Civic
+
+Because **this repo started as a different product, and MENTOR is a deliberate pivot away
+from it.** `reference/python/docs/COMMAND_PLATFORM_PLAN.md` is the original plan: COMMAND, an
+"Autonomous Enterprise OS" of five MCP apps on one shared engine. You can see the turn in the
+history — the platform arrives at `1e4067a` as a consolidation of earlier work, MENTOR at
+`b0531b6`.
+
+**Four of those five commanders are still here, still tested, and deliberately unregistered.**
+The deployed server offers 10 tools and all 10 are MENTOR's loop. The reason for cutting them
+is not tidiness: `self_heal` runs on the *same* pricing service and the *same*
+tax-before-discount bug as MENTOR's fixture, and its description offers to patch, prove and
+deploy the fix. Ask a model *"the pricing test is failing, help"* next to that tool and it
+picks the actionable one — contradicting MENTOR's entire thesis, live, on our own bug.
+Full reasoning: `GAPS.md` Gap 11.
+
+**We are not asking you to take the generalization on trust.** The claim that matters is that
+the *learning loop* works on more than one kind of student project, and that one is
+demonstrable in a single command — `npm run walk`, against `fixtures/safety-gear/`: a vision
+project with three owned components instead of four, a boundary component the student draws
+but does not own, and a different class of bug. That the engine underneath *also* runs cloud
+cost anomalies is a systems footnote, evidenced by a passing test suite and nothing more.
+See `MENTOR-CONCEPT.md` §6, which ranks these claims by how well each is actually evidenced.
+
+Deleting the four would buy cleaner optics and cost real, working, tested code. Keeping them
+unregistered and saying plainly why is the honest trade.
 
 ### How the pieces actually connect
 
@@ -279,7 +308,7 @@ working human-approval UI.
 | Deployed to NitroCloud | ⬜ **next** — `DEPLOY.md` path A, ~30 min |
 | Can a student really draw this in Lumina? | ✅ **yes** — real `component` node, verified in-browser end to end |
 | Layer 2 · the lesson panels | ⬜ roadmap — the one stage of the loop still missing |
-| Evidence study (n=5) | ⬜ not run — Gap 7 |
+| Evidence study (n=5) | ⬜ **not run** — protocol ready in [`STUDY.md`](STUDY.md), Gap 7 |
 | Product name | ❓ still `[[PRODUCT NAME]]` — Gap 8 |
 
 **Next action: deploy it.** The code exists and works; it just isn't live. Follow
