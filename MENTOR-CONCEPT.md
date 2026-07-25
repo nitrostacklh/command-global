@@ -97,8 +97,37 @@ This layer is doing two jobs at once:
    record of **what the student intended to build.** That artifact is what makes Layer 4
    possible, and it is the thing no other tool in this space has.
 
-`[[FILL: what Lumina currently exports — JSON? node/edge shape? This determines the
-integration work in §8.]]`
+**ANSWERED (2026-07-25).** Lumina previously exported only *runnable* formats — n8n and
+Node-RED JSON — and kept the raw graph in `localStorage`, never on disk. It now also
+exports a **plan artifact**, `lumina.plan/v1`, built for this layer:
+
+```json
+{
+  "schema": "lumina.plan/v1",
+  "name":   "Pricing service",
+  "nodes":  [{ "id", "type", "label", "position", "data" }],
+  "edges":  [{ "id", "source", "target", "sourceHandle", "targetHandle" }],
+  "order":  ["n-validate", "n-discount", "n-tax", "n-total"],
+  "entry":  ["n-validate"], "terminal": ["n-total"],
+  "cyclic": false, "warnings": []
+}
+```
+
+`order` is the field that matters: a **topological sort** — the sequence the student
+intended. Layer 4's whole claim ("you designed tax last, you built it second") is a
+comparison against it, so it is part of the artifact rather than re-derived downstream.
+Ties break on canvas position, so two exports of an unchanged canvas are byte-identical
+and MENTOR cannot report drift that isn't there.
+
+Plain JSON, no Lumina types — MENTOR (TypeScript) and Lumina (Python + React) agree on
+this one file shape and nothing else. **Integration cost for §8: small.** Built and tested
+(`lumina/export_plan.py`, 15 tests); the student produces one with the **Plan** button.
+
+> ⚠️ **But see `GAPS.md` Gap 2.** Lumina's 34 node types are all *vision/audio pipeline*
+> primitives — camera, detection, whisper, pose. There is **no generic software-component
+> node**, so a student cannot really draw `validate → discount → tax → total` today; the
+> fixture uses `script` nodes as stand-ins. That is a ~2-hour fix, *or* a reason to move
+> the demo project to an AI pipeline Lumina already expresses. It needs a decision.
 
 ### Layer 4 — MENTOR: debugging as the lesson
 
@@ -228,11 +257,17 @@ This document describes the full vision. The submission is a subset, deliberatel
 
 ### Ships for the hackathon
 - [ ] MENTOR as the sixth commander — one `DomainAdapter`, one module (`ARCHITECTURE.md` §14)
-- [ ] **One** project, executed completely: `[[the pricing/tax-discount fixture]]`
+      ⚠️ costs more than §14 implies: the engine has no successful path that skips
+      `deploy()`, and not deploying is the point. `GAPS.md` Gap 3b, with two options.
+- [x] **One** project, executed completely: the pricing / tax-discount fixture →
+      `fixtures/pricing/`. Plan, build, history and failing test all present; the
+      §3 line numbers (40 and 12) are now literally true of it.
 - [ ] The causal timeline widget — plan row, build row, labelled drift arrow, confidence badge
-- [ ] Lumina graph as the plan input `[[integration cost TBD — see §3 Layer 3]]`
+      *(only `mission-trace` exists today — `GAPS.md` Gap 4)*
+- [x] Lumina graph as the plan input — **integration cost was small**, and it's done:
+      `lumina.plan/v1` + the **Plan** button. See §3 Layer 3.
 - [ ] The refusal: MENTOR names the origin and declines to write the fix
-- [ ] ≤3-min demo video
+- [ ] ≤3-min demo video *(script drafted — `DEPLOY.md` §6a)*
 
 ### Roadmap — say it on the last slide, don't build it
 - Comic-styled panels for Layer 2 *(build only if the deploy is already green)*
@@ -258,12 +293,24 @@ This document describes the full vision. The submission is a subset, deliberatel
 
 ## 10. Open questions
 
-- `[[Layer 1: role-based or project-based? This changes §3.]]`
-- `[[Lumina export format — what does the graph look like on disk?]]`
+- `[[Layer 1: role-based or project-based? This changes §3.]]` — *`fixtures/pricing/README.md`
+  is written **role-based**, per §3's stated assumption. If that's wrong, that file changes.*
+- ~~`[[Lumina export format — what does the graph look like on disk?]]`~~ → **answered in
+  §3 Layer 3**: `lumina.plan/v1`, and it did not exist before — Lumina only wrote compiled
+  n8n / Node-RED output. Now built and tested.
 - `[[Can MENTOR trace causality on a multi-file project, or is the demo scoped to one file
   with a git history? Recommendation: one file. A tool that confidently points at the wrong
-  line is worse than useless in education.]]`
-- `[[Who authors project #2, and when?]]`
+  line is worse than useless in education.]]` — *the fixture takes the recommendation: one
+  file (`build/pricing.js`). Its history is **authored**, not derived from git — `GAPS.md`
+  Gap 5 argues for shipping it that way and putting derivation on the roadmap.*
+- `[[Who authors project #2, and when?]]` — *out of submission scope (§8 ships one project);
+  answer it before promising a curriculum on the roadmap slide.*
+
+**New question this reorganization raised:** how does a student's `plan.lumina.json` reach
+MENTOR when MENTOR runs on NitroCloud and the file is on their laptop? Same constraint
+`ARCHITECTURE.md` §15 already documents for the bundled broken service. It decides
+`explain_drift`'s signature, so settle it before writing `mentor.module.ts` —
+`GAPS.md` Gap 6 (recommendation: take the plan as a tool argument).
 
 ---
 
