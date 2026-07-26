@@ -3,34 +3,73 @@
 @tailwind utilities;
 
 :root {
-  --sf-bg: #030305;
-  --sf-surface: #0a0a0f;
-  --sf-surface-bright: #13131a;
-  --background: #030305;
+  /* Light Mode (Default) */
+  --sf-bg: #f8fafc;
+  --sf-surface: rgba(15, 23, 42, 0.02);
+  --sf-surface-bright: rgba(15, 23, 42, 0.05);
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  
+  --primary: #8B5CF6; /* High contrast primary for light mode */
+  --primary-glow: rgba(139, 92, 246, 0.15);
+  --secondary: #0D9488;
+  
+  --surface: rgba(15, 23, 42, 0.02);
+  --surface-hover: rgba(15, 23, 42, 0.05);
+  --border: rgba(15, 23, 42, 0.08);
+  --border-bright: rgba(15, 23, 42, 0.15);
+  
+  --accent-blue: #0284C7;
+  --accent-green: #16A34A;
+  --accent-yellow: #D97706;
+  --accent-red: #DC2626;
+
+  --font-sans: 'Space Grotesk', 'Outfit', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --card-bg: rgba(255, 255, 255, 0.85);
+
+  /* High contrast slates for light mode text */
+  --slate-300: #475569; /* slate-600 */
+  --slate-400: #334155; /* slate-700 */
+  --slate-500: #1e293b; /* slate-800 */
+  --slate-600: #0f172a; /* slate-900 */
+}
+
+.dark {
+  /* Dark Mode */
+  --sf-bg: #020617;
+  --sf-surface: rgba(255, 255, 255, 0.03);
+  --sf-surface-bright: rgba(255, 255, 255, 0.08);
+  --background: #020617;
   --foreground: #f8fafc;
   
-  --primary: #4285F4;
-  --primary-glow: rgba(66, 133, 244, 0.15);
-  --secondary: #A855F7;
+  --primary: #6EE7FF;
+  --primary-glow: rgba(110, 231, 255, 0.15);
+  --secondary: #8B5CF6;
   
-  --surface: #0a0a0f;
-  --surface-hover: #13131a;
-  --border: #1a1a25;
-  --border-bright: #2d2d3f;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-hover: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.05);
+  --border-bright: rgba(255, 255, 255, 0.12);
   
-  --accent-blue: #4285F4;
-  --accent-green: #34A853;
-  --accent-yellow: #FBBC05;
-  --accent-red: #EA4335;
+  --accent-blue: #38BDF8;
+  --accent-green: #22C55E;
+  --accent-yellow: #F59E0B;
+  --accent-red: #EF4444;
+  --card-bg: rgba(2, 6, 23, 0.7);
 
-  --font-sans: 'Outfit', 'Roboto', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  /* Dark mode slates */
+  --slate-300: #cbd5e1; /* slate-300 */
+  --slate-400: #94a3b8; /* slate-400 */
+  --slate-500: #64748b; /* slate-500 */
+  --slate-600: #475569; /* slate-600 */
 }
 
 body {
-  @apply bg-[#030305] text-[#f8fafc] selection:bg-[#4285F4] selection:text-white;
-  font-family: 'Outfit', 'Roboto', system-ui, sans-serif;
-  overflow: hidden;
+  @apply text-[var(--foreground)] selection:bg-[#6EE7FF] selection:text-black transition-colors duration-300;
+  background-color: var(--background);
+  font-family: 'Space Grotesk', 'Outfit', 'Inter', system-ui, sans-serif;
+  overflow-y: auto; /* Allow natural scrolling */
   margin: 0;
   padding: 0;
 }
@@ -235,6 +274,7 @@ body {
   transform: rotateY(180deg);
 }
 
+/* Animated Gradient Border Card */
 .gradient-border-card {
   position: relative;
   background: rgba(2, 6, 23, 0.7);
@@ -271,6 +311,26 @@ body {
   opacity: 0.015;
 }
 
+/* SVG circle and line draws for the logo */
+.draw-logo-circle {
+  stroke-dasharray: 283;
+  stroke-dashoffset: 283;
+  animation: drawStroke 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.draw-logo-tangent {
+  stroke-dasharray: 150;
+  stroke-dashoffset: 150;
+  animation: drawStroke 1.2s cubic-bezier(0.4, 0, 0.2, 1) 1.2s forwards;
+}
+
+@keyframes drawStroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Typewriter animation cursor */
 .typewriter-cursor::after {
   content: "|";
   animation: blink 0.8s infinite;

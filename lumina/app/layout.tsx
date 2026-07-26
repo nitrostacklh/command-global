@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LUMINA | Privacy-First On-Device AI Pipeline Orchestration",
-  description: "Build multimodal workflows on a local visual canvas.",
+  title: "Tangent | Find Where Your Thinking Changed",
+  description: "Futuristic intelligent learning platform for tracing software architectural implementation drift.",
 };
 
 export default function RootLayout({
@@ -12,14 +12,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <link
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased bg-[#030305] text-white min-h-screen font-sans">{children}</body>
+      <body className="antialiased bg-[#020617] text-white min-h-screen font-sans overflow-hidden">{children}</body>
     </html>
   );
 }

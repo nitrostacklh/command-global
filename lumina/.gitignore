@@ -28,6 +28,8 @@ Thumbs.db
 
 CLAUDE.md
 .claude/
-lumina.db
+# The glob matters: plain `lumina.db` leaves SQLite's WAL sidecars
+# (lumina.db-shm, lumina.db-wal) tracked, and they get committed by accident.
+lumina.db*
 s/
 m/

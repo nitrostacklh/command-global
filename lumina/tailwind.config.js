@@ -17,14 +17,20 @@ module.exports = {
     extend: {
       colors: {
         /**
-         * The imported design's palette, renamed from `tangent-*`.
+         * Two palettes, kept side by side on purpose.
          *
-         * Deliberately additive. The source PR also redefined Tailwind's own
-         * `slate-300..600` as theme-flipping CSS variables, which would have
-         * silently restyled every existing surface — the canvas, the library and
-         * all five MENTOR stage panels lean on `text-slate-*` heavily. Leaving
-         * stock slate alone means the imported screens get their tokens and
-         * nothing already built moves a pixel.
+         * `tangent-*` is what the redesigned dashboard, library and tab screens
+         * are written against (~294 usages across 15 files). `mentor-*` is the
+         * same design re-tokenised for the screens under /mentor. Dropping
+         * either one does not fail the build — Tailwind emits nothing for an
+         * unknown utility — it just silently unstyles whichever set of screens
+         * lost its tokens. So both stay until one side is migrated to the other.
+         *
+         * Stock `slate-300..600` is deliberately NOT overridden. Redefining it
+         * as theme-flipping CSS variables would restyle every existing surface:
+         * the canvas, the library and all five MENTOR stage panels lean on
+         * `text-slate-*` heavily (Canvas.tsx alone has 42 usages), and none of
+         * those files were part of either redesign.
          */
         mentor: {
           primary: "var(--mentor-primary)",
@@ -37,6 +43,18 @@ module.exports = {
           borderBright: "var(--mentor-border-bright)",
           error: "var(--mentor-error)",
           success: "var(--mentor-success)",
+        },
+        tangent: {
+          primary: "var(--primary)",
+          secondary: "var(--secondary)",
+          accent: "var(--accent-blue)",
+          bg: "var(--background)",
+          card: "var(--sf-surface)",
+          text: "var(--foreground)",
+          border: "var(--border)",
+          borderBright: "var(--border-bright)",
+          error: "var(--accent-red)",
+          success: "var(--accent-green)",
         },
         google: {
           blue: "#4285F4",
