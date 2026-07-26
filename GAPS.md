@@ -9,9 +9,9 @@
 
 ## The one-paragraph summary
 
-**MENTOR is built** (Gap 3) **and so are both its widgets** (Gaps 4 and 13). **177 tests green
-across three apps — mcp-roster 46 · sentinel 72 · mcp-profile 59**, every number watched
-printing on 2026-07-26. Verified end-to-end over real MCP: `explain_drift` returns the exact
+**MENTOR is built** (Gap 3) **and so are both its widgets** (Gaps 4 and 13). **182 tests green
+across three apps — mcp-roster 46 · sentinel 72 · mcp-profile 64**, every number watched
+printing on 2026-07-26 (Node 22.19). On Node 20 it is **177**: see the note below. Verified end-to-end over real MCP: `explain_drift` returns the exact
 claim the concept doc promises — origin `pricing.js:12`, error surfaced at
 `pricing.test.js:40`, confidence 0.91 computed rather than hardcoded — and the causal-timeline
 widget renders it with the fix withheld and a follow-up question wired to chat. The engine
@@ -66,6 +66,7 @@ and 17). The deploy is done, the product is named, and Layer 2 has both a tool a
 | 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 → 3, now 23 across three services, all one story | done |
 | 15 | ~~Docs asserted counts the code owns, and drifted~~ | ✅ **fixed** — `npm run check:docs`, now fleet-aware | done |
 | 19 | ~~Student work did not survive the conversation~~ | ✅ **fixed** — REGISTRAR, now MCP-3. *(Was a second Gap 16; renumbered.)* | done |
+| 20 | ~~`fixture:check` failed on every Windows clone~~ | ✅ **fixed** — CRLF/LF false positive; `npm run verify` is green on Windows for the first time | done |
 
 *Reordered 2026-07-26 (seventh time): after the deploy landed, after the 58 tests were ported,
 after Gap 13's widget shipped, and after porting the tests proved Gap 14 had already closed
@@ -89,7 +90,7 @@ into the two new apps and left the imports behind. Consequences, all verified:
 | `sentinel` build | ❌ 5 × TS2307 — `npx tsc` fails, so **0 tests ran** | ✅ compiles, **72/72** |
 | `sentinel` tool surface | declared a `flashcard` tool whose code had moved to MCP-3 | ✅ removed |
 | `mcp-roster` tests | **0** | ✅ **46/46** |
-| `mcp-profile` tests | **0** — on a service serving live public traffic | ✅ **59/59** |
+| `mcp-profile` tests | **0** — on a service serving live public traffic | ✅ **64/64** (59 on Node 20) |
 | `npm run fixture:check` | ❌ red | ✅ green, and its sync check actually runs — see below |
 
 **The 58 tests are ported.** `learn.test.ts` (42) and `registrar.test.ts` (16) were recovered
@@ -196,7 +197,7 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 - **`sentinel/` calls no LLM at all.** Verified: zero LLM references in its own source, zero
   outbound HTTP, four dependencies (`@nitrostack/core`, `@modelcontextprotocol/ext-apps`,
   `dotenv`, `zod`), and every test passes with no key and no network — 128/128 when this was
-  written, **177 across the three apps today**. In MCP the *client* model
+  written, **182 across the three apps today** (177 on Node 20). In MCP the *client* model
   is the agent (`ARCHITECTURE.md` §2, Idea 2), and MENTOR needs one least of all six
   commanders — drift detection is an ordering comparison, the confidence is a formula, the
   refusal is hardcoded. **There is nothing to generate.**
@@ -259,7 +260,7 @@ what a wired canvas produces.
 **MENTOR's finding did not change** — origin still `tax @ build/pricing.js:12`,
 confidence still **0.91**, failure still `pricing.test.js:40`. That was the prediction
 when this gap was opened ("switching to A requires no change to the plan artifact"), and
-it held: the whole suite passed untouched (128/128 at the time; **177** today), and
+it held: the whole suite passed untouched (128/128 at the time; **182** today), and
 `fixture:check` confirmed the embedded copies still matched disk.
 
 <details>
@@ -536,7 +537,7 @@ measuring one third of the project while still reporting green:
 |---|---|---|
 | Gate | Was | Now |
 |---|---|---|
-| `npm test` (root) | `npm --prefix sentinel test` — 110 of 177 tests never ran | runs **all three apps**: 46 · 72 · 59 |
+| `npm test` (root) | `npm --prefix sentinel test` — 135 of 182 tests never ran | runs **all three apps**: 46 · 72 · 64 |
 | `npm run check:docs` | started `sentinel/dist` and read *its* `tools/list`, so every count was compared against MCP-2's alone | starts **all three**, and compares against a *set* — each app's own surface plus the fleet total |
 | `npm run fixture:check` | called the orphaned `embed_learn_fixtures.mjs` | calls `embed_fixtures.mjs --check`, which regenerates all five embedded modules and fails on a byte |
 | `npm run sync:shared` | named in twenty generated file headers and **not an npm script** — and unpassable on Windows, since the banner is built with `\n` while git checks the copies out with `\r\n`, so all 20 read as DRIFTED | wired, newline-insensitive, and inside `npm run verify` |
@@ -660,7 +661,7 @@ fifteen platform tool names finds none of them.
 
 | Check | Result |
 |---|---|
-| `npm test` (root — all three) | ✅ `mcp-roster` **46/46** · `sentinel` **72/72** · `mcp-profile` **59/59** — **177 total**, re-observed 2026-07-26 (was 128/128 on one app pre-split) |
+| `npm test` (root — all three) | ✅ `mcp-roster` **46/46** · `sentinel` **72/72** · `mcp-profile` **64/64** — **182 total** on Node 22.19; **177** on Node 20, where five SQLite cases skip. Re-observed 2026-07-26 (was 128/128 on one app pre-split) |
 | `explain_drift` over real MCP (`node dist/index.js`, stdio) | ✅ origin `tax @ build/pricing.js:12`, planned 3rd / built 2nd |
 | … its confidence | ✅ **0.91**, computed from 5 signals; engine gate **0.964 autonomous** |
 | … its refusal | ✅ `fix_withheld: true` + a follow-up question, not a patch |
@@ -946,6 +947,46 @@ places where docs and code could previously have drifted apart silently.
 
 ---
 
+## Gap 20 — ~~`fixture:check` failed on every Windows clone~~ ✅ **FIXED** (2026-07-26)
+
+**Found by running `npm run verify` on Windows rather than reading that it was green.** It
+exited 1, and had been doing so on every Windows machine since the generator was written.
+
+`embed_fixtures.mjs --check` compared the file on disk against freshly generated content with
+a raw `===`. Git checks these files out as **CRLF** wherever `core.autocrlf` is on — the
+default on Windows — while the generator always writes **LF**. So all five generated modules
+reported `STALE` with **zero content drift**, which is provable in three steps:
+
+| Step | Observed |
+|---|---|
+| `--check` on a clean tree | 5 × `STALE` |
+| run the generator, then `git diff` | **empty** — the content was already identical |
+| `git checkout -- .`, `--check` again | 5 × `STALE` again — autocrlf put the CRLFs back |
+
+The file that reported stale had **490 CR characters and not one byte of different content.**
+
+**Why this mattered more than a cosmetic annoyance.** This is the guard that stops the embedded
+copies drifting from `fixtures/` — the thing that would let a deployed service serve a brief
+the repo no longer contains. A guard that fails on every Windows clone for a reason unrelated
+to what it checks is a guard the team learns to skip, and then it protects nothing. That is
+`GAPS.md` Gap 15's lesson arriving from the opposite direction: Gap 15 was a guard too *broad*,
+this was a guard too *literal*.
+
+**The fix compares content and leaves the convention alone** — one `sameContent()` helper that
+normalises `\r\n` before the compare. Deliberately *not* a `.gitattributes` `text eol=lf` rule:
+that would renormalise the working tree of every clone, which is a large and risky diff to take
+right before a demo, to fix what is really a comparison bug.
+
+**Verified both ways, because asserting a guard passes on a clean tree proves nothing:**
+
+- `npm run fixture:check` → exit **0**, all five `ok`
+- inject a **one-character** content change into `fixtures.roster.ts` → `STALE`, exit 1
+- `npm run verify` end to end → **exit 0**, `ALL CHECKS PASSED`
+
+That last line is the point: **`npm run verify` had never been green on Windows before this.**
+
+---
+
 ## Gap 19 — Student work did not survive the conversation ✅ **FIXED** (2026-07-25)
 
 > **Renumbered 2026-07-26. This was originally *also* Gap 16** — two different gaps carried
@@ -1023,5 +1064,7 @@ safe would be worse still.
 > locally, so the SQLite branch really executes rather than skipping). The store API changed
 > shape in the move — `ProgressStore` keyed `(student, project, role)` became `ProfileStore`
 > keyed `student`, holding one whole `mentor.profile/v1` — so these are ports, not restorations.
-> `mcp-profile` is **59/59**.
+> `mcp-profile` is **64/64** on Node 22.5+, **59/59** on Node 20 — the SQLite half of the store
+> contract skips where `node:sqlite` is absent rather than failing. Both are green; the total is
+> 182 or 177 accordingly.
 
