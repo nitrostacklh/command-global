@@ -38,6 +38,7 @@ import {
   ToolDecorator as Tool,
   PromptDecorator as Prompt,
   Module,
+  Widget,
   ExecutionContext,
   z,
 } from '@nitrostack/core';
@@ -418,6 +419,11 @@ export class RosterTools {
       handle: handleArg,
     }),
   })
+  // Renders the panels rather than the JSON — `MENTOR-CONCEPT.md` §3 asks for panels,
+  // not prose. The widget cannot leak the reveal, because the gate below never sends
+  // it: the choice buttons call this tool again and the second half arrives as a fresh
+  // result. See `src/widgets/app/lesson-panels/page.tsx`.
+  @Widget('lesson-panels')
   async openLesson(
     input: { project: string; role: string; chose?: string; handle?: string },
     ctx: ExecutionContext,

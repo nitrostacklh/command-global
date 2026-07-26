@@ -1,0 +1,25 @@
+{
+  "name": "mentor-roster-widgets",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "MCP-1's widget app. `nitrostack-cli build` bundles every app/**/page.tsx with esbuild; Next.js is here for `npm run dev` only.",
+  "scripts": {
+    "dev": "next dev -p 3002 --port 3002",
+    "build": "next build",
+    "start": "next start -p 3002"
+  },
+  "dependencies": {
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@nitrostack/widgets": "^1.0.8",
+    "@modelcontextprotocol/ext-apps": ">=0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  }
+}
