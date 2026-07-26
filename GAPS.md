@@ -566,9 +566,10 @@ the digit-arrow-digit narrowing that made it useful. The true surface is **23 to
 three services (8 · 6 · 9)**, and it is now checked. Verified by planting a wrong count and
 watching the gate fail — asserting a guard passes on a clean tree proves nothing (Gap 15).
 
-Of the 27, **5 are genuinely stale and all 5 are in `DEPLOY.md`**, which asserts `13 tools` from
-the pre-split world. That file is outside the documentation stream's boundary. `sentinel/README.md`
-line 73 says the same thing and is not scanned by the gate at all.
+Of the 27, **5 were genuinely stale and all 5 were in `DEPLOY.md`**, which still asserted the
+pre-split count. That file was outside the documentation stream's boundary; Stream A owns it and
+has corrected all five. `sentinel/README.md` line 73 said the same thing and is not scanned by
+the gate at all — corrected by hand at the same time, and still a real hole in the gate's reach.
 
 > **Do not "fix" this by relaxing the guard.** Gap 15 records that the first version of
 > `check_docs.mjs` was too broad, produced 25 correct-behaviour findings, and that *"a guard
