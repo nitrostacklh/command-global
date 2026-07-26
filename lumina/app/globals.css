@@ -194,3 +194,123 @@ body {
   color: #34A853;
   text-shadow: 0 0 10px rgba(52, 168, 83, 0.3);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Imported from the interface redesign (PR #4), for the sign-in and home
+   screens under /mentor.
+
+   Appended rather than merged: the source file also switched the app to a
+   light-mode default and re-pointed Tailwind's slate scale at theme variables.
+   That would have restyled the canvas, the library and every MENTOR stage panel
+   at once, so what comes across is the part the imported screens actually need —
+   their palette and their animations. One theme, dark, matching the rest of the
+   app (`<html className="dark">`), which is why these sit on :root.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --mentor-primary: #6EE7FF;
+  --mentor-secondary: #8B5CF6;
+  --mentor-accent: #38BDF8;
+  --mentor-bg: #020617;
+  --mentor-card: rgba(255, 255, 255, 0.03);
+  --mentor-text: #f8fafc;
+  --mentor-border: rgba(255, 255, 255, 0.06);
+  --mentor-border-bright: rgba(255, 255, 255, 0.12);
+  --mentor-error: #EF4444;
+  --mentor-success: #22C55E;
+}
+
+/* Depth helpers for the flip cards on the home screen. */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.gradient-border-card {
+  position: relative;
+  background: rgba(2, 6, 23, 0.7);
+  border-radius: 1rem;
+  z-index: 1;
+}
+
+.gradient-border-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, #6EE7FF, #8B5CF6, transparent, #38BDF8);
+  background-size: 300% 300%;
+  border-radius: 1rem;
+  z-index: -1;
+  animation: gradientShift 6s ease infinite;
+  opacity: 0.15;
+  transition: opacity 0.3s ease;
+}
+
+.gradient-border-card:hover::before {
+  opacity: 0.45;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* The `%3E` in the original data URI had been mangled to `%3联`, which makes the
+   whole SVG unparseable and the overlay silently invisible. Fixed here. */
+.noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.015;
+}
+
+.typewriter-cursor::after {
+  content: "|";
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.shadow-glow-cyan {
+  box-shadow: 0 0 15px rgba(110, 231, 255, 0.25);
+}
+
+.shadow-glow-purple {
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
+}
+
+.shadow-glow-red {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Used by the imported screens' scroll areas and the 3D scene's fallback. */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.loader {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(110, 231, 255, 0.2);
+  border-top-color: #6EE7FF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
