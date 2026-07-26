@@ -22,6 +22,7 @@ interface WorkspaceTabProps {
 }
 
 export default function WorkspaceTab({ onNavigateToTab, onSelectDriftNode }: WorkspaceTabProps) {
+  const [driftActive, setDriftActive] = useState(true);
   const [selectedNode, setSelectedNode] = useState<string | null>("Database Router");
   const [confidence, setConfidence] = useState(64);
   const [chatMessages, setChatMessages] = useState([
@@ -42,40 +43,64 @@ export default function WorkspaceTab({ onNavigateToTab, onSelectDriftNode }: Wor
     { name: "config.yaml", type: "file" },
   ];
 
-  const nodes = [
-    { id: "n1", label: "User Client", type: "input", x: 40, y: 30, status: "aligned" },
-    { id: "n2", label: "Auth Gateway", type: "logic", x: 140, y: 30, status: "aligned" },
-    { id: "n3", label: "Database Router", type: "db", x: 260, y: 70, status: "drift" },
-    { id: "n4", label: "User Store", type: "storage", x: 140, y: 110, status: "aligned" },
-  ];
-
-  const handleAction = (actionType: string) => {
+  // Helper to query backend python server LLM API
+  const queryLLM = async (promptText: string, fallbackText: string, fallbackCode = "") => {
     setIsTyping(true);
-    let reply = "";
-    let codeSnippet = "";
-
-    if (actionType === "explain") {
-      reply = "Explain: The 'Database Router' accepts arbitrary HTTP requests instead of securing input through JWT middleware in 'Auth Gateway'. This represents an operational drift.";
-      codeSnippet = "export async function handleQuery(req) {\n  // Missing jwtVerify(req.headers.authorization)\n  const client = await pool.connect(); \n}";
-    } else if (actionType === "timeline") {
-      onNavigateToTab("timeline");
-      setIsTyping(false);
-      return;
-    } else if (actionType === "why") {
-      reply = "Why: Students often bypass gateways during local testing to speed up debugging, but leaving direct socket bindings in production configurations deviates from the design blueprint.";
-    } else if (actionType === "flashcard") {
-      onNavigateToTab("learning");
-      setIsTyping(false);
-      return;
-    }
-
-    setTimeout(() => {
+    try {
+      const response = await fetch("http://localhost:8000/api/llm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          node_id: selectedNode || "Database Router",
+          prompt: promptText,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setChatMessages(prev => [
+          ...prev,
+          {
+            sender: "assistant",
+            text: data.text || fallbackText,
+            code: data.text.includes("```") ? "" : (fallbackCode || "/* Telemetry Analysis Verified */"),
+          },
+        ]);
+      } else {
+        throw new Error("API response error");
+      }
+    } catch (err) {
+      // Graceful offline fallback
       setChatMessages(prev => [
         ...prev,
-        { sender: "assistant", text: reply, code: codeSnippet },
+        {
+          sender: "assistant",
+          text: fallbackText,
+          code: fallbackCode,
+        },
       ]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
+  };
+
+  const handleAction = (actionType: string) => {
+    if (actionType === "explain") {
+      queryLLM(
+        "Explain the structural drift anomaly for Node: Database Router where the Auth Gateway was bypassed.",
+        "Explain: The 'Database Router' accepts arbitrary HTTP requests instead of securing input through JWT middleware in 'Auth Gateway'. This represents an operational drift.",
+        "export async function handleQuery(req) {\n  // Missing jwtVerify(req.headers.authorization)\n  const client = await pool.connect(); \n}"
+      );
+    } else if (actionType === "timeline") {
+      onNavigateToTab("timeline");
+    } else if (actionType === "why") {
+      queryLLM(
+        "Why do developers bypass Auth Gateway middleware during local tests, and what is the security risk of socket bindings in production?",
+        "Why: Students often bypass gateways during local testing to speed up debugging, but leaving direct socket bindings in production configurations deviates from the design blueprint.",
+        "/* Security Spec Audit: Direct connections bypass JWT structural middleware filters */"
+      );
+    } else if (actionType === "flashcard") {
+      onNavigateToTab("learning");
+    }
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -85,23 +110,44 @@ export default function WorkspaceTab({ onNavigateToTab, onSelectDriftNode }: Wor
     const userText = chatInput;
     setChatMessages(prev => [...prev, { sender: "user", text: userText, code: "" }]);
     setChatInput("");
-    setIsTyping(true);
 
-    setTimeout(() => {
-      setChatMessages(prev => [
-        ...prev,
-        {
-          sender: "assistant",
-          text: "Based on your layout, you can reconcile this anomaly by adding an incoming gateway signature check before launching queries. Try examining: `db_router.ts#L42-L58`.",
-          code: "if (req.headers['x-gateway-signature'] !== process.env.GATEWAY_SECRET) {\n  throw new Error('Access denied');\n}",
-        },
-      ]);
-      setIsTyping(false);
-    }, 1000);
+    queryLLM(
+      userText,
+      `Based on local specifications, you can resolve the drift in ${selectedNode || "Database Router"} by adding a signature verification check. Try reviewing: db_router.ts#L42-L58.`,
+      "if (req.headers['x-gateway-signature'] !== process.env.GATEWAY_SECRET) {\n  throw new Error('Access denied');\n}"
+    );
+  };
+
+  // Reset Canvas layout to healthy blueprint config
+  const handleResetView = () => {
+    setDriftActive(false);
+    setSelectedNode(null);
+    setConfidence(100);
+    setChatMessages([
+      {
+        sender: "assistant",
+        text: "Workspace view reset. All node configurations restored to baseline specs. Structural integrity: 100%. Awaiting new VCS delta traces...",
+        code: "",
+      },
+    ]);
+  };
+
+  // Re-inject drift anomalies to canvas layout
+  const handleTraceAnomaly = () => {
+    setDriftActive(true);
+    setSelectedNode("Database Router");
+    setConfidence(64);
+    setChatMessages([
+      {
+        sender: "assistant",
+        text: "I've analyzed your actual implementation. There is a structural difference: your DB Router connects directly to public feeds, bypassing the gateway check.",
+        code: "/* Expected Path: User -> Gateway -> DB */\n/* Actual Path: User -> DB (Direct Socket) */",
+      },
+    ]);
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden h-full animate-fade-in">
+    <div className="flex-1 flex overflow-hidden h-full animate-fade-in select-none">
       
       {/* 1. Left Explorer Panel */}
       <div className="w-60 border-r border-tangent-border bg-white/[0.01] flex flex-col justify-between flex-shrink-0">
@@ -116,16 +162,16 @@ export default function WorkspaceTab({ onNavigateToTab, onSelectDriftNode }: Wor
               <div
                 key={i}
                 className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
-                  file.name === "db_router.ts"
+                  file.name === "db_router.ts" && driftActive
                     ? "bg-tangent-error/5 text-tangent-error border border-tangent-error/10"
                     : "text-slate-400 hover:text-tangent-text hover:bg-white/[0.02]"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <FileCode2 size={13} className={file.warning ? "text-tangent-error" : "text-slate-500"} />
+                  <FileCode2 size={13} className={file.warning && driftActive ? "text-tangent-error" : "text-slate-500"} />
                   <span className="truncate">{file.name}</span>
                 </div>
-                {file.warning && (
+                {file.warning && driftActive && (
                   <span className="w-1.5 h-1.5 rounded-full bg-tangent-error shadow-glow-red animate-pulse" />
                 )}
               </div>
@@ -160,19 +206,22 @@ export default function WorkspaceTab({ onNavigateToTab, onSelectDriftNode }: Wor
       {/* 2. Center Node Canvas Area */}
       <div className="flex-1 bg-[#020617] relative flex flex-col justify-between overflow-hidden">
         {/* Top Control Bar */}
-        <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-tangent-border bg-white/[0.01] backdrop-blur-md pointer-events-auto shadow-2xl">
+        <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-auto">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-tangent-border bg-white/[0.01] backdrop-blur-md shadow-2xl">
             <Layers size={12} className="text-tangent-primary animate-pulse" />
             <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Workspace Canvas</span>
           </div>
 
-          <div className="flex items-center gap-2 pointer-events-auto">
-            <button className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-tangent-border bg-white/[0.01] hover:bg-white/[0.04] text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-tangent-text transition-all cursor-pointer">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleResetView}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-tangent-border bg-white/[0.01] hover:bg-white/[0.04] text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-tangent-text transition-all cursor-pointer active:scale-95"
+            >
               <RotateCcw size={10} />
               Reset View
             </button>
             <button
-              onClick={() => onNavigateToTab("timeline")}
+              onClick={handleTraceAnomaly}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-tangent-primary hover:bg-tangent-accent text-black font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-glow-cyan"
             >
               <Zap size={10} fill="black" />
@@ -199,11 +248,14 @@ export default function WorkspaceTab({ onNavigateToTab, onSelectDriftNode }: Wor
               {/* User Client to Auth Gateway */}
               <path d="M 120 180 Q 220 180, 220 180" stroke="rgba(110, 231, 255, 0.4)" strokeWidth="2" strokeDasharray="5 5" fill="none" />
               {/* Auth Gateway to Database Router */}
-              <path d="M 320 180 Q 400 180, 440 220" stroke="rgba(239, 68, 68, 0.4)" strokeWidth="2" fill="none" />
+              <path d="M 320 180 Q 400 180, 440 220" stroke="rgba(110, 231, 255, 0.3)" strokeWidth="2" fill="none" />
               {/* Auth Gateway to User Store */}
               <path d="M 320 180 Q 320 260, 220 260" stroke="rgba(110, 231, 255, 0.3)" strokeWidth="2" fill="none" />
+              
               {/* Direct socket shortcut (DRIFT) User client directly to Database Router */}
-              <path d="M 120 180 Q 280 280, 440 220" stroke="rgba(239, 68, 68, 0.8)" strokeWidth="2.5" strokeDasharray="8 4" className="animate-flow" fill="none" style={{ filter: "drop-shadow(0 0 6px #EF4444)" }} />
+              {driftActive && (
+                <path d="M 120 180 Q 280 280, 440 220" stroke="rgba(239, 68, 68, 0.8)" strokeWidth="2.5" strokeDasharray="8 4" className="animate-flow" fill="none" style={{ filter: "drop-shadow(0 0 6px #EF4444)" }} />
+              )}
             </g>
           </svg>
 
@@ -230,25 +282,31 @@ export default function WorkspaceTab({ onNavigateToTab, onSelectDriftNode }: Wor
               <p className="text-[9px] text-slate-500 font-medium">JSON Web Token Checker</p>
             </div>
 
-            {/* Node 3: Database Router (DRIFTING) */}
+            {/* Node 3: Database Router */}
             <div
               onClick={() => setSelectedNode("Database Router")}
               className={`absolute left-[62%] top-[45%] p-4 rounded-2xl border w-48 space-y-2 cursor-pointer transition-all duration-300 ${
-                selectedNode === "Database Router"
-                  ? "border-tangent-error bg-tangent-error/5 shadow-glow-red scale-105"
-                  : "border-tangent-error/40 bg-white/[0.01] hover:border-tangent-error"
+                driftActive
+                  ? selectedNode === "Database Router"
+                    ? "border-tangent-error bg-tangent-error/5 shadow-glow-red scale-105"
+                    : "border-tangent-error/40 bg-white/[0.01] hover:border-tangent-error"
+                  : "border-tangent-border bg-white/[0.01] hover:border-tangent-borderBright"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[8px] font-black text-tangent-error uppercase tracking-widest">Drift Detected</span>
-                <span className="w-2 h-2 rounded-full bg-tangent-error shadow-glow-red animate-pulse" />
+                <span className={`text-[8px] font-black uppercase tracking-widest ${driftActive ? "text-tangent-error" : "text-slate-500"}`}>
+                  {driftActive ? "Drift Detected" : "Storage"}
+                </span>
+                <span className={`w-2 h-2 rounded-full ${driftActive ? "bg-tangent-error shadow-glow-red animate-pulse" : "bg-tangent-success"}`} />
               </div>
               <h4 className="text-xs font-bold text-tangent-text">Database Router</h4>
               <p className="text-[9px] text-slate-400 font-medium">Postgres / Redis Connector</p>
-              <div className="pt-2 flex items-center justify-between text-[8px] font-black text-tangent-error tracking-wider border-t border-tangent-error/10">
-                <span>Bypassed Middleware</span>
-                <ChevronRight size={10} />
-              </div>
+              {driftActive && (
+                <div className="pt-2 flex items-center justify-between text-[8px] font-black text-tangent-error tracking-wider border-t border-tangent-error/10">
+                  <span>Bypassed Middleware</span>
+                  <ChevronRight size={10} />
+                </div>
+              )}
             </div>
 
             {/* Node 4: User Store */}
@@ -291,7 +349,7 @@ export default function WorkspaceTab({ onNavigateToTab, onSelectDriftNode }: Wor
           <div className="flex items-center gap-4 p-3 rounded-xl bg-white/[0.02] border border-tangent-border">
             <div className="relative w-14 h-14 flex items-center justify-center flex-shrink-0">
               <svg className="w-full h-full transform -rotate-90">
-                <circle cx="28" cy="28" r="22" stroke="rgba(255,255,255,0.02)" strokeWidth="4" fill="transparent" />
+                <circle cx="28" cy="28" r="22" stroke="var(--border)" strokeWidth="4" fill="transparent" />
                 <circle
                   cx="28"
                   cy="28"
