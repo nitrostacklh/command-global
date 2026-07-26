@@ -163,7 +163,7 @@ export default function Home() {
             </section>
 
             <section id="analytics" className="min-h-[85vh] border-t border-tangent-border/50 pt-16">
-              <AnalyticsTab />
+              <AnalyticsTab onNavigateToTab={scrollToSection} />
             </section>
 
             <section id="profile" className="min-h-[85vh] border-t border-tangent-border/50 pt-16">
