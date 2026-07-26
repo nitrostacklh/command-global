@@ -652,10 +652,32 @@ console.log(
   ),
 );
 
+/**
+ * Is the file on disk the same *content* as what we would generate?
+ *
+ * Line endings are deliberately not part of the answer. Git checks these files out
+ * as CRLF wherever `core.autocrlf` is on — which is the default on Windows — while
+ * this generator always writes LF. A raw `===` therefore reported **every** generated
+ * module STALE on a Windows clone, with zero content drift: running the generator
+ * produced no `git diff` at all, and the next `git checkout` put the CRLFs straight
+ * back. That made `npm run fixture:check`, and so `npm run verify`, permanently red on
+ * one platform for a reason that has nothing to do with fixtures.
+ *
+ * That is worse than it sounds. This check is the guard that stops the embedded copies
+ * drifting from `fixtures/`, and a guard that cries wolf on every Windows machine is a
+ * guard people learn to skip — the exact failure `GAPS.md` Gap 15 was written about.
+ *
+ * Normalising here rather than in `.gitattributes` on purpose: a `text eol=lf` rule
+ * would renormalise the working tree of every clone, which is a large diff to take for
+ * a comparison bug. The convention on disk is left alone; only the comparison changes.
+ */
+const sameContent = (disk, generated) =>
+  disk !== null && disk.replace(/\r\n/g, '\n') === generated.replace(/\r\n/g, '\n');
+
 let changed = 0;
 for (const out of OUTPUTS) {
   const actual = existsSync(out.path) ? readFileSync(out.path, 'utf8') : null;
-  const same = actual === out.text;
+  const same = sameContent(actual, out.text);
   const label = out.path.slice(ROOT.length + 1).replace(/\\/g, '/');
 
   if (CHECK) {

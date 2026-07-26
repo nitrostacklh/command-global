@@ -82,7 +82,7 @@ its own.
 > fixture is green. `npm run fixture:check` asserts the failure is still exactly where it
 > should be (`pricing.test.js:40`, `80 !== 72`) and **fails loudly if someone "fixes" it.**
 >
-> The project's own test suite is **177 passing across three apps** (46 · 72 · 59). Those are separate: run
+> The project's own test suite is **182 passing across three apps** (46 · 72 · 64; 177 on Node 20). Those are separate: run
 > `npm test` to judge the code, `npm run fixture:test` to see the student's bug.
 
 ---
@@ -199,7 +199,7 @@ npm run install:all      # deps for sentinel/ and lumina/
 npm run verify           # ⚠️ sentinel's 47 only — see GAPS.md Gap 18
 ```
 
-`npm run verify` runs **all three apps** — 46 · 72 · 59 = **177** — then the shared-contract
+`npm run verify` runs **all three apps** — 46 · 72 · 64 = **182** (177 on Node 20) — then the shared-contract
 guard, the fixture guard, the twelve-turn student journey across all three servers over real
 MCP, and the doc check. **It needs only Node** — no Python, no network, no key. (It reached
 only `sentinel` until 2026-07-26; `GAPS.md` Gap 18.)
@@ -323,7 +323,7 @@ working human-approval UI.
 | ⑤ drift → ⑥ flashcard | ✅ built + tested — answer absent from the payload until earned |
 | **`causal-timeline` widget** | ✅ **built** — renders the drift, withholds the fix |
 | Three demo projects, five seats, all inputs | ✅ complete, verified, and guarded |
-| Whole suite | ✅ **177** (46 · 72 · 59), offline, no API key, no model |
+| Whole suite | ✅ **182** (46 · 72 · 64), offline, no API key, no model — 177 on Node 20 |
 | Docs agree with the code | ⚠️ `npm run check:docs` reads only **sentinel's** tool list, so post-split it measures one of three services — Gap 18 |
 | Student work survives the chat | ✅ REGISTRAR, now MCP-3 — identity + storage, **no `save` verb added** — Gap 19 |
 | Durable storage on the deployed service | ⬜ NitroCloud is Node 20; `node:sqlite` needs 22.5, so live progress is per-restart **and says so** |

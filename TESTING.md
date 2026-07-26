@@ -63,7 +63,7 @@ npm run verify
       sentinel      # pass 72
       mcp-profile   # pass 59
 
-      Total across the three: **177**. (It reached only `sentinel` until 2026-07-26 —
+      Total across the three: **182** on Node 22.5+, **177** on Node 20. (It reached only `sentinel` until 2026-07-26 —
       `GAPS.md` Gap 18.)
 - [ ] Then `shared contracts are identical in every app` — the copies of `shared/` in all
       three apps and `studio/` have not been hand-edited
@@ -496,7 +496,9 @@ npm run install:all && npm run verify
 ```
 
 - [ ] Both succeed following **only** what the README says
-- [ ] `# pass 46`, `# pass 72`, `# pass 59` — the root `npm test` runs all three — **177** in total
+- [ ] `# pass 46`, `# pass 72`, `# pass 64` — the root `npm test` runs all three — **182** in total
+      (`# pass 59` and **177** on Node 20: the five SQLite store-contract cases skip where
+      `node:sqlite` is absent. Both are green — check which runtime you are on before calling it wrong.)
 - [ ] You never needed Python, an API key, or a network call to the model
 
 - [ ] Read the README as if you'd never seen it. Could you explain the product back in one

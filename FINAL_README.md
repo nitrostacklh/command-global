@@ -8,10 +8,13 @@
 > |---|---|---|---|---|
 > | **MCP-1** | `mcp-roster/` | catalog, role-scoped briefs, lessons, the checkpoint spec | 8 | **46** |
 > | **MCP-2** | `sentinel/` | verification, drift, the build verdict | 6 | **72** |
-> | **MCP-3** | `mcp-profile/` | the student record, and the flashcards | 9 | **59** |
-> | | | | **23** | **177** |
+> | **MCP-3** | `mcp-profile/` | the student record, and the flashcards | 9 | **64** / 59 |
+> | | | | **23** | **182** / 177 |
 >
-> **177 tests, all green, every number watched printing on 2026-07-26.** Where a path below
+> **182 tests on Node 22.5+, 177 on Node 20 — all green, every number watched printing on
+> 2026-07-26.** The difference is five SQLite store-contract cases in `mcp-profile` that *skip*
+> where `node:sqlite` is absent rather than failing a runtime that cannot support an optional
+> feature; NitroCloud builds on Node 20, so both numbers are real. Where a path below
 > still says `sentinel/src/modules/learn/` or `…/registrar/`, the code moved: `learn/` became
 > `mcp-roster/src/catalog/`, and `registrar/` became `mcp-profile/src/profile/`. Section 12
 > carries the current map. Where this document and the code disagree, **the code and
@@ -328,7 +331,7 @@ This is the only part that goes to NitroStack Cloud. It is pure TypeScript on th
 | **CLI / build / deploy** | **`@nitrostack/cli` ^1.0.15** (`nitrostack-cli dev / build / start`) | Compiles, runs a local dev server, and packs for Cloud. `npm run pack` produces the deploy zip. |
 | **Input validation** | **Zod ^3.22** | Every tool's `inputSchema` is a Zod schema. It validates and *describes* arguments at the MCP boundary (e.g. `explain_drift` accepts a plan as a JSON string *or* an object, both optional). Validating at the boundary is a project rule. |
 | **MCP app-extension** | **`@modelcontextprotocol/ext-apps`** | Supports the interactive widget surface (the causal-timeline UI the tool renders in the client). |
-| **Tests** | **Node's built-in test runner** (`node --test`), 177 tests across the three apps | No Jest, no Vitest — zero extra runtime deps, runs offline. Tests run against the *compiled* `dist/**/*.test.js`. |
+| **Tests** | **Node's built-in test runner** (`node --test`), 182 tests across the three apps (177 on Node 20 — five SQLite cases skip) | No Jest, no Vitest — zero extra runtime deps, runs offline. Tests run against the *compiled* `dist/**/*.test.js`. |
 | **Config** | **dotenv** | Only for the *optional* wider repo; MENTOR itself needs no env vars. |
 | **The widget** | **React / Next.js** (in `sentinel/src/widgets/`) | The `causal-timeline` page: plan row, build row, the labelled drift arrow, five confidence bars each with its reason, and an *"Ask instead →"* button wired to `sendFollowUpMessage` so the refusal doesn't dead-end. |
 
@@ -666,7 +669,7 @@ command-global/                 ⭐ the monorepo — the only repo with history 
 │       ├── modules/aegis/        built, tested, UNREGISTERED
 │       └── widgets/              the causal-timeline UI
 │
-├── mcp-profile/                MCP-3 — 9 tools, 59 tests
+├── mcp-profile/                MCP-3 — 9 tools, 64 tests (59 on Node 20)
 │   └── src/
 │       ├── profile/
 │       │   ├── profile.ts        applyVerdict, mastery, the SM-2 review schedule
@@ -712,7 +715,7 @@ Origin: `pricing.js:12`, confidence **0.91** (§10).
 > 🟢 **One test fails on purpose.** The broken build *is* the demo — MENTOR has nothing to explain
 > if it's green. `npm run fixture:check` asserts the failure is still exactly where it should be
 > and **fails loudly if someone "fixes" it.** The project's *own* suite is separate and passing:
-> **177 across the three apps.**
+> **182 across the three apps** (177 on Node 20).
 >
 > This is also the only seat with runnable broken source on disk (`fixtures/pricing/build/`),
 > which is why the §1 line numbers — broke on 40, went wrong on 12 — are *literally* true here
@@ -748,9 +751,9 @@ first. `catalogCoverage()` reports `playableSeats: 5, demoableSeats: 3` rather t
 git clone <this-repo>
 cd "AGENTIC AI"
 npm run install:all      # deps for all three apps + lumina/
-npm run verify           # all 177 tests, then the guards and the journey
+npm run verify           # all 182 tests, then the guards and the journey
 ```
-`npm run verify` runs every app's suite (46 · 72 · 59 = **177**), the shared-contract guard, the
+`npm run verify` runs every app's suite (46 · 72 · 64 = **182**; 59 and 177 on Node 20), the shared-contract guard, the
 fixture guard, the twelve-turn student journey across all three servers over real MCP, and the
 doc check. It needs **only Node** — no Python, no network, no key.
 
@@ -793,7 +796,7 @@ changes nothing. MENTOR serves no static user-supplied paths, so the advisory do
 |---|---|
 | All 23 tools, all 7 artifacts, three demos | ✅ built + tested |
 | Causal-timeline widget · lesson-panels widget · refusal (enforced) · flashcard gate | ✅ built |
-| 177 tests (46 · 72 · 59), offline, no key, no model | ✅ |
+| 182 tests (46 · 72 · 64), offline, no key, no model — 177 on Node 20 | ✅ |
 | Deployed to NitroStack Cloud | ✅ all three live and wired (`DEPLOY.md` §5b–c) |
 | ≤3-min demo video | ⬜ (script ready) |
 | n=5 evidence study (Research points) | ⬜ protocol ready in `STUDY.md`, not yet run |
