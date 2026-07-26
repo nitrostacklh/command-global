@@ -90,8 +90,14 @@ export default function TimelineTab() {
       setTypewriterText("");
       const type = () => {
         if (index < fullExplanation.length) {
-          setTypewriterText(prev => prev + fullExplanation.charAt(index));
-          index++;
+          // Slice to the new length rather than appending inside the updater.
+          // `prev + charAt(index)` reads the mutable `index` when React runs the
+          // updater, not when it is scheduled, so a replayed or double-invoked
+          // updater (StrictMode) appended the wrong character and the sentence
+          // came out garbled. Deriving from a captured length is idempotent.
+          const next = index + 1;
+          index = next;
+          setTypewriterText(fullExplanation.slice(0, next));
           timer = setTimeout(type, 15);
         }
       };

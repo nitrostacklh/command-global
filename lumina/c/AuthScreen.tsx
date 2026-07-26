@@ -37,13 +37,23 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
     let currentLine = 0;
     const interval = setInterval(() => {
       if (currentLine < codeTemplates.length) {
-        setCodeLines(prev => [...prev, codeTemplates[currentLine]]);
-        currentLine++;
-        
+        // Read the array HERE, not inside the updater below.
+        //
+        // A state updater must be pure: React decides when to run it, and may run
+        // it more than once (StrictMode does exactly that in dev). Closing over the
+        // mutable `currentLine` and indexing inside the updater meant the index was
+        // read at render time rather than now — by which point `currentLine++` had
+        // already run, so on the last tick it read one past the end, appended
+        // `undefined`, and the render then threw on `line.includes(...)`.
+        const line = codeTemplates[currentLine];
+        const step = currentLine + 1;
+        currentLine = step;
+
+        setCodeLines(prev => [...prev, line]);
         // Toggle node activity as code compiles
         setNodePositions(prev =>
           prev.map((node, i) =>
-            i === currentLine % prev.length ? { ...node, active: !node.active } : node
+            i === step % prev.length ? { ...node, active: !node.active } : node
           )
         );
       } else {
