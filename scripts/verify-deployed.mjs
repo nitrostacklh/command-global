@@ -325,14 +325,23 @@ try {
           { kind: 'component_built', component: 'total', file: 'build/pricing.js', line: 17, at: 'T+24m', source: 'verify-live' },
           { kind: 'test_run', outcome: 'fail', file: 'build/pricing.test.js', line: 40, at: 'T+38m', source: 'verify-live' },
         ];
+        // `hand_off` is left at its default so the verdict really is filed with MCP-3.
+        // That bridge is invisible from outside any other way — `roster_status` reports
+        // MCP-1's peers, and nothing reports MCP-2's — so a fleet with SENTINEL wired
+        // and PROFILE unset would otherwise pass every check while the loop stayed open
+        // at its last joint. It writes under a synthetic handle, never `anonymous`.
         const verdict = await fleet.call('build_verdict', {
           spec: derived.spec,
           plan,
           events,
           student: STUDENT,
           finalise: true,
-          hand_off: false,
         });
+        check(
+          verdict.bridge?.mode === 'live' && verdict.filed_with_profile === true,
+          'MCP-2 can file its verdict with MCP-3 — the last joint of the loop',
+          `${verdict.bridge?.mode}${verdict.bridge?.note ? ' — ' + verdict.bridge.note.slice(0, 70) : ''}`,
+        );
         check(verdict.status === 'escalated', 'a drifted build escalates rather than completing', verdict.status);
         check(
           verdict.verdict?.drift?.origin?.line === 12,
