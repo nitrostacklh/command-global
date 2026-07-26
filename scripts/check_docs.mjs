@@ -19,52 +19,49 @@
  *   npm run check:docs
  */
 
-import { spawn } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { openFleet, APPS, APP_NAMES } from './lib/fleet.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const problems = [];
 const notes = [];
 
-// ── the ground truth: ask the running server ──────────────────────────────────
-async function liveToolNames() {
-  const entry = join(ROOT, 'sentinel', 'dist', 'index.js');
-  if (!existsSync(entry)) {
-    notes.push('sentinel/dist not built — skipped the tool-surface checks. Run npm run sentinel:build.');
+/**
+ * The ground truth, from all three running servers.
+ *
+ * This used to ask one. After the split there is no single number for "how many
+ * tools does MENTOR have" — there are three surfaces and a fleet total — so a guard
+ * that compared every asserted count against `sentinel`'s alone reported every
+ * correct sentence in `DEPLOY.md`'s fleet table as a defect. A guard that fires on a
+ * document doing its job gets switched off within a week, and then it protects
+ * nothing (Gap 15 learned this once already, from the other direction).
+ *
+ * So the truth is now a *set*: each app's own count, and the fleet total. A prose
+ * number is wrong only if it is none of those.
+ */
+async function fleetSurfaces() {
+  const unbuilt = APP_NAMES.filter((n) => !existsSync(join(ROOT, APPS[n].dir, 'dist', 'index.js')));
+  if (unbuilt.length) {
+    notes.push(
+      `${unbuilt.map((n) => APPS[n].dir).join(', ')} not built — skipped the tool-surface checks. ` +
+        'Run npm run build:all.',
+    );
     return null;
   }
-  const srv = spawn(process.execPath, [join(ROOT, 'scripts', 'start-mcp.mjs')], {
-    stdio: ['pipe', 'pipe', 'ignore'],
-  });
+
+  const fleet = await openFleet({ local: true, clientName: 'check-docs' });
   try {
-    return await new Promise((resolve, reject) => {
-      let buf = '';
-      const timer = setTimeout(() => reject(new Error('server timeout')), 60_000);
-      srv.stdout.on('data', (c) => {
-        buf += c.toString();
-        let nl;
-        while ((nl = buf.indexOf('\n')) >= 0) {
-          const line = buf.slice(0, nl).trim();
-          buf = buf.slice(nl + 1);
-          if (!line.startsWith('{')) continue;
-          try {
-            const m = JSON.parse(line);
-            if (m.id === 2) {
-              clearTimeout(timer);
-              resolve(m.result.tools.map((t) => t.name));
-            }
-          } catch {}
-        }
-      });
-      const send = (o) => srv.stdin.write(JSON.stringify(o) + '\n');
-      send({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'docs', version: '1' } } });
-      send({ jsonrpc: '2.0', method: 'notifications/initialized' });
-      send({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} });
-    });
+    if (fleet.missing.length) {
+      notes.push(`${fleet.missing.join(', ')} would not start — skipped the tool-surface checks.`);
+      return null;
+    }
+    const perApp = new Map();
+    for (const name of APP_NAMES) perApp.set(name, fleet.on(name).tools);
+    return { perApp, all: fleet.allTools() };
   } finally {
-    srv.kill();
+    fleet.close();
   }
 }
 
@@ -81,7 +78,7 @@ const docs = () => {
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 const lineOf = (text, index) => text.slice(0, index).split('\n').length;
 
-const tools = await liveToolNames();
+const surfaces = await fleetSurfaces();
 
 // ── 1. any asserted tool count must be the real one ───────────────────────────
 //
@@ -94,8 +91,18 @@ const tools = await liveToolNames();
 // nothing. So this checks the one thing that actually went wrong — an asserted
 // *count* that the code owns and the prose copied — and leaves prose about the
 // platform alone.
-if (tools) {
-  const real = tools.length;
+if (surfaces) {
+  // Every count a doc is allowed to state: each app's own surface, and the fleet
+  // total. `1` is added because "1 tool" appears in ordinary prose about a single
+  // tool and flagging it would be noise rather than a finding.
+  const legal = new Set([
+    ...[...surfaces.perApp.values()].map((t) => t.length),
+    surfaces.all.length,
+    1,
+  ]);
+  const truth =
+    [...surfaces.perApp.entries()].map(([n, t]) => `${n} ${t.length}`).join(', ') +
+    `, fleet ${surfaces.all.length}`;
   const pattern = /(?:tools \((\d+)\)|(?:exactly |returns )?(\d+) tools)/gi;
   // A wrong count is legitimate when the sentence is history ("was exposing 23"),
   // a transition ("went 23 → 3"), or a diagnostic ("if you see 23, …").
@@ -111,7 +118,7 @@ if (tools) {
     const lines = text.split('\n');
     for (const m of text.matchAll(pattern)) {
       const n = Number(m[1] ?? m[2]);
-      if (n === real) continue;
+      if (legal.has(n)) continue;
       const line = lineOf(text, m.index);
       // Markdown wraps, so the qualifying word is frequently on the line above the
       // number. Judging one line at a time produced two false positives on prose
@@ -119,7 +126,8 @@ if (tools) {
       const context = lines.slice(Math.max(0, line - 3), line + 1).join(' ');
       if (HISTORICAL.test(context)) continue;
       problems.push(
-        `${rel}:${line} asserts "${m[0]}" but the built server serves ${real}\n      ${context.trim().slice(0, 130)}`,
+        `${rel}:${line} asserts "${m[0]}", which is no app's surface and not the fleet total ` +
+          `(${truth})\n      ${context.trim().slice(0, 130)}`,
       );
     }
   }
@@ -128,7 +136,7 @@ if (tools) {
   // Only the two documents that are pure step-by-step instruction. Reference and
   // design docs are allowed — required, even — to discuss unregistered code.
   const INSTRUCTIONAL = ['TESTING.md', 'WALKTHROUGH.md'];
-  const known = new Set(tools);
+  const known = new Set(surfaces.all);
   const retired = ['self_heal', 'propose_patch', 'optimize_spend', 'run_organization', 'apply_for_scheme', 'verify_output', 'redline_contract'];
   for (const rel of INSTRUCTIONAL) {
     if (!existsSync(join(ROOT, rel))) continue;
@@ -190,4 +198,11 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(G('ok') + `  docs agree with the code${tools ? ` (${tools.length} tools: ${tools.join(', ')})` : ''}`);
+console.log(
+  G('ok') +
+    '  docs agree with the code' +
+    (surfaces
+      ? ` (${[...surfaces.perApp.entries()].map(([n, t]) => `${n} ${t.length}`).join(' · ')} · ` +
+        `${surfaces.all.length} across the fleet)`
+      : ''),
+);

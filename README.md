@@ -139,7 +139,7 @@ history — the platform arrives at `1e4067a` as a consolidation of earlier work
 `b0531b6`.
 
 **Four of those five commanders are still here, still tested, and deliberately unregistered.**
-The deployed server offers 13 tools and all 10 are MENTOR's loop. The reason for cutting them
+The three deployed services offer 23 tools between them and every one is MENTOR's loop. The reason for cutting them
 is not tidiness: `self_heal` runs on the *same* pricing service and the *same*
 tax-before-discount bug as MENTOR's fixture, and its description offers to patch, prove and
 deploy the fix. Ask a model *"the pricing test is failing, help"* next to that tool and it

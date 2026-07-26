@@ -35,7 +35,7 @@ appears; there's a full [glossary](#15-glossary) at the end.
 9. [Under the hood #2: the drift algorithm, traced on the real bug](#9-under-the-hood-2-the-drift-algorithm-traced-on-the-real-bug)
 10. [Under the hood #3: the two confidence systems](#10-under-the-hood-3-the-two-confidence-systems)
 11. [Under the hood #4: the flashcard gate](#11-under-the-hood-4-the-flashcard-gate)
-12. [The 10 tools and the code map](#12-the-10-tools-and-the-code-map)
+12. [The 23 tools and the code map](#12-the-10-tools-and-the-code-map)
 13. [The two demo projects](#13-the-two-demo-projects)
 14. [Install, run, deploy](#14-install-run-deploy)
 15. [Glossary](#15-glossary)
@@ -553,41 +553,61 @@ place to keep it.)
 
 ---
 
-## 12. The 10 tools and the code map
+## 12. The 23 tools and the code map
 
-A connected client sees exactly **10 tools**, grouped into three agents that are three stages of
-one loop. The grouping is deliberate: in MCP the tool list *is* the interface, and grouping makes
-the shape of the loop legible from `tools/list` alone.
+The loop is **three separately deployed MCP applications**, not one server, and each one
+connects on its own URL: **8 + 6 + 9 = 23 tools**. The split is deliberate and it is the
+security boundary, not filing — MCP-3 is the only process that ever holds a flashcard
+*answer*, so a bug anywhere else cannot leak what the student is meant to earn. In MCP the
+tool list *is* the interface, so three services each telling one story means a client's
+model can tell which stage of the loop it is in from `tools/list` alone.
 
-### ROSTER — pick your path & role (stage ①)
+### MCP-1 · `mentor-roster` — path, role, brief, lesson (stages ①–③) · 8 tools
 | Tool | Does |
 |---|---|
-| `browse_catalog` | Show the curated menu: product types → projects → roles. |
-| `open_brief` | Open a role's brief: what you **own**, what you're **given**, what's **not yours**. |
+| `sign_in` | Start or resume a student; opens their record in MCP-3. A handle, not a login, and it says so. |
+| `list_roles` | The **role** comes first, before any project — job descriptions, with how many seats are playable. |
+| `projects_for_role` | The project list, *derived from the role* rather than a static catalog filtered. |
+| `open_brief` | The assignment: what you **own**, what you're **given**, what's **not yours**, and the acceptance criteria. |
+| `open_lesson` | Layer 2 — panels the student walks. Withholds the reveal until they commit to an answer. |
+| `check_scope` | Did you design *your* job? Catches **scope** drift, before a line of code. |
+| `checkpoint_spec` | Turns your own design into the ordered gates — `mentor.checkpoints/v1`, the artifact MCP-2 verifies against. |
+| `roster_status` | What this service holds, and which peers it can actually reach. |
 
-### COACH — design check & checkpoints (stages ③–④)
+### MCP-2 · `mentor` — verification, drift, refusal (stages ④–⑤) · 6 tools
 | Tool | Does |
 |---|---|
-| `check_scope` | Confirm the design you drew covers your slice (catches *scope* drift). |
-| `checkpoints` | Turn your own plan into an ordered checklist. |
-| `record_progress` | Log each piece you finish — this log becomes your build history. |
-| `is_it_done` | Judge whether the slice is complete. |
-
-### MENTOR — drift, refusal, reward (stages ⑤–⑥)
-| Tool | Does |
-|---|---|
+| `open_session` | Takes MCP-1's spec and the design it came from, and starts watching. |
+| `build_event` | Records what the student did, as it happens. Never blocks out-of-order work — that divergence is the lesson. |
+| `build_verdict` | Every gate marked from what was witnessed, plus the drift — `mentor.verdict/v1`, the document MCP-3 files. |
 | `explain_drift` | **The headline.** Runs §9, renders the `causal-timeline` widget with confidence. Args optional → falls back to the bundled demo. |
 | `withhold_fix` | Explains *why* it won't write the fix — a visible tool call, not just prose. |
-| `flashcard` | Issues the earned concept, gated on real test output (§11). |
 | `mentor_status` | "What am I / what do I need" orientation. |
 
-Plus three **prompts** (`pick_a_project`, `work_the_slice`, `debugging_tutor`) — canned starter
-messages that drive the loop.
+### MCP-3 · `mentor-profile` — the record, and the reward (stage ⑥) · 9 tools
+| Tool | Does |
+|---|---|
+| `open_profile` · `read_profile` | The student record: role history, projects, checkpoints, the drift and difficulty ledgers, the mastery map. |
+| `note_role_choice` · `record_verdict` | The receiving ends of MCP-1's and MCP-2's arrows. |
+| `class_progress` | Instructor only. **Refuses** a student — the refusal is the point of having roles. |
+| `profile_status` | What is owned here, and whether a record is actually being kept. |
+| `flashcard` | Issues the earned concept, gated on real test output (§11). The only process with an answer. |
+| `review_flashcard` · `due_cards` | Recall scheduling, hardest-first, counted in sittings rather than days. |
+
+Plus five **prompts** — `pick_a_role` and `review_my_design` (MCP-1), `debugging_tutor`
+(MCP-2), `pick_up_where_i_left_off` and `quiz_me` (MCP-3) — canned starter messages that
+drive the loop.
 
 ### Code map
 
 ```
-sentinel/                       ⭐ deployable MCP server — TypeScript, NitroStack SDK, 61 tests
+mcp-roster/                     ⭐ MCP-1 — catalog, briefs, lessons, the spec · 8 tools · 14 tests
+└── src/
+    ├── roster.module.ts          sign_in, list_roles, projects_for_role, open_brief, open_lesson
+    ├── gates.module.ts           check_scope, checkpoint_spec
+    └── catalog/                  catalog.ts · brief.ts · lesson.ts · spec.ts + the embedded fixtures
+
+sentinel/                       ⭐ MCP-2 — verification, drift, refusal · 6 tools · 72 tests
 └── src/
     ├── core/                   the engine
     │   ├── engine.ts             the incident lifecycle (§8)
@@ -596,20 +616,29 @@ sentinel/                       ⭐ deployable MCP server — TypeScript, NitroS
     │   ├── coordinator.ts        cross-domain coordination
     │   └── types.ts
     ├── modules/
-    │   ├── learn/              ROSTER + COACH
-    │   │   ├── roster.module.ts    browse_catalog, open_brief
-    │   │   ├── coach.module.ts     check_scope, checkpoints, record_progress, is_it_done
-    │   │   ├── catalog.ts / brief.ts / checkpoints.ts / card.ts   the artifact logic
+    │   ├── verify/             THE VERIFIER
+    │   │   ├── verify.module.ts    open_session, build_event, build_verdict
+    │   │   ├── session.ts          the one thing a snapshot cannot hold: attempts over time
+    │   │   ├── verify.ts           marking each gate from what was witnessed
+    │   │   └── verdict.ts          mentor.verdict/v1, and the `given` reconciliation
     │   ├── mentor/             MENTOR
-    │   │   ├── mentor.module.ts    explain_drift, withhold_fix, flashcard, mentor_status
+    │   │   ├── mentor.module.ts    explain_drift, withhold_fix, mentor_status
     │   │   ├── mentor.adapter.ts   the engine-inverting adapter (§8)
-    │   │   ├── drift.ts            the drift algorithm (§9)
-    │   │   ├── plan.ts / build.ts  the artifact parsers (§6)
-    │   ├── sentinel/ ledger/ verdict/ relay/ aegis/   built, tested, UNREGISTERED
-    │   └── …
+    │   │   └── drift.ts            the drift algorithm (§9)
+    │   └── aegis/              built, tested, UNREGISTERED
     ├── widgets/                the causal-timeline UI (React/Next.js)
-    ├── app.module.ts           registers ONLY roster + coach + mentor (the 10 tools)
+    ├── app.module.ts           registers ONLY verify + mentor (the 6 tools)
     └── index.ts                bootstrap (McpApplicationFactory)
+
+mcp-profile/                    ⭐ MCP-3 — the record and the cards · 9 tools · 0 tests (a real gap)
+└── src/
+    ├── profile.module.ts         open_profile, read_profile, note_role_choice, record_verdict,
+    │                             class_progress, profile_status
+    ├── cards.module.ts           flashcard, review_flashcard, due_cards
+    └── concepts/                 the ONLY place a flashcard answer exists
+
+shared/                         the bridge contracts, copied into all three by npm run sync:shared
+└── contracts.ts                 mentor.checkpoints/v1 · lumina.build_event/v1 · mentor.verdict/v1
 
 lumina/                         the design canvas — Next.js + React + ReactFlow + Electron + Python
 ├── c/nodes/ComponentNode.tsx     the "component" box a student draws
@@ -701,10 +730,10 @@ changes nothing. MENTOR serves no static user-supplied paths, so the advisory do
 ### State of things
 | | |
 |---|---|
-| All 10 tools, all 5 artifacts, both demos | ✅ built + tested |
+| All 23 tools across three services, all 5 artifacts, both demos | ✅ built + tested |
 | Causal-timeline widget · refusal (enforced) · flashcard gate | ✅ built |
-| 61/61 tests, offline, no key, no model | ✅ |
-| Deployed to NitroStack Cloud | ⬜ **next** |
+| 86 tests, offline, no key, no model | ✅ 14 (MCP-1) · 72 (MCP-2) · **0 (MCP-3 — a real gap)** |
+| Deployed to NitroStack Cloud | ✅ all three live · ⬜ peer URLs not yet set (`DEPLOY.md` §5c) |
 | ≤3-min demo video | ⬜ (script ready) |
 | n=5 evidence study (Research points) | ⬜ protocol ready in `STUDY.md`, not yet run |
 | Layer 2 interactive lesson panels | ⬜ roadmap |

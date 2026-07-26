@@ -1,307 +1,193 @@
 /**
- * Print MENTOR's entire MCP surface, so you can eyeball it without hand-writing
- * JSON-RPC. Talks to the BUILT server over stdio — the same artifact NitroCloud
- * runs — so what you see here is what a client sees.
+ * Walk the loop once on the SECOND project, over real MCP, and print every artifact.
  *
- *   npm run probe            # the whole surface + explain_drift on the fixture
- *   npm run probe -- --json  # raw JSON, for diffing between runs
+ *   npm run probe
  *
- * Build first (`npm run sentinel:build`); this deliberately does not build for
- * you, so you are always probing the artifact you think you are.
+ * ## What this is for
+ *
+ * One question decides how a demo lands: *"is this one hardcoded example?"* The honest
+ * answer is a different project, a different role, a different bug and a different
+ * confidence score, produced live in about fifteen seconds. That is this script.
+ *
+ * `safety-gear/cv` owns three components instead of pricing's four, the bug is
+ * alerting on a condition that did not exist yet rather than taxing before a discount,
+ * and its build history is **tracked** rather than hand-authored — so it scores higher
+ * on the same formula, because the evidence is better and not because anything was
+ * tuned.
+ *
+ * `npm run walk` asserts the pricing journey and exits non-zero on a regression; this
+ * one prints, so you can time the beats and read the numbers before you point a camera
+ * at anything. Both drive all three apps.
+ *
+ * ## Why it had to be rewritten
+ *
+ * It drove one server, calling `browse_catalog`, `checkpoints`, `record_progress` and
+ * `is_it_done`, and read its fixture out of `sentinel/dist/modules/learn/` — a path
+ * deleted in the three-way split. None of those tools or paths exist any more.
  */
 
-import { spawn } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { existsSync } from 'node:fs';
+import { openFleet, ROOT, ANSWER, G, R, B, DIM } from './lib/fleet.mjs';
+import { pathToFileURL } from 'node:url';
+import { join } from 'node:path';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SENTINEL = join(ROOT, 'sentinel');
-const ENTRY = join(SENTINEL, 'dist', 'index.js');
-const RAW = process.argv.includes('--json');
+const ok = (s) => G(s);
+const bad = (s) => R(s);
+const h = (title) => console.log(`\n${B(title)}`);
 
-if (!existsSync(ENTRY)) {
-  console.error('No build found at sentinel/dist/index.js — run `npm run sentinel:build` first.');
-  process.exit(1);
-}
-
-const srv = spawn(process.execPath, [ENTRY], { cwd: SENTINEL, stdio: ['pipe', 'pipe', 'ignore'] });
-const pending = new Map();
-let id = 0;
-let buf = '';
-
-srv.stdout.on('data', (chunk) => {
-  buf += chunk.toString();
-  let nl;
-  while ((nl = buf.indexOf('\n')) >= 0) {
-    const line = buf.slice(0, nl).trim();
-    buf = buf.slice(nl + 1);
-    if (!line.startsWith('{')) continue;
-    try {
-      const msg = JSON.parse(line);
-      const resolve = pending.get(msg.id);
-      if (resolve) {
-        pending.delete(msg.id);
-        resolve(msg);
-      }
-    } catch {
-      /* not a JSON-RPC frame */
-    }
-  }
-});
-
-function rpc(method, params, notify = false) {
-  const msg = { jsonrpc: '2.0', method, ...(params ? { params } : {}) };
-  if (notify) {
-    srv.stdin.write(JSON.stringify(msg) + '\n');
-    return Promise.resolve();
-  }
-  msg.id = ++id;
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`timeout: ${method}`)), 60_000);
-    pending.set(msg.id, (m) => {
-      clearTimeout(timer);
-      resolve(m);
-    });
-    srv.stdin.write(JSON.stringify(msg) + '\n');
-  });
-}
-
-const h = (s) => console.log('\n\x1b[1m' + s + '\x1b[0m');
-const ok = (s) => '\x1b[32m' + s + '\x1b[0m';
-
-try {
-  const init = await rpc('initialize', {
-    protocolVersion: '2024-11-05',
-    capabilities: {},
-    clientInfo: { name: 'probe', version: '1' },
-  });
-  await rpc('notifications/initialized', undefined, true);
-
-  const [tools, prompts, resources] = await Promise.all([
-    rpc('tools/list', {}),
-    rpc('prompts/list', {}),
-    rpc('resources/list', {}),
-  ]);
-  const drift = await rpc('tools/call', { name: 'explain_drift', arguments: {} });
-  const payload = JSON.parse(drift.result.content.find((c) => c.type === 'text').text);
-
-  if (RAW) {
-    console.log(JSON.stringify({
-      serverInfo: init.result.serverInfo,
-      tools: tools.result.tools.map((t) => t.name),
-      prompts: prompts.result?.prompts?.map((p) => p.name) ?? [],
-      resources: resources.result.resources.map((r) => r.uri),
-      explain_drift: payload,
-    }, null, 2));
-  } else {
-    h('server');
-    console.log(`  ${init.result.serverInfo.name} ${init.result.serverInfo.version}`);
-
-    h(`tools (${tools.result.tools.length})`);
-    for (const t of tools.result.tools) {
-      console.log(`  ${ok(t.name)}`);
-      console.log(`    ${t.description.slice(0, 110)}${t.description.length > 110 ? '…' : ''}`);
-    }
-
-    h(`prompts (${prompts.result?.prompts?.length ?? 0})`);
-    for (const p of prompts.result?.prompts ?? []) console.log(`  ${ok(p.name)}`);
-
-    h(`resources (${resources.result.resources.length})`);
-    for (const r of resources.result.resources) console.log(`  ${ok(r.uri)}`);
-
-    const d = payload.drift ?? payload;
-    h('explain_drift (bundled fixture, no arguments)');
-    console.log(`  origin      ${ok(d.origin.component)} @ ${d.origin.file}:${d.origin.line}`);
-    console.log(`  plan  row   ${(payload.plan_row ?? []).join(' -> ')}`);
-    console.log(`  build row   ${(payload.build_row ?? []).join(' -> ')}`);
-    console.log(`  failure     ${payload.failure?.file}:${payload.failure?.line}  ${payload.failure?.message}`);
-    console.log(`  confidence  ${ok(String(d.confidence))}`);
-    let sum = 0;
-    for (const [name, c] of Object.entries(d.confidence_components ?? {})) {
-      sum += c.score * c.weight;
-      console.log(`     ${name.padEnd(12)} ${String(Math.round(c.score * 100) + '%').padStart(4)} x ${c.weight}   ${c.reason}`);
-    }
-    console.log(`     ${'sum'.padEnd(12)} ${sum.toFixed(4)}  ${Math.abs(sum - d.confidence) < 5e-3 ? ok('matches reported confidence') : '\x1b[31mMISMATCH\x1b[0m'}`);
-    console.log(`  fix_withheld ${payload.fix_withheld === true ? ok('true') : '\x1b[31m' + payload.fix_withheld + '\x1b[0m'}`);
-
-    const writers = tools.result.tools.filter((t) => /patch|write|fix_code|edit|apply|heal/i.test(t.name));
-    h('refusal check');
-    console.log(`  tools that could modify a student's build: ${writers.length === 0 ? ok('none') : '\x1b[31m' + writers.map((t) => t.name).join(', ') + '\x1b[0m'}`);
-
-    await walkTheLoop();
-  }
-} finally {
-  srv.kill();
-}
+const PROJECT = 'safety-gear';
+const ROLE = 'cv';
+const HANDLE = 'probe';
 
 /**
- * Walk all five bridges over the wire.
+ * The bundled design and history, read out of the built app rather than copied here.
  *
- * The unit tests cover this logic in-process; this proves the same chain survives
- * being an MCP server — schemas, JSON round-trips, and the client holding the
- * progress log between calls, which it must because the server stores nothing.
- *
- * It doubles as the demo script, which is the real reason it lives here: if this
- * section is green, the ≤3-min video has very little left to go wrong in.
+ * MCP-2 embeds them because it deploys as a lone folder and cannot read `fixtures/` at
+ * runtime. Importing the built module means this script holds no fourth copy of an
+ * artifact that already exists in three places.
  */
-async function walkTheLoop() {
-  const call = async (name, args) => {
-    const res = await rpc('tools/call', { name, arguments: args });
-    const text = res.result?.content?.find((c) => c.type === 'text')?.text;
-    if (!text) throw new Error(`${name} returned no text content`);
-    return JSON.parse(text);
-  };
-  const step = (n, label) => console.log(`  ${'①②③④⑤'[n - 1]} ${label}`);
-  const bad = (s) => '\x1b[31m' + s + '\x1b[0m';
-
-  h('the learning loop, end to end over MCP');
-
-  // ① pick a product type, then a project
-  const domains = await call('browse_catalog', {});
-  const vision = await call('browse_catalog', { domain: 'vision' });
-  const project = vision.projects[0];
-  step(1, `${domains.domains.length} domains → ${project.project} (${project.roles.length} roles)`);
-  console.log(`     ${domains.honesty}`);
-
-  // ② the role-scoped brief — owns / given / not yours
-  const brief = await call('open_brief', { project: 'safety-gear', role: 'cv' });
-  step(2, `brief: owns ${brief.you_own.length}, given ${brief.given_to_you.length}, not yours ${brief.not_yours.length}`);
-  console.log(`     owns      ${brief.you_own.map((o) => o.component).join(', ')}`);
-  console.log(`     given     ${brief.given_to_you.map((g) => `${g.component} (${g.owned_by})`).join(', ')}`);
-  console.log(`     not yours ${brief.not_yours.join(', ')}`);
-  const LESSON = 'condition has to be established';
-  console.log(
-    `     concept answer withheld with the assignment: ${JSON.stringify(brief).includes(LESSON) ? bad('LEAKED') : ok('yes')}`,
-  );
-
-  // ③ does the design cover the slice?
-  const scope = await call('check_scope', { project: 'safety-gear', role: 'cv' });
-  step(3, `in_scope=${scope.in_scope ? ok('true') : bad('false')} — ${scope.summary}`);
-  console.log(`     boundary drawn correctly: ${scope.boundary.join(', ') || '(none)'}`);
-
-  const foreign = await call('check_scope', {
-    project: 'pricing',
-    role: 'backend',
-    plan: JSON.stringify(planWith(['validate', 'discount', 'tax', 'total', 'receipt'])),
-  });
-  console.log(
-    `     drawing "receipt" (frontend's job) → ${
-      !foreign.in_scope && foreign.out_of_scope.length === 1 ? ok('caught as out_of_scope') : bad('NOT CAUGHT')
-    }`,
-  );
-
-  // ④ checkpoints from the student's own plan, then build it in the wrong order
-  const cps = await call('checkpoints', { project: 'safety-gear', role: 'cv' });
-  const idOf = (s) => cps.checkpoints.find((c) => c.subject === s)?.id;
-  step(4, `${cps.checkpoints.length} checkpoints derived from the student's own design`);
-  for (const c of cps.checkpoints) {
-    const after = c.blocked_by.length ? `  ← after ${c.blocked_by.join(',')}` : '';
-    console.log(`     ${c.id}  ${c.kind.padEnd(9)} ${c.subject}${after}`);
-  }
-
-  const progress = await call('record_progress', {
-    project: 'safety-gear',
-    role: 'cv',
-    reached: [
-      { checkpoint: idOf('detect person'), file: 'detect.py', line: 14, at: 'T+00m' },
-      { checkpoint: idOf('alert'), file: 'alert.py', line: 9, at: 'T+07m' },
-      { checkpoint: idOf('check helmet'), file: 'detect.py', line: 31, at: 'T+21m' },
-      // They ran the acceptance tests and a1 went red. Recorded as a failure:
-      // still in the history (MENTOR needs it to link the failure to the work),
-      // but not counted toward done.
-      { checkpoint: idOf('a1'), file: 'test_safety.py', line: 22, at: 'T+29m', outcome: 'fail' },
-    ],
-  });
-  console.log(
-    `     out-of-order work: ${
-      progress.out_of_order.length
-        ? ok(`recorded not blocked — ${progress.out_of_order[0].checkpoint} should have followed ${progress.out_of_order[0].should_have_followed.join(', ')}`)
-        : bad('not detected')
-    }`,
-  );
-  console.log(`     build history provenance: ${ok(progress.build_history.provenance)}`);
-
-  // the join: that progress log IS explain_drift's input
-  const drift = await call('explain_drift', {
-    plan: JSON.stringify(await bundledSafetyPlan()),
-    build: JSON.stringify({
-      ...progress.build_history,
-      failure: {
-        test: 'a1',
-        file: 'test_safety.py',
-        line: 22,
-        message: 'alerted on a compliant worker: expected 0 alerts, got 1',
-      },
-    }),
-    symptom: 'my safety test fails on a worker who IS wearing a helmet',
-  });
-  console.log(
-    `     → explain_drift on the tracked history: origin ${ok(`${drift.origin?.component} @ ${drift.origin?.file}:${drift.origin?.line}`)}, confidence ${ok(String(drift.confidence))}`,
-  );
-  console.log(
-    `       provenance scored ${ok(String(drift.confidence_components.provenance.score))} — a hand-authored history would be 0.4`,
-  );
-
-  // ⑤ the card: refused while red, earned when green
-  const red = await call('flashcard', {
-    project: 'safety-gear',
-    role: 'cv',
-    test_output: '1 failed, 2 passed in 0.11s',
-  });
-  const green = await call('flashcard', {
-    project: 'safety-gear',
-    role: 'cv',
-    test_output: '3 passed in 0.09s',
-  });
-  step(5, 'flashcard');
-  console.log(
-    `     tests red   → earned=${red.earned}  answer in payload: ${JSON.stringify(red).includes(LESSON) ? bad('LEAKED') : ok('no — the field is absent')}`,
-  );
-  console.log(
-    `     tests green → earned=${green.earned}  ${green.earned ? ok('answer released') : bad('still withheld')}`,
-  );
-  console.log(`     earned by   ${green.earnedBy?.origin}, which surfaced at ${green.earnedBy?.surfaced}`);
-  console.log(
-    `     junk output "looks fine to me" → ${(await call('flashcard', { project: 'safety-gear', role: 'cv', test_output: 'looks fine to me' })).earned === false ? ok('not accepted as passing') : bad('ACCEPTED')}`,
-  );
-
-  const done = await call('is_it_done', {
-    project: 'safety-gear',
-    role: 'cv',
-    log: JSON.stringify(progress.log),
-  });
-  h('is_it_done (built, but nothing verified)');
-  console.log(`  done=${done.done === false ? ok('false') : bad('true')} — ${done.blocking.length} condition(s) outstanding`);
-  console.log(`  e.g. "${done.blocking[0]}"`);
-  console.log(`  expected-unbuilt reconciliation: ${done.expected_unbuilt.map((e) => e.component).join(', ') || '(none)'}`);
-}
-
-/** A chain plan with the given labels — for the negative scope case. */
-function planWith(labels) {
-  return {
-    schema: 'lumina.plan/v1',
-    name: 'probe',
-    nodes: labels.map((label, i) => ({
-      id: `n${i}`,
-      type: 'component',
-      label,
-      position: { x: i * 200, y: 0 },
-      data: {},
-    })),
-    edges: labels.slice(1).map((_, i) => ({ id: `e${i}`, source: `n${i}`, target: `n${i + 1}` })),
-    order: labels.map((_, i) => `n${i}`),
-    entry: ['n0'],
-    terminal: [`n${labels.length - 1}`],
-    cyclic: false,
-    warnings: [],
-  };
-}
-
-/** Read the bundled plan out of the built app, so this script holds no copy of it. */
-async function bundledSafetyPlan() {
+async function bundledSafetyGear() {
   const mod = await import(
-    new URL('../sentinel/dist/modules/learn/fixtures.learn.js', import.meta.url).href
+    pathToFileURL(join(ROOT, 'sentinel', 'dist', 'modules', 'mentor', 'fixtures.demo.js')).href
   );
-  return JSON.parse(mod.SAFETY_PLAN_JSON);
+  return {
+    plan: JSON.parse(mod.DEMO_PLAN_JSON[PROJECT]),
+    build: JSON.parse(mod.DEMO_BUILD_JSON[PROJECT]),
+  };
+}
+
+/** The build history, replayed as the event stream a client would have streamed. */
+const asEvents = (build) => [
+  ...build.steps
+    .filter((s) => s.kind === 'implement')
+    .map((s) => ({
+      schema: 'lumina.build_event/v1',
+      kind: 'component_built',
+      component: s.component,
+      file: s.file,
+      line: s.line,
+      at: s.at,
+      summary: s.summary,
+      source: 'probe',
+    })),
+  ...(build.failure
+    ? [
+        {
+          schema: 'lumina.build_event/v1',
+          kind: 'test_run',
+          outcome: 'fail',
+          file: build.failure.file,
+          line: build.failure.line,
+          at: 'T+90m',
+          summary: build.failure.message,
+          source: 'probe',
+        },
+      ]
+    : []),
+];
+
+let fleet;
+try {
+  fleet = await openFleet({ local: true, clientName: 'probe' });
+  if (fleet.missing.length) {
+    console.error(R(`\nNot built: ${fleet.missing.join(', ')}. Run: npm run build:all\n`));
+    process.exit(1);
+  }
+  const call = fleet.call;
+
+  h('The fleet');
+  for (const svc of fleet.services.values()) {
+    console.log(`  ${svc.label}  ${svc.name} ${svc.version}  ${DIM(svc.role)}`);
+    console.log(`        ${DIM(svc.tools.join('  '))}`);
+  }
+  const writers = fleet.allTools().filter((t) => /patch|write|fix_code|edit|apply|heal/i.test(t));
+  console.log(`  can modify a student's build: ${writers.length ? bad(writers.join(', ')) : ok('nothing')}`);
+
+  // ① the choice ─────────────────────────────────────────────────────────────
+  h('① list_roles → projects_for_role  (MCP-1)');
+  const roles = await call('list_roles', { handle: HANDLE });
+  console.log(`  ${roles.coverage.roles} roles across ${roles.coverage.projects} projects · ${roles.coverage.playableSeats}/${roles.coverage.seats} seats playable`);
+  console.log(`  ${DIM(roles.honesty)}`);
+  const offers = await call('projects_for_role', { role: ROLE, handle: HANDLE });
+  const seat = offers.projects.find((p) => p.project === PROJECT);
+  console.log(`  ${ROLE} → ${offers.projects.map((p) => p.project).join(', ')}`);
+  console.log(`  ${DIM(seat.why_its_worth_your_afternoon)}`);
+
+  // ② the role slice ─────────────────────────────────────────────────────────
+  h('② open_brief  (MCP-1)');
+  const brief = await call('open_brief', { project: PROJECT, role: ROLE, handle: HANDLE });
+  console.log(`  owns     ${brief.you_own.map((o) => o.component).join(', ')}`);
+  console.log(`  given    ${brief.given_to_you.map((g) => `${g.component} (${g.owned_by})`).join(', ')}`);
+  console.log(`  not ours ${brief.not_yours.join(', ') || '(nothing)'}`);
+  console.log(`  concept  ${brief.concept_you_are_here_to_learn.question}`);
+  console.log(`  answer   ${JSON.stringify(brief).includes(ANSWER) ? bad('LEAKED') : ok('not in this process')}`);
+
+  // ③ the design ─────────────────────────────────────────────────────────────
+  h('③ check_scope  (MCP-1) — scope drift, before a line of code');
+  const { plan, build } = await bundledSafetyGear();
+  const scope = await call('check_scope', { project: PROJECT, role: ROLE, plan });
+  console.log(`  in_scope=${scope.in_scope ? ok('true') : bad('false')}  ${DIM(scope.summary)}`);
+  const withExtra = {
+    ...plan,
+    nodes: [...plan.nodes, { id: 'n-dashboard', type: 'component', label: 'dashboard', position: { x: 900, y: 0 }, data: {} }],
+    order: [...plan.order, 'n-dashboard'],
+  };
+  const foreign = await call('check_scope', { project: PROJECT, role: ROLE, plan: withExtra });
+  console.log(`  + dashboard → in_scope=${foreign.in_scope === false ? ok('false') : bad('true')}  out_of_scope=${(foreign.out_of_scope ?? []).join(', ')}`);
+
+  // ④ the work plan ──────────────────────────────────────────────────────────
+  h('④ checkpoint_spec  (MCP-1) — gates in the order THEY drew');
+  const derived = await call('checkpoint_spec', { project: PROJECT, role: ROLE, plan, handle: HANDLE });
+  const spec = derived.spec;
+  for (const c of spec.checkpoints) {
+    console.log(`  ${c.id.padEnd(6)} ${c.kind.padEnd(9)} ${c.subject}${c.blockedBy.length ? DIM(`   after ${c.blockedBy.join(', ')}`) : ''}`);
+  }
+  console.log(`  ${DIM(spec.definition_of_done)}`);
+
+  // ⑤ the build, watched ─────────────────────────────────────────────────────
+  h('⑤ open_session → build_event  (MCP-2) — watching, not blocking');
+  const opened = await call('open_session', { spec, plan, student: `handle:${HANDLE}` });
+  const events = asEvents(build);
+  const streamed = await call('build_event', { session: opened.session.id, events });
+  console.log(`  session ${opened.session.id} · ${streamed.accepted} event(s) accepted, ${streamed.rejected.length} rejected`);
+  console.log(`  gates   ${streamed.passed}/${streamed.of} passed`);
+  console.log(`  order   ${streamed.out_of_order.length ? bad(streamed.out_of_order.join(' · ')) : ok('as designed')}`);
+  if (streamed.stuck) console.log(`  stuck   ${streamed.stuck.subject} — ${DIM(streamed.stuck.why)}`);
+
+  // ⑥ the verdict ────────────────────────────────────────────────────────────
+  h('⑥ build_verdict  (MCP-2) — the artifact MCP-3 files');
+  const verdict = await call('build_verdict', { session: opened.session.id, student: `handle:${HANDLE}`, finalise: true });
+  const d = verdict.verdict.drift;
+  console.log(`  status      ${verdict.status === 'escalated' ? ok('escalated') : verdict.status}`);
+  console.log(`  origin      ${d?.origin ? `${d.origin.component} @ ${d.origin.file}:${d.origin.line}` : '(none)'}`);
+  console.log(`  should be   after ${d?.origin?.shouldFollow ?? '—'}  (planned ${d?.origin?.plannedPosition}, built ${d?.origin?.actualPosition})`);
+  console.log(`  surfaced    ${d?.failure ? `${d.failure.file}:${d.failure.line}` : '(none)'}`);
+  console.log(`  confidence  ${ok(String(d?.confidence))}  ${DIM(`provenance ${verdict.verdict.provenance} — pricing's authored history scores 0.91`)}`);
+  console.log(`  boundary    ${(verdict.expected_unbuilt ?? []).join(', ') || '(none)'} ${DIM('— correctly unbuilt, not outstanding work')}`);
+  console.log(`  fix         ${verdict.fix_withheld ? ok('withheld') : bad('RETURNED')}`);
+  console.log(`  next        ${DIM(verdict.next_question)}`);
+
+  // ⑦ the card ───────────────────────────────────────────────────────────────
+  h('⑦ record_verdict → flashcard  (MCP-3) — the only process with an answer');
+  await call('record_verdict', { verdict: verdict.verdict, student: `handle:${HANDLE}` });
+  const red = await call('flashcard', { project: PROJECT, role: ROLE, student: `handle:${HANDLE}`, test_output: '# tests 4\n# pass 3\n# fail 1' });
+  console.log(`  tests red   earned=${red.earned === false ? ok('false') : bad('true')} · back field ${'back' in red ? bad('PRESENT') : ok('absent')}`);
+  console.log(`  ${DIM(red.blocking?.[0] ?? '')}`);
+  const junk = await call('flashcard', { project: PROJECT, role: ROLE, student: `handle:${HANDLE}`, test_output: 'looks fine to me' });
+  console.log(`  junk output ${junk.earned === false ? ok('not accepted as passing') : bad('ACCEPTED')}`);
+
+  await call('build_event', { session: opened.session.id, events: [{ schema: 'lumina.build_event/v1', kind: 'test_run', outcome: 'pass', file: build.tests, at: 'T+120m', source: 'probe' }] });
+  const done = await call('build_verdict', { session: opened.session.id, student: `handle:${HANDLE}`, finalise: true });
+  await call('record_verdict', { verdict: done.verdict, student: `handle:${HANDLE}` });
+  const earned = await call('flashcard', { project: PROJECT, role: ROLE, student: `handle:${HANDLE}`, test_output: '# tests 4\n# pass 4\n# fail 0' });
+  console.log(`  tests green earned=${earned.earned ? ok('true') : bad('false')} · earned against ${earned.earnedBy?.origin ?? '(nothing)'}`);
+  console.log(`  ${DIM((earned.back ?? '(withheld)').slice(0, 110))}`);
+
+  console.log(`\n${G('Six stages, three services, a second project.')}`);
+  console.log(DIM('The bridges are not live over stdio — the artifacts were carried by hand, which is'));
+  console.log(DIM('the supported path. Set the peer URLs (DEPLOY.md §5c) and the same walk goes over HTTP.\n'));
+} catch (err) {
+  console.error(R('\nTHREW: ') + (err instanceof Error ? (err.stack ?? err.message) : String(err)));
+  process.exitCode = 1;
+} finally {
+  fleet?.close();
 }

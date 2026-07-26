@@ -16,8 +16,8 @@ hour"*). **Read the box below first** — the fastest path is Studio's Deploy bu
 > | **clean `git clone` → `install:all` → `verify`** | ✅ passes with nothing pre-installed — the judge's path |
 > | `npm run build` in `lumina/` | ✅ Next.js production build clean, 6 routes |
 > | `prompts/get debugging_tutor` | ✅ **fixed** — every `@Prompt` returned the wrong shape and had never worked |
-> | **built** server over stdio, via `npm run mcp` | ✅ `initialize` → **`mentor 1.0.0`**; `tools/list` → **13 tools**, the six stages of the loop |
-> | `npm run walk` | ✅ the nine-turn student journey asserted over real MCP |
+> | **built** servers over stdio, via `node scripts/tools-of.mjs <app>` | ✅ `mentor-roster` **8 tools** · `mentor` **6 tools** · `mentor-profile` **9 tools** |
+> | `npm run walk` | ✅ the twelve-turn student journey asserted across all three apps over real MCP |
 > | `explain_drift` on the built artifact | ✅ origin `tax @ build/pricing.js:12`, confidence **0.91**, `fix_withheld: true` |
 > | `resources/list` | ✅ advertises **only** `causal-timeline` (+ health, examples) — `mission-trace` removed |
 >
@@ -128,10 +128,11 @@ From the monorepo root, `npm run sentinel:build` and `npm test` do the same thin
 > launch — which fails on a flaky network or a locked npm cache (seen here: `EPERM` on
 > cache cleanup, server never started, no output). It is now a `devDependency`, so the
 > launch is deterministic and offline. **Verified:** `npx tsx src/index.ts` serves
-> `initialize` as `mentor 1.0.0` and returns **13 tools** — `browse_catalog`, `open_brief`,
-> `check_scope`, `checkpoints`, `record_progress`, `is_it_done`, `explain_drift`,
-> `withhold_fix`, `flashcard`, `mentor_status`. Those are the six stages of one loop
-> (`GAPS.md` Gap 12).
+> `initialize` as `mentor 1.0.0` and returns **6 tools** — `open_session`, `build_event`,
+> `build_verdict`, `explain_drift`, `withhold_fix`, `mentor_status`. That is MCP-2's whole
+> story and only MCP-2's: watch a build against the spec MCP-1 issued, judge it, and refuse
+> to write the fix. The other two thirds of the loop are separate deployments — `mcp-roster`
+> serves the catalog, briefs and lessons, `mcp-profile` the record and the cards.
 >
 > **If you see 3**, you are on a build from before Gap 12 — rebuild. **If you see 23**, the
 > five platform modules got re-registered in `app.module.ts`; see `GAPS.md` Gap 11 for why
@@ -232,7 +233,7 @@ npm run build                  → Installing widget dependencies...  ✓
                                  Bundling widgets...  ✓ (2 widgets)
                                  Compiling TypeScript...  ✓
                                  Build Complete (48.5s)   exit 0
-node dist/index.js             → mentor 1.0.0, 13 tools
+node dist/index.js             → mentor 1.0.0, 6 tools
 ```
 
 **`nitrostack-cli build` installs the widget dependencies itself**, so a plain
@@ -280,7 +281,7 @@ automatically redeploy."*
 > |---|---|
 > | `npm install` | ✅ 330 packages — **including `src/widgets/node_modules`**, so the nested widget deps need no separate step |
 > | `npm run build` | ✅ 5.7s — `src/widgets/out/` (2 widgets) + `dist` |
-> | `node dist/index.js` over stdio | ✅ `mentor 1.0.0`, **13 tools** |
+> | `node dist/index.js` over stdio | ✅ `mentor 1.0.0`, **6 tools** |
 >
 > The cwd trap that `scripts/start-mcp.mjs` exists to work around does **not** affect a
 > deployment: the platform runs the app from its own project root, which is the condition the
@@ -340,43 +341,98 @@ automatically redeploy."*
 
 ## 5b. ✅ DEPLOYED AND VERIFIED (2026-07-25)
 
-**Live — all three, verified over the wire 2026-07-26** with `npm run verify:fleet`:
+**Live — all three, verified over the wire 2026-07-26** with `npm run verify:live`:
 
 | | Service URL | Surface |
 |---|---|---|
 | **MCP-1** roster | `https://roster-6a654317-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` | 8 tools |
-| **MCP-2** sentinel | `https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` | 3 tools |
+| **MCP-2** sentinel | `https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` | 6 tools |
 | **MCP-3** profile | `https://profile-6a65408b-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` | 9 tools |
 
-> ⚠️ **The peers are not wired yet.** All three pass every surface check while
+> ⚠️ **The peers are still not wired.** All three pass every surface check while
 > `roster_status` reports `PROFILE_URL` and `SENTINEL_URL` unset. That is not a
 > contradiction — a missing peer is a *supported state*, so a completely disconnected
-> fleet looks identical to a healthy one from outside. Set the three env vars below on
-> each service, then re-check `roster_status`. Until then there are three working
-> services rather than one product.
+> fleet looks identical to a healthy one from outside, and asking `roster_status` is the
+> only question that tells them apart. **§5c below is the fix, and it is a human step.**
+> Until it is done there are three working services rather than one product.
 
-**Live (MCP-2, historical):** `https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai`
-
-Deployed by path C from the `nitrostacklh/mentor-mcp` mirror. Re-check it any time — after
-every redeploy, and once immediately before the demo:
+### Re-check it any time — after every redeploy, and once immediately before the demo
 
 ```bash
-npm run verify:live -- https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai
+npm run verify:live -- \
+  https://roster-6a654317-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai \
+  https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai \
+  https://profile-6a65408b-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai
 ```
 
-**21/21 against the live service**: `mentor 1.0.0` · exactly 13 tools, all six stages, nothing
-extra · **no tool that can modify a student's build** · `causal-timeline` served and
-`mission-trace` not · `explain_drift` → `tax @ build/pricing.js:12`, confidence **0.91**,
-`fix_withheld` · catalog and brief bundled · **the flashcard's answer appears nowhere in a
-live withheld payload.**
+**Order does not matter** — each service is resolved by the name it reports at
+`initialize`, and every tool call is routed to the app that actually serves that tool.
+Passing the URLs the wrong way round is exactly the mistake worth catching, so it is
+caught rather than assumed away.
 
-Plus REGISTRAR's boundary, checked **as an unauthenticated caller** — which is the position
-anyone who finds the URL is in: anonymous is admitted rather than rejected, `class_progress`
-**refuses** it, and anonymous progress is not persisted so one visitor's run cannot leak into
-the next one's session.
+What it asserts, in seven groups:
+
+| | |
+|---|---|
+| **The fleet** | three services, each identifying as one of the three apps, each deployed exactly once |
+| **Tool surfaces** | 8 · 6 · 9, nothing missing and nothing belonging to another app; **no tool anywhere can modify a student's build**; `causal-timeline` served by MCP-2 and `mission-trace` served by nobody |
+| **The bridges** | `roster_status` reports both peers configured **and reachable** — the only check a disconnected fleet fails |
+| **MCP-1** | catalog and briefs travelled inside the image · the project list is derived from the role · the brief is role-scoped · `open_lesson` withholds its reveal until the student commits · `check_scope` catches someone else's component |
+| **MCP-2** | `explain_drift` → `tax @ build/pricing.js:12`, confidence **0.91**, `fix_withheld` · a spec from MCP-1 driven through `build_verdict` escalates on a witnessed history, `provenance: observed` |
+| **MCP-3** | an unauthenticated caller is admitted as anonymous, `class_progress` **refuses** them, the flashcard withholds with the `back` field **absent**, unrecognised output is not treated as passing, and green text alone does not release an answer without the verifier agreeing |
+| **The split** | the flashcard answer appears in **no** MCP-1 or MCP-2 payload — not filtered, absent, because the string is not in those processes |
+
+> The old one-URL form is gone, and could not have been repaired by editing a list: it
+> drove `browse_catalog`, `open_brief`, `flashcard`, `whoami`, `class_progress` and
+> `record_progress` against a single service, and after the split those live in three
+> processes and two of them no longer exist.
+
+> **One assertion changed rather than moved, and it is worth knowing before a demo.** The
+> pre-split REGISTRAR made anonymous callers *stateless*, so one visitor's run could not
+> surface in the next visitor's session. MCP-3 made a different call: `anonymous` is a real
+> shared record, and `profile_status` says so out loud — *"anonymous progress is shared with
+> every other anonymous caller on this deployment"*. Honest, but it means **two judges
+> hitting the URL back to back share a drawer.** `npm run walk` measures which of the two
+> regimes is live rather than assuming; `verify:live` only reads, so it never writes into
+> that shared record itself.
 
 That group is the one worth re-running before you present: it proves the bundled fixtures
-travelled inside the image, so the app has something to talk about with nothing uploaded.
+travelled inside the image, so the apps have something to talk about with nothing uploaded.
+
+## 5c. Wire the peers — the last human step, and the one nothing else can fake
+
+Each service needs the other two as environment variables. Set them in the NitroCloud
+console (app → **MCP → Settings / Environment**), then redeploy that service.
+
+| Service | Set | To |
+|---|---|---|
+| **roster** | `SENTINEL_URL` | `https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` |
+| | `PROFILE_URL` | `https://profile-6a65408b-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` |
+| **sentinel** | `ROSTER_URL` | `https://roster-6a654317-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` |
+| | `PROFILE_URL` | `https://profile-6a65408b-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` |
+| **profile** | `ROSTER_URL` | `https://roster-6a654317-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` |
+| | `SENTINEL_URL` | `https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai` |
+
+No trailing slash needed — `shared/peer.ts` strips one either way.
+
+**`MENTOR_PEER_TOKEN` is optional and should stay unset here.** It is a shared secret sent
+as a bearer header (and a `peer_token` argument) between the three services; with it set,
+MCP-3 refuses record-writing tools that do not present it. Unset, MCP-3 accepts those
+writes and marks the record `attested: false` — the honest position for a demo deployment,
+and it costs nothing that matters, because **a flashcard answer never depends on
+attestation**: MCP-3 re-parses the student's verbatim test output itself. Setting it buys
+a stricter provenance label and one more thing to get wrong on the day.
+
+Then confirm, rather than assume:
+
+```bash
+npm run verify:live -- <the three URLs>
+```
+
+The **bridges** group above goes green only when `roster_status` reports both peers
+`configured: true` *and* `reachable: true`. Reachability is probed with a real call, not
+inferred from the variable being set, so a URL pointing at a service that is down still
+reads as broken.
 
 > **Storage on the live service is `memory, durable=false`**, and `whoami` says so. Note the
 > reason it gives is *"MENTOR_STORE is not set to sqlite"* — the flag was never set on the

@@ -288,7 +288,7 @@ in this order, and do not lead with the third.
    (`ARCHITECTURE.md` §7). One lifecycle, six skins.
 
    > ⚠️ **Be honest about the strength of claim 3, and consider not making it.** The
-   > submission deploys **13 tools, all of them MENTOR's loop**. The other four adapters ship
+   > submission deploys **23 tools across three services, all of them MENTOR's loop**. The other four adapters ship
    > unregistered, because one of them (`self_heal`) offers to autonomously patch the exact
    > bug MENTOR refuses to patch (`GAPS.md` Gap 11). So the evidence a judge can *see* is a
    > passing test suite and an adapter table on a slide — not a running system.

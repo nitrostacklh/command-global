@@ -96,21 +96,35 @@ npm run probe
 
 Compare against this exactly:
 
-- [ ] `server` → **`mentor 1.0.0`** *(not `command-platform`)*
-- [ ] `tools (13)` → **exactly these, in this order** — the order matters, it is the order a
-      student meets them, and it is how a client's model can tell which stage they're in:
+MENTOR is **three** deployed MCP applications, so there are three surfaces to check, not one.
+`node scripts/tools-of.mjs <app>` prints any of them in about two seconds.
 
-      browse_catalog   open_brief                    ← ROSTER  (stages ① ②)
-      check_scope      checkpoints
-      record_progress  is_it_done                    ← COACH   (stages ③ ④)
-      explain_drift    withhold_fix
-      flashcard        mentor_status                 ← MENTOR  (stages ⑤ ⑥)
+- [ ] `mcp-roster` → **`mentor-roster 1.0.0`**, `tools (8)`:
 
-- [ ] **No `self_heal`, `propose_patch`, `apply_for_scheme`, `run_organization`, `optimize_spend`, or `verify_output`.**
-      If you see **3**, you are on a pre-Gap-12 build — rebuild. If you see **23**, the
-      platform modules got re-registered in `app.module.ts` — read `GAPS.md` Gap 11 before
-      "fixing" that. `self_heal` patches the *same bug* MENTOR refuses to patch.
-- [ ] `prompts (3)` → `pick_a_project`, `work_the_slice`, `debugging_tutor`
+      sign_in  list_roles  projects_for_role  open_brief    ← path, role, assignment (① ②)
+      open_lesson                                           ← the lesson              (③)
+      check_scope  checkpoint_spec                          ← design review + gates   (④)
+      roster_status
+
+- [ ] `sentinel` → **`mentor 1.0.0`** *(not `command-platform`)*, `tools (6)`:
+
+      open_session  build_event  build_verdict              ← watch and judge the build (⑤)
+      explain_drift  withhold_fix                           ← the claim, and the refusal
+      mentor_status
+
+- [ ] `mcp-profile` → **`mentor-profile 1.0.0`**, `tools (9)`:
+
+      open_profile  read_profile  note_role_choice
+      record_verdict  class_progress  profile_status        ← the record
+      flashcard  review_flashcard  due_cards                ← the reward              (⑥)
+
+- [ ] **No `self_heal`, `propose_patch`, `apply_for_scheme`, `run_organization`, `optimize_spend`, or `verify_output`**
+      on any of the three. If `sentinel` serves **3**, you are on a build from before the
+      verifier was wired — rebuild. If it serves **23**, the platform modules got
+      re-registered in `app.module.ts` — read `GAPS.md` Gap 11 before "fixing" that.
+      `self_heal` patches the *same bug* MENTOR refuses to patch.
+- [ ] `prompts` → `pick_a_role`, `review_my_design` (MCP-1) · `debugging_tutor` (MCP-2) ·
+      `pick_up_where_i_left_off`, `quiz_me` (MCP-3)
 - [ ] `resources (3)` → `ui://widget/next-causal-timeline.html`, `health://checks`, `widget://examples`
 - [ ] **No `mission-trace` resource.** Its example payload contained the literal fix.
 - [ ] `origin` → **`tax @ build/pricing.js:12`**

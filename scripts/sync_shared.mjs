@@ -55,6 +55,19 @@ const G = (s) => `\x1b[32m${s}\x1b[0m`;
 const R = (s) => `\x1b[31m${s}\x1b[0m`;
 const DIM = (s) => `\x1b[2m${s}\x1b[0m`;
 
+/**
+ * Compare ignoring line endings.
+ *
+ * Byte comparison made this guard unpassable on Windows and nobody noticed, because
+ * nothing ran it: the banner above is built with `\n` while git hands the checked-out
+ * copies back with `\r\n`, so all twenty copies read as DRIFTED on a tree where every
+ * one of them was byte-identical in content. A guard that cannot pass is a guard that
+ * gets removed from the build, and then the duplication it exists to police is
+ * genuinely unguarded. The thing being protected is the *contract text*, and a
+ * newline convention is not part of a contract.
+ */
+const same = (a, b) => a.replace(/\r\n/g, '\n') === b.replace(/\r\n/g, '\n');
+
 if (!existsSync(SOURCE)) {
   console.error(R(`shared/ not found at ${SOURCE}`));
   process.exit(1);
@@ -94,7 +107,7 @@ for (const target of TARGETS) {
       if (actual === null) {
         console.log(`  ${R('MISSING')}  ${target.app}/…/${file}`);
         drifted++;
-      } else if (actual !== wanted) {
+      } else if (!same(actual, wanted)) {
         console.log(`  ${R('DRIFTED')}  ${target.app}/…/${file}`);
         drifted++;
       } else {
@@ -104,7 +117,7 @@ for (const target of TARGETS) {
     }
 
     const actual = existsSync(dest) ? readFileSync(dest, 'utf8') : null;
-    if (actual === wanted) {
+    if (actual !== null && same(actual, wanted)) {
       console.log(`  ${DIM(`unchanged ${target.app}/…/${file}`)}`);
       continue;
     }
