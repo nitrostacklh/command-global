@@ -13,6 +13,8 @@
     "test:sentinel": "npm --prefix sentinel test",
     "lumina:dev": "npm --prefix lumina run dev",
     "mentor:ui": "npm --prefix lumina run dev",
+    "stack": "node scripts/stack.mjs",
+    "stack:services": "node scripts/stack.mjs --no-ui",
     "lumina:build": "npm --prefix lumina run build",
     "lumina:backend": "npm --prefix lumina run backend",
     "lumina:full": "npm --prefix lumina run full-dev",

@@ -28,6 +28,20 @@ export interface ServiceMeta {
   readonly defaultUrl: string;
 }
 
+/**
+ * Where a service lives when nothing overrides it.
+ *
+ * The deployed URL is the fallback so the page works with no configuration at
+ * all. `npm run stack` sets the `NEXT_PUBLIC_*_URL` vars to its own localhost
+ * ports, which is what makes the local fleet the default without anybody
+ * pasting three URLs into the settings panel first. Read at module scope
+ * because Next inlines `NEXT_PUBLIC_*` at build time — a function call here
+ * would not see them any earlier, and this keeps the constant a constant.
+ */
+function endpoint(fromEnv: string | undefined, deployed: string): string {
+  return fromEnv?.trim() || deployed;
+}
+
 export const SERVICES: readonly ServiceMeta[] = [
   {
     key: 'roster',
@@ -35,8 +49,10 @@ export const SERVICES: readonly ServiceMeta[] = [
     title: 'Roster',
     owns: 'role, projects, the brief, the lesson, and the checkpoint spec',
     colour: '#1565C0',
-    defaultUrl:
+    defaultUrl: endpoint(
+      process.env.NEXT_PUBLIC_ROSTER_URL,
       'https://roster-6a654317-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai/mcp',
+    ),
   },
   {
     key: 'sentinel',
@@ -44,8 +60,10 @@ export const SERVICES: readonly ServiceMeta[] = [
     title: 'Sentinel',
     owns: 'checkpoint verification, drift, and the build verdict',
     colour: '#D4AF37',
-    defaultUrl:
+    defaultUrl: endpoint(
+      process.env.NEXT_PUBLIC_SENTINEL_URL,
       'https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai/mcp',
+    ),
   },
   {
     key: 'profile',
@@ -53,8 +71,10 @@ export const SERVICES: readonly ServiceMeta[] = [
     title: 'Profile',
     owns: 'the whole student record, and the only copy of a concept answer',
     colour: '#FF6D00',
-    defaultUrl:
+    defaultUrl: endpoint(
+      process.env.NEXT_PUBLIC_PROFILE_URL,
       'https://profile-6a65408b-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai/mcp',
+    ),
   },
 ] as const;
 

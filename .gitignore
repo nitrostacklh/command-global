@@ -54,3 +54,7 @@ Thumbs.db
 
 # claude-flow / ruflo local daemon state — machine-specific, never shared
 .claude-flow/
+
+# Local full-stack run (npm run stack) — a student record and its log, both machine-local.
+mentor-profiles.db*
+stack.log
