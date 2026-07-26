@@ -1,22 +1,47 @@
 {
   "$comment": [
-    "Project-scoped MCP config. Open this folder in Claude Code (or any client that",
-    "reads .mcp.json) and MENTOR is connected — that is the fastest way to use this",
+    "Project-scoped MCP config. Open this folder in Claude Code (or any client that reads",
+    ".mcp.json) and all three MENTOR services connect — that is the fastest way to use this",
     "product the way a student does, with a real model choosing the tools.",
     "",
-    "It goes through scripts/start-mcp.mjs rather than straight to",
-    "sentinel/dist/index.js on purpose: @nitrostack/core resolves widget HTML from",
-    "process.cwd(), so launching the entry point directly from the repo root fails",
-    "at startup with an error about a missing HTML file. The launcher chdirs first.",
+    "MENTOR is THREE deployed applications, not one, and the split is the security boundary:",
+    "MCP-3 is the only process that ever holds a flashcard answer. Connecting all three is",
+    "what makes the loop close — MCP-1 files your role choice with MCP-3 and hands the",
+    "checkpoint spec to MCP-2, and MCP-2 files its verdict back to MCP-3, which is what",
+    "releases the card once your own tests are green.",
     "",
-    "Requires a build: npm run sentinel:build",
+    "These are the LIVE services on NitroCloud (DEPLOY.md 5b), so the server-to-server",
+    "bridges are real. Needs a network, but no API key and no account.",
     "",
-    "See WALKTHROUGH.md for what to actually say once it is connected."
+    "OFFLINE INSTEAD: after npm run build:all, swap each block for its stdio equivalent —",
+    "",
+    "  mentor-roster   command node, args [dist/index.js], cwd mcp-roster",
+    "  mentor          command node, args [scripts/start-mcp.mjs]",
+    "  mentor-profile  command node, args [dist/index.js], cwd mcp-profile",
+    "",
+    "The cwd matters: @nitrostack/core resolves widget HTML from process.cwd(), so launching",
+    "an entry point from the repo root dies at startup with an error about a missing HTML",
+    "file — which reads like a broken widget build and is not. scripts/start-mcp.mjs chdirs",
+    "first, which is why MCP-2 goes through it.",
+    "",
+    "Offline the peer URLs are unset, so the three cannot call each other and you carry the",
+    "artifacts between them by hand. That path is fully supported and each service says so",
+    "rather than implying your work is being kept.",
+    "",
+    "See WALKTHROUGH.md for what to actually say once this is connected."
   ],
   "mcpServers": {
+    "mentor-roster": {
+      "type": "http",
+      "url": "https://roster-6a654317-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai/mcp"
+    },
     "mentor": {
-      "command": "node",
-      "args": ["scripts/start-mcp.mjs"]
+      "type": "http",
+      "url": "https://mentor-6a64f852-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai/mcp"
+    },
+    "mentor-profile": {
+      "type": "http",
+      "url": "https://profile-6a65408b-the-localhosts-amrita-university-coimbatore.app.nitrocloud.ai/mcp"
     }
   }
 }
