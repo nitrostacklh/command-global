@@ -9,12 +9,19 @@
 
 ## The one-paragraph summary
 
-**MENTOR is built** (Gap 3) **and so is its widget** (Gap 4). 128/128 tests green, verified
-end-to-end over real MCP: `explain_drift` returns the exact claim the concept doc promises —
-origin `pricing.js:12`, error surfaced at `pricing.test.js:40`, confidence 0.91 computed
-rather than hardcoded — and the causal-timeline widget renders it with the fix withheld and
-a follow-up question wired to chat. The engine reframe worked, so the §6 Research claim
-holds: **one engine, six unrelated domains, the sixth of which inverts it.**
+**MENTOR is built** (Gap 3) **and so are both its widgets** (Gaps 4 and 13). **157 tests green
+across three apps — sentinel 47 · mcp-roster 46 · mcp-profile 64**, every number watched
+printing on 2026-07-26. Verified end-to-end over real MCP: `explain_drift` returns the exact
+claim the concept doc promises — origin `pricing.js:12`, error surfaced at
+`pricing.test.js:40`, confidence 0.91 computed rather than hardcoded — and the causal-timeline
+widget renders it with the fix withheld and a follow-up question wired to chat. The engine
+reframe worked, so the §6 Research claim holds: **one engine, six unrelated domains, the sixth
+of which inverts it.**
+
+> **Read the count above as the corrected one.** This file said `128/128` for a day after the
+> three-MCP split had stopped that from being true, which is the specific failure Gap 16 and
+> Gap 15 are both about. Every count in this file is now a number someone ran. Where a number
+> is inherited from before the split and has not been re-observed, it says so.
 
 Gap 2 is now closed too: Lumina has a real **`component`** node, and the fixture's plan is
 no longer a stand-in shape but a byte-identical **real export** from the canvas. Gap 11 —
@@ -34,37 +41,44 @@ That also settles **Gap 5**: a tracked checkpoint log *is* a build history, so p
 is the floor rather than the ceiling — `safety-gear` scores **0.97** on evidence that was
 actually observed rather than remembered.
 
-What's left is no longer engineering. It is: **deploy it** (a solved procedure — Gap 1),
-**run the n=5 study** (Gap 7, the cheapest unclaimed points in a Research track), and
-**name the product** (Gap 8 — still `[[PRODUCT NAME]]`). Plus one genuine hole: **Layer 2,
-the lesson panels, is now the only stage of the loop with nothing behind it** (Gap 13).
+What's left is no longer engineering. It is: **run the n=5 study** (Gap 7, the cheapest
+unclaimed points in a Research track) and **get two questions answered by people** (Gaps 9
+and 17). The deploy is done, the product is named, and Layer 2 has both a tool and a widget.
 
 | # | Gap | Severity | Who unblocks it |
 |---|---|---|---|
-| 1 | Deploy to NitroCloud + connect a client | 🟠 **do this next** | you, ~30 min |
-| 16 | **The three-MCP split left `main` broken** — sentinel did not compile; 58 tests deleted, never ported | 🔴 **read this first** | partly fixed below |
-| 13 | ~~Layer 2 (lesson panels)~~ | ✅ **built** — `mentor.lesson/v1`, 5 lessons, 14 tests | widget still open |
-| 7 | Evidence study (n=5) not run — **protocol ready** in `STUDY.md` | 🟡 free points, Research track | ~2h with classmates |
-| 8 | Open `[[placeholders]]` incl. product name | 🟡 submission hygiene | you |
-| 9 | Six official tracks never confirmed | 🟡 submission hygiene | organizers |
-| 14 | Only 2 of 5 catalog roles are playable | 🟢 honest, and reported as such | ~1h per brief |
+| 7 | Evidence study (n=5) not run — **protocol ready** in `STUDY.md` | 🟠 **do this next** · free points, Research track | ~2h with classmates |
+| 16 | The three-MCP split left `main` broken — sentinel did not compile; 58 tests deleted | 🟡 **build fixed, tests ported**; one hole left, see below | MCP-2's `verify/` is still unwired |
+| 9 | Six official tracks never confirmed | 🟡 submission hygiene | **organizers** |
+| 17 | Who authors the next three projects? | 🟡 blocks the curriculum slide, not the demo | **a person has to volunteer** |
+| 18 | Root `npm test` and `check:docs` only see one of three apps | 🟡 the guards under-report | Stream A (`scripts/`, `package.json`) |
 | 10 | Lumina hygiene (uncommitted work, no CI) | 🟢 low | ~1h |
+| 1 | ~~Deploy to NitroCloud~~ | ✅ **done** — three services live, verified over the wire | done |
+| 8 | ~~Open `[[placeholders]]` incl. product name~~ | ✅ **resolved** — the product is **MENTOR** | done |
+| 13 | ~~Layer 2 (lesson panels)~~ | ✅ **closed, both halves** — `mentor.lesson/v1` + the `lesson-panels` widget | done |
+| 14 | ~~Only 2 of 5 catalog roles are playable~~ | ✅ **closed** — all 5 seats briefed, 3 demoable | done |
 | 12 | ~~The bridges between the layers~~ | ✅ **closed** — 5 versioned artifacts | done |
 | 5 | ~~Build history is authored, not derived~~ | ✅ **resolved** — `provenance: observed` | done |
 | 2 | ~~Lumina can't express a software architecture~~ | ✅ **closed** — `component` node | done |
 | 6 | ~~Plan can't reach a deployed MENTOR~~ | ✅ **resolved** — tool argument | done |
 | 3 | ~~MENTOR doesn't exist~~ | ✅ **built** | done |
 | 4 | ~~`causal-timeline` widget~~ | ✅ **built** | done |
-| 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 → 3, now 13 on one story | done |
-| 15 | ~~Docs asserted counts the code owns, and drifted~~ | ✅ **fixed** — `npm run check:docs` | done |
+| 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 → 3, now 20 across three services, all one story | done |
+| 15 | ~~Docs asserted counts the code owns, and drifted~~ | ✅ **fixed** — `npm run check:docs` (but see Gap 18) | done |
+| 19 | ~~Student work did not survive the conversation~~ | ✅ **fixed** — REGISTRAR, now MCP-3. *(Was a second Gap 16; renumbered.)* | done |
 
-*Reordered 2026-07-25 (five times): after the Studio handbook downgraded Gap 1, after MENTOR
-shipped, after Gaps 2 and 11 closed, after Gap 12 closed the bridges, and after a review
-found Gap 15. **Gap 1 is still the critical path** — the code exists and isn't live yet.*
+*Reordered 2026-07-26 (seventh time): after the deploy landed, after the 58 tests were ported,
+after Gap 13's widget shipped, and after porting the tests proved Gap 14 had already closed
+without anyone noticing. **Gap 7 is now the critical path** — it is the only remaining item
+that would change how the submission is read, and it needs people rather than code.*
+
+> **Two gaps were added by finishing the others**, which is the honest way for this list to
+> grow: Gap 17 (the curriculum needs an author) was hiding inside Gap 8's placeholder, and
+> Gap 18 (the root guards only see sentinel) was invisible while sentinel was the only app.
 
 ---
 
-## Gap 16 — 🔴 The three-MCP split left `main` broken, and the test count is not what this file says
+## Gap 16 — 🟡 The three-MCP split left `main` broken — build fixed, 58 tests ported, one hole left
 
 **Found 2026-07-26, by running the suite rather than reading about it.** PR #1
 (`three-mcp-architecture`, merge `aab534d`) moved `learn/` and `registrar/` out of `sentinel/`
@@ -74,9 +88,34 @@ into the two new apps and left the imports behind. Consequences, all verified:
 |---|---|---|
 | `sentinel` build | ❌ 5 × TS2307 — `npx tsc` fails, so **0 tests ran** | ✅ compiles, **47/47** |
 | `sentinel` tool surface | declared a `flashcard` tool whose code had moved to MCP-3 | ✅ removed |
-| `mcp-roster` tests | **0** | ✅ **14** (this session's, on Gap 13) |
-| `mcp-profile` tests | **0** | ❌ still 0 |
-| `npm run fixture:check` | ❌ red | ❌ still red — see below |
+| `mcp-roster` tests | **0** | ✅ **46/46** |
+| `mcp-profile` tests | **0** — on a service serving live public traffic | ✅ **64/64** |
+| `npm run fixture:check` | ❌ red | ⚠️ passes, but skips its own sync check — see below |
+
+**The 58 tests are ported.** `learn.test.ts` (42) and `registrar.test.ts` (16) were recovered
+from `e15810a` and split along the new deployment boundaries — six files, and the counts above
+are what the runner printed. The modules had been reshaped by the split, so this was a port and
+not a paste; five things it turned up are in the commit message, and three of them are findings
+about the *original* tests rather than about the new code:
+
+- **`assertNoFix`'s regex had a false positive and a dead alternative.** It flagged any `;` as
+  code, and `record-before-you-notify` — a concept authored *after* the split — legitimately
+  reads *"…watching the screen; it fails the first time…"*. Separately its `=>` alternative sat
+  inside `\b(…)\b`, and `\b=>\b` cannot match, so an arrow function would have passed straight
+  through. The original suite never caught either, because it only ever checked two concepts.
+- **Gap 14 had already closed and nobody had noticed** — see that gap below.
+- **Bundled plans are per *project*, not per seat**, so `demo: true` is the flag that means a
+  plan exists for *this* seat. A consequence worth knowing: one project cannot have two
+  demoable seats.
+
+**Still open, and it is a real coverage hole:** `sentinel/src/modules/verify/` —
+`verifyCheckpoints`, `findStuck`, `buildFromEvents`, which are **MCP-2's actual job** — has no
+`@Module`, no tools and no tests, and nothing imports it. Thirteen of the original 58 cases
+tested exactly that behaviour (`recordProgress`, `buildFromProgress`, `judgeDone`,
+`passedCheckpoints`, and two on `findDrift`) and **could not be ported**, because those
+functions no longer exist in either app the porting stream owned. They are recorded at the foot
+of `mcp-roster/src/catalog/spec.test.ts` rather than replaced with tests of something adjacent.
+Wiring `verify/` up is MCP-2's work and it is the largest single thing still missing.
 
 **Fixed here:** the build. `sentinel/src/app.module.ts` no longer imports three modules that
 do not exist in the package, and `mentor.module.ts` no longer carries the pre-split
@@ -84,26 +123,41 @@ do not exist in the package, and `mentor.module.ts` no longer carries the pre-sp
 card answer, so a `flashcard` tool living in MCP-2 contradicts the invariant rather than
 merely duplicating a verb. `mcp-profile/src/cards.module.ts` already has the real one.
 
-**Not fixed, and someone has to decide:**
+**Still someone else's call — both are in `scripts/` and `package.json`, which the porting
+stream does not own:**
 
-1. **58 test cases were deleted and never ported** — `learn.test.ts` (42) and
-   `registrar.test.ts` (16), covering ROSTER, COACH, the card gate and REGISTRAR. They were
-   removed with the modules they tested; the modules were recreated in the new apps, the
-   tests were not. **This file's "128/128 green" is no longer true** and neither is
-   `FINAL_README.md`'s. The honest number today is 61 (47 + 14), across two of three apps.
-2. **`scripts/embed_learn_fixtures.mjs` is orphaned** — it writes
+1. **`scripts/embed_learn_fixtures.mjs` is orphaned** — it writes
    `sentinel/src/modules/learn/fixtures.learn.ts`, a path deleted in the split, and it is
-   still wired into `npm run fixture:check`, which is why `npm run verify` is red. It was
-   superseded by `embed_fixtures.mjs`, which writes all three apps. Removing it from the
-   `fixture:check` script is probably right, but that is the project's verify gate and not a
-   call to make silently.
-3. **`sentinel/src/modules/verify/`** — `verifyCheckpoints`, `findStuck`, `buildFromEvents`,
-   added by the split as MCP-2's actual job — is **completely unwired**. No `@Module`, no
-   tools, no tests, and nothing imports it.
+   still wired into `npm run fixture:check`. It was superseded by `embed_fixtures.mjs`, which
+   writes all three apps. `fixture:check` now *exits 0*, which is worse than red: it prints
+   `fixtures.learn.ts is missing` and `skipped embedded-fixture sync check`, so the gate that
+   exists to catch embedded copies drifting from disk is **silently not running**. Removing it
+   from the script is probably right, but that is the project's verify gate and not a call to
+   make silently.
+2. **The root guards only ever look at `sentinel`** — promoted to its own gap, **Gap 18**,
+   because it is not a consequence of the split so much as something the split made wrong.
 
 ---
 
-## Gap 1 — ~~🔴~~ 🟡 **DOWNGRADED** — deploy no longer depends on the repo layout
+## Gap 1 — ~~Deploy to NitroCloud~~ ✅ **DONE** — three services live and verified over the wire
+
+**All three are deployed and serving: MCP-1 `mentor-roster` (8 tools), MCP-2 `mentor-mcp`
+(3 tools), MCP-3 `mentor-profile` (9 tools) — 20 tools, verified over the wire.** URLs are in
+`DEPLOY.md`. This was the critical path for two days and it is no longer on the list.
+
+**Path C turned out to matter after all**, which is why the repo now has four remotes rather
+than one. NitroCloud's *Connect Repository* dialog has **no Root Directory field** — the
+handbook's omission was accurate, not incomplete — so a repo deploys at its own root and an app
+in a subdirectory cannot be deployed by it. Hence the three one-way mirrors
+(`nitrostacklh/mentor-roster`, `mentor-mcp`, `mentor-profile`) generated by
+`scripts/push-mirrors.mjs`. The monorepo stays the source of truth; the mirrors are never
+edited by hand.
+
+**One rules question is still open and it is not ours:** whether connecting `{serviceUrl}/sse`
+to ChatGPT is a hard submission criterion, or whether a NitroStudio AI Chat demo satisfies it.
+See the box below — that is a *people* problem, and it is the only part of this gap that is.
+
+<details><summary>The original analysis, kept for the record</summary>
 
 **Resolved by `NitroStack_Studio_Handbook.pdf` §9, read 2026-07-25.** This was written as
 the blocker. It isn't one: the handbook documents **three** deploy paths, and two of them
@@ -135,7 +189,8 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 
 - **`sentinel/` calls no LLM at all.** Verified: zero LLM references in its own source, zero
   outbound HTTP, four dependencies (`@nitrostack/core`, `@modelcontextprotocol/ext-apps`,
-  `dotenv`, `zod`), and 128/128 tests pass with no key and no network. In MCP the *client* model
+  `dotenv`, `zod`), and every test passes with no key and no network — 128/128 when this was
+  written, **157 across the three apps today**. In MCP the *client* model
   is the agent (`ARCHITECTURE.md` §2, Idea 2), and MENTOR needs one least of all six
   commanders — drift detection is an ordering comparison, the confidence is a formula, the
   refusal is hardcoded. **There is nothing to generate.**
@@ -155,13 +210,15 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 per-student cost.* Schools cannot buy Copilot seats for every student, and that argument
 lands with an education judge while reinforcing the §5 incentive moat.
 
-> **Verified:** `sentinel/` builds and passes 128/128 from its new path, and
+> **Verified (2026-07-25, pre-split — sentinel alone is 47/47 today):** `sentinel/` builds and passes 128/128 from its new path, and
 > `npx tsx src/index.ts` — Studio's actual launch command — serves `initialize` +
 > `tools/list` over stdio with every tool registered. Also fixed along the way: **`tsx`
 > was not a declared dependency**, so Studio's launch relied on `npx` fetching it and
 > failed here with an `EPERM` npm-cache error, server never starting. It's a
 > `devDependency` now. That would have presented on the day as Studio's
 > *"Dependencies not installed / tsx is not available"* and cost real debugging time.
+
+</details>
 
 ---
 
@@ -196,8 +253,8 @@ what a wired canvas produces.
 **MENTOR's finding did not change** — origin still `tax @ build/pricing.js:12`,
 confidence still **0.91**, failure still `pricing.test.js:40`. That was the prediction
 when this gap was opened ("switching to A requires no change to the plan artifact"), and
-it held: 128/128 tests pass untouched, and `fixture:check` confirms the embedded copies
-still match disk.
+it held: the whole suite passed untouched (128/128 at the time; **157** today), and
+`fixture:check` confirmed the embedded copies still matched disk.
 
 <details>
 <summary>The original analysis, kept for the record</summary>
@@ -368,8 +425,9 @@ single character — `^` where the file had `↑`.)
 ## Gap 7 — The evidence study has not been run 🟡
 
 **n = 0.** `MENTOR-CONCEPT.md` §7 specifies it (n=5, split A/B against Copilot, measure
-time-to-locate on a second bug of the same class, unaided) and annotates it
-`[[RUN THIS. One number changes how the submission is read.]]`.
+time-to-locate on a second bug of the same class, unaided). Its old *"RUN THIS"* placeholder was
+resolved on 2026-07-26 into plain prose — not because anything was done, but because a
+placeholder pretending to be a task was hiding a gap that belongs on this list instead.
 
 That annotation is correct and this is the cheapest unclaimed points in the whole
 submission. The track is **Education & Research**; almost no hackathon entry contains a
@@ -399,23 +457,39 @@ Gap 3 is done, so nothing blocks this but scheduling.
 
 ---
 
-## Gap 8 — Unresolved `[[placeholders]]` 🟡
+## Gap 8 — ~~Unresolved `[[placeholders]]`~~ ✅ **RESOLVED** (2026-07-26)
 
-Still open in `MENTOR-CONCEPT.md`:
+**The product is MENTOR.** Every `[[placeholder]]` in `MENTOR-CONCEPT.md` is now closed, and
+the two that only a person can answer are marked **ASK** in place rather than guessed at.
 
-- **`[[PRODUCT NAME]]`** — the doc's own title. §9 says the student-facing product may
-  need a name separate from MENTOR, and that COMMAND/SENTINEL/AEGIS is
-  "military-enterprise vocabulary… wrong for a student-facing education product."
-  **Partly done (Gap 11):** the MCP server now identifies itself as `mentor` and the
-  package is `mentor`, so the two surfaces a judge's client actually shows are no longer
-  `command-platform` / `sentinel-mcp`. Still open: the *product* name in this doc's title,
-  and this repo is still `command-global`.
-- **§3 Layer 1: role-based or project-based?** Changes §3. `fixtures/pricing/README.md`
-  is written role-based (§3's stated assumption) — if that's wrong, that file changes.
-- **§3 Layer 2: how many panels per lesson?** Doc suggests 4–6. Roadmap anyway (§8).
-- **§7: `n = [[5]]`** — confirm the number.
-- **§10: who authors project #2, and when?** Out of submission scope; answer it before
-  promising a curriculum on the roadmap slide.
+| Placeholder | Resolution |
+|---|---|
+| **`[[PRODUCT NAME]]`** ×3 | **MENTOR.** See below — the code had already decided |
+| §3 Layer 1: role-based or project-based? | *(was already struck)* both, in that order |
+| §3 Layer 2: how many panels per lesson? | **four** — `setup` · `commit` · `witness` · `generalise`, on all five seats. Answered by building it, not by picking from the suggested 4–6 |
+| §3: `[[N]]` deliverables | **three** acceptance criteria, the same on every seat |
+| §7: `n = [[5]]` | **5**, pre-committed in `STUDY.md` along with the analysis |
+| §7: `[[RUN THIS]]` | still not run — that is Gap 7, and it stays open as a *gap* rather than as a placeholder |
+| §6: which official track name | **ASK — organizers.** Gap 9 |
+| §10: multi-file causality? | **answered**: every one of the five seats scopes to a single entry file |
+| §10: who authors project #2? | **ASK — a person.** Promoted to Gap 17, because three projects ship now and the real question changed |
+
+**Why MENTOR rather than a new student-facing name.** §9 asked whether the product needed one
+separate from the commander. It does not, and the honest reason is that the decision had
+already been made by the code — the document was the only thing that had not caught up:
+
+- the MCP servers identify as `mentor-roster` / `mentor` / `mentor-profile`
+- the packages are `mentor`, `mentor-roster`, `mentor-profile`
+- **all seven artifact schemas** are `mentor.*`
+- the three deployed services are `mentor-*`
+
+Minting a second name now would make the slide and `tools/list` disagree — which is precisely
+the failure Gap 15 exists to prevent, committed deliberately and at the level of the product's
+own name.
+
+**Left alone on purpose: the repo is still `command-global`.** Renaming it breaks three mirror
+remotes and `scripts/push-mirrors.mjs` on submission day to fix something no judge sees. It is
+the platform's name, and the platform is what this repo is a history of.
 
 ## Gap 9 — The six official tracks were never confirmed 🟡
 
@@ -424,6 +498,83 @@ Carried over from `ARCHITECTURE.md` §16.2 and still open. The commanders were m
 RELAY→Civic) and `MENTOR-CONCEPT.md` §6 asks to confirm "Education & Research" is the
 real printed track name. Get the list from the organizers; it affects the slide, the
 README, and each commander's framing text.
+
+**This is the one open question no work in this repo can close.** Everything else on this list
+is either code or a decision we are allowed to make. Marked **ASK** in `MENTOR-CONCEPT.md` §6.
+
+## Gap 17 — Nobody is committed to authoring the next three projects 🟡
+
+**Split out of Gap 8 on 2026-07-26, because finishing Gap 8 changed the question.** The old
+placeholder asked *"who authors project #2, and when?"* — three projects and five seats now
+ship, so #2 is answered by the repo. The live question is whether anyone is committed to
+writing the **fourth, fifth and sixth**, which is what turns a demo into a curriculum.
+
+**This blocks a slide, not the demo.** The submission is complete without it. But
+`MENTOR-CONCEPT.md` §8 lists "a curriculum" on the roadmap, and a roadmap item with no name
+against it is the kind of claim a judge is trained to discount — the same reason §6 warns
+against leading with "we built more than we are showing you".
+
+The cost is known and small, which is what makes the absence of a volunteer the whole problem:
+roughly an hour per seat — `owns`, `given`, three acceptance criteria, four lesson panels, and
+a concept whose answer is a principle rather than code. **ASK: get a name against it, or drop
+"curriculum" from the roadmap slide and say "three projects, and the authoring cost is an hour
+a seat" instead.** The second is a better slide than an unowned promise.
+
+## Gap 18 — The root guards only ever look at `sentinel` 🟡
+
+**Found 2026-07-26 by running them after the test count tripled.** Both of the repo's
+top-level quality gates were written when `sentinel` was the only app, and the split left them
+measuring one third of the project while still reporting green:
+
+| Gate | What it does now | Consequence |
+|---|---|---|
+| `npm test` (root) | `npm --prefix sentinel test` | **110 of the 157 tests never run from the root.** `npm run verify` inherits this |
+| `npm run check:docs` | starts `sentinel/dist` and reads *its* `tools/list` | every doc's tool count is compared against MCP-2's **3**, so it flags correct statements as wrong |
+| `npm run fixture:check` | calls the orphaned `embed_learn_fixtures.mjs` | exits 0 while printing that it **skipped** the sync check (Gap 16) |
+
+`check:docs` is the awkward one, and it deserves care rather than deletion.
+
+**Measured 2026-07-26, before and after the documentation pass** (`git stash` on the doc
+changes, ran the gate, unstashed):
+
+| | Findings | Exit |
+|---|---|---|
+| Before the doc corrections | **17** | 1 |
+| After | **27** | 1 |
+
+**Correcting the docs made the gate noisier, and that is the right trade.** All 27 findings are
+tool counts, and every one in a doc that was updated is now a *true* statement being
+mis-measured: `README.md` saying MCP-1 serves 8 tools is correct, and gets flagged because the
+checker asked MCP-2. The count went up precisely because the docs now state the real per-service
+surface instead of a single stale number.
+
+The two ways to make the gate green were both worse than leaving it red:
+
+- **Delete the tool counts** — the docs get less useful to satisfy a checker measuring the wrong
+  thing.
+- **Spell the numbers out** (`eight tools`) so the digit pattern stops matching — that is
+  evading the guard, and Gap 15's whole lesson is that a guard people work around protects
+  nothing.
+
+So the numbers stayed true and the gate stayed red. **The failure mode Gap 15 built it to catch
+is real and currently unguarded**: the true surface is **20 tools across three services
+(8 · 3 · 9)**, and nothing checks that number anywhere. The fix is to have `check_docs.mjs`
+start all three servers and know which count belongs to which — keeping the digit-arrow-digit
+narrowing that made it useful.
+
+Of the 27, **5 are genuinely stale and all 5 are in `DEPLOY.md`**, which asserts `13 tools` from
+the pre-split world. That file is outside the documentation stream's boundary. `sentinel/README.md`
+line 73 says the same thing and is not scanned by the gate at all.
+
+> **Do not "fix" this by relaxing the guard.** Gap 15 records that the first version of
+> `check_docs.mjs` was too broad, produced 25 correct-behaviour findings, and that *"a guard
+> that fires on a document doing its job gets switched off within a week, and then it protects
+> nothing."* A guard that asks one of three services is the same failure with the opposite
+> sign. Either teach it the three-app shape or retire it — leaving it noisy is the one option
+> that guarantees it stops being read.
+
+**Owner: Stream A.** `scripts/` and `package.json` are outside the documentation stream's
+boundary, so this is reported rather than fixed.
 
 ## Gap 11 — The tool surface contradicted the thesis ✅ **FIXED** (2026-07-25)
 
@@ -498,11 +649,11 @@ fifteen platform tool names finds none of them.
 
 | Check | Result |
 |---|---|
-| `cd sentinel && npm test` | ✅ **128/128 pass** (32 platform + 33 MENTOR) |
+| `cd sentinel && npm test` | ✅ **47/47** · `cd mcp-roster && npm test` **46/46** · `cd mcp-profile && npm test` **64/64** — **157 total**, re-observed 2026-07-26 (was 128/128 on one app pre-split) |
 | `explain_drift` over real MCP (`node dist/index.js`, stdio) | ✅ origin `tax @ build/pricing.js:12`, planned 3rd / built 2nd |
 | … its confidence | ✅ **0.91**, computed from 5 signals; engine gate **0.964 autonomous** |
 | … its refusal | ✅ `fix_withheld: true` + a follow-up question, not a patch |
-| `tools/list` | ✅ **13 tools, all one loop** — was 3 after Gap 11; +7 for the bridges (Gap 12) |
+| `tools/list` | ✅ **20 tools across three services (8 · 3 · 9), all one loop** — was 23 before Gap 11, 3 after it, 13 after the bridges (Gap 12), then split three ways |
 | `npm run probe` — all six stages over real MCP | ✅ every bridge green, refusal check still `none` |
 | `npx tsx src/index.ts` — Studio's real launch command | ✅ serves the full tool list over stdio |
 | Studio project validity | ✅ `sentinel/` valid · monorepo root correctly **invalid** |
@@ -583,7 +734,7 @@ The number went up because the evidence improved.
    (ROSTER → COACH → MENTOR) so the shape is legible from `tools/list` alone. The refusal
    check in `npm run probe` still reports **no tool that can modify a student's build.**
 
-> **Verified:** 109/109 tests (was 67). `npm run probe` walks all six stages over real MCP
+> **Verified (2026-07-25, pre-split):** 109/109 tests (was 67). `npm run probe` walks all six stages over real MCP
 > against `safety-gear` and prints each artifact. `npm run fixture:check` now also asserts
 > the generated `fixtures.learn.ts` matches `fixtures/*.json`.
 >
@@ -620,11 +771,43 @@ Two enforcement points, because neither is worth trusting:
   a flag, because a field a model can read is a field it will read out, and a reveal read to
   a student who never picked a side teaches nothing. A made-up `chose` value is refused.
 
-⬜ **Still open:** the panels render as structured JSON, not as a widget. `MENTOR-CONCEPT.md`
-§3 asks for authored SVG + text sharing a component with `causal-timeline`; the three-way
-split makes that literal sharing impossible (separate deployments), and `mcp-roster` has no
-widget app at all — only the `widget` npm script, pointing at a `src/widgets` that does not
-exist. The `figure` field on each panel is already the structured shape a widget would draw.
+✅ **The widget shipped 2026-07-26, and Gap 13 is now closed in both halves.**
+`mcp-roster/src/widgets/app/lesson-panels/page.tsx`, registered in `widget-manifest.json` with
+both halves of the lesson as worked examples, attached via `@Widget('lesson-panels')`.
+`npm run build` reports **1 widget bundled**. mcp-roster went 41 → **46** tests.
+
+**The gate survives the widget, and it is structural rather than promised.** The obvious
+implementation — fetch the lesson, hide the back half, reveal on click — would have destroyed
+the mechanism, because the withheld panels would then be sitting in the page one inspection
+away from a student who never picked a side. Instead the choice buttons call `open_lesson`
+**again** with `chose` set, and the reveal arrives as a fresh tool result. The widget cannot
+show the reveal early *even if it wanted to*, because it has never been sent it — the same
+construction as the flashcard's absent `back` field.
+
+Verified in a browser against four real payload shapes, not inferred:
+
+| Check | Result |
+|---|---|
+| Part 1 rendered | setup + commit only; body text contains no reveal string |
+| The **shipped bundle** grepped for lesson content | ✅ no `$72.00`, no `$80.00`, no concept key, no answer phrase — it is a renderer, and holds no lesson |
+| Commit → reveal | one click → one `callTool('open_lesson', {chose})`; witness + generalise arrive |
+| A made-up choice | server returns part 1 again with `rejected`; the panel shows the refusal and does not advance |
+| Dark theme, no-lesson state, console | legible · handled · **zero errors**; the witness table scrolls in its own box, the body does not |
+
+Three things found by building it, all recorded in the commit rather than quietly fixed:
+a bare `?` between the two setup chips read as a **missing-font glyph** (the `unordered`
+figure's whole point is the *absence* of an arrow, so it now says "then? or first?");
+`disabled={asking !== null}` does **not** prevent a double submit because React batches state,
+so the guard is a synchronous ref (five clicks in one tick → one call); and the manifest's
+example payloads are now **checked against live `open_lesson` output** by
+`src/catalog/widget.test.ts`, because hand-copying a payload into a shipped JSON file is
+exactly the drift Gap 15 is about — and the manifest is served to hosts, so it is the one
+place a leak would hide in a file nobody reads as code.
+
+⬜ **What genuinely did not survive:** `MENTOR-CONCEPT.md` §3's *"one rendering component, two
+uses"*. `causal-timeline` is in MCP-2 and `lesson-panels` in MCP-1 — separate deployments, so
+literal sharing is impossible. They share the visual language and nothing else. That is a real
+cost of the three-app architecture, and it is paid here rather than papered over.
 
 <details><summary>The original gap, for the record</summary>
 
@@ -657,25 +840,40 @@ optional, so it is four panels, not three.)*
 
 ---
 
-## Gap 14 — Only 2 of the catalog's 5 roles are playable 🟢
+## Gap 14 — ~~Only 2 of the catalog's 5 roles are playable~~ ✅ **CLOSED** — and it had closed before anyone noticed
 
-`fixtures/catalog.json` advertises 3 domains, 3 projects and 5 roles. Two roles have briefs:
-`pricing/backend` and `safety-gear/cv`. The other three (`pricing/frontend`,
-`safety-gear/platform`, `event-ingest/data`) are listed with `briefed: false`.
+**All five seats have briefs.** Observed 2026-07-26 while porting the deleted tests:
+`catalogCoverage()` reports `{roles: 5, domains: 3, projects: 3, seats: 5, playableSeats: 5,
+demoableSeats: 3}`. Every seat has a brief, a lesson (four panels) and three acceptance
+criteria: `pricing/backend`, `pricing/frontend`, `safety-gear/cv`, `safety-gear/platform`,
+`event-ingest/data`.
 
-**This is deliberate and it is reported rather than hidden.** `browse_catalog` says
-*"2 of 5 roles have a brief written and are playable today"* in its first response, before a
-student invests a click, and `open_brief` on an unbriefed role returns the playable list
-instead of an empty screen. `learn.test.ts` asserts the `briefed` flag matches whether a
-brief actually exists in both directions, so the catalog cannot lie by drifting.
+**How this gap closed is more interesting than that it closed.** Nobody closed it. The seats
+were written at some point during the split work and this file was never updated — so the
+project was *under*-claiming, in a document whose entire job is to say what is not done. The
+old `learn.test.ts` asserted `playableRoles === 2`, and that assertion is what surfaced it:
+porting the test made it fail, and the failure was the doc being stale rather than the code
+being wrong. **A test that encodes a gap is how you find out the gap is gone.**
 
-They are listed because **seeing the rest of the team is the point of role-scoping.** A
+**The honest gap moved rather than vanishing.** Five seats are playable; **three are
+demoable** — `pricing/backend`, `safety-gear/cv`, `event-ingest/data` — meaning a bundled plan
+exists so they run end to end with nothing uploaded. The other two need the student to draw
+and export their own design first. `catalogCoverage` reports both numbers separately and
+`roleIndex` puts `playable` and `demoable` on *every row*, because a student picks a row and a
+footnote does not stop anyone clicking the wrong one. `roster.test.ts` now asserts
+`demoable < playable`, which is the claim that is still true.
+
+One consequence worth knowing, found the same way: **bundled plans are keyed by *project*, not
+by seat**, so `pricing/frontend` shares the backend's canvas and correctly does not match it.
+That is why `demo` is a per-seat flag — and why one project cannot have two demoable seats.
+
+They are all listed because **seeing the rest of the team is the point of role-scoping.** A
 student who owns pricing should be able to see that a frontend engineer owns the cart they
-are handed — that is what makes `given` mean something. Removing the unplayable roles would
-make the catalog honest in a way that was less useful.
+are handed — that is what makes `given` mean something.
 
-Each additional brief is roughly an hour: `owns`, `given`, three acceptance criteria, and a
-concept whose answer is a principle rather than code (`assertNoFix` enforces the last part).
+Each additional seat is roughly an hour: `owns`, `given`, three acceptance criteria, four
+lesson panels, and a concept whose answer is a principle rather than code. Who writes the next
+three is **Gap 17**.
 
 ---
 
@@ -737,7 +935,14 @@ places where docs and code could previously have drifted apart silently.
 
 ---
 
-## Gap 16 — Student work did not survive the conversation ✅ **FIXED** (2026-07-25)
+## Gap 19 — Student work did not survive the conversation ✅ **FIXED** (2026-07-25)
+
+> **Renumbered 2026-07-26. This was originally *also* Gap 16** — two different gaps carried
+> the same number for a day, because whoever opened the three-MCP-split gap did not scroll to
+> the bottom of this file first. Every reference elsewhere in the repo means the split by
+> "Gap 16", so this one moved rather than that one. Noted rather than silently corrected: a
+> duplicate identifier in the project's own issue list is exactly the class of drift Gap 15 is
+> about, and it survived a day here too.
 
 Every tool was pure and the client held the progress log. Right for a stateless deploy, and
 it had one cost nobody had said out loud: **close the chat and the student's afternoon was
@@ -796,8 +1001,16 @@ safe would be worse still.
   in `app.module.ts`, every caller is anonymous — so identity and RBAC are **implemented and
   tested but not yet exercised end to end against a real token.** Do not claim otherwise.
 
-> **Verified:** 128/128 (was 109) — 19 new tests covering the store contract against both
-> backends, role extraction from scopes *and* claims, an unauthenticated caller presenting an
-> instructor scope being refused, and the fallback-not-throw path. `npm run walk` and
-> `npm run check:docs` green.
+> **Verified (2026-07-25, pre-split):** 128/128 (was 109) — 19 new tests covering the store
+> contract against both backends, role extraction from scopes *and* claims, an unauthenticated
+> caller presenting an instructor scope being refused, and the fallback-not-throw path.
+> `npm run walk` and `npm run check:docs` green.
+>
+> **Re-verified 2026-07-26, after the split moved all of this to MCP-3.** These tests were
+> among the 58 deleted by `aab534d` and are now ported to `mcp-profile` — where the store
+> contract runs against **both** backends again (`node:sqlite` is available on Node 22.19
+> locally, so the SQLite branch really executes rather than skipping). The store API changed
+> shape in the move — `ProgressStore` keyed `(student, project, role)` became `ProfileStore`
+> keyed `student`, holding one whole `mentor.profile/v1` — so these are ports, not restorations.
+> `mcp-profile` is **64/64**.
 

@@ -57,9 +57,17 @@ npm run install:all
 npm run verify
 ```
 
-- [ ] Ends with `# pass 109` and `# fail 0`
-- [ ] Then five `ok` lines from the fixture guard, ending
-      `ok  fixtures.learn.ts matches fixtures/*.json`
+- [ ] Ends with `# pass 47` and `# fail 0` — **sentinel's share only.** The root scripts still
+      reach one of the three apps (`GAPS.md` Gap 18), so also run:
+
+      (cd mcp-roster && npm test)    # expect # pass 46
+      (cd mcp-profile && npm test)   # expect # pass 64
+
+      Total across the three: **157**.
+- [ ] Then the `ok` lines from the fixture guard.
+      ⚠️ It currently prints `fixtures.learn.ts is missing` and
+      `skipped embedded-fixture sync check` **and still exits 0** — the orphaned
+      `embed_learn_fixtures.mjs` (Gap 16). Treat a skipped sync check as a red flag, not a pass.
 - [ ] Then `ALL CHECKS PASSED` from `npm run walk` — the nine-turn student journey
       asserted over real MCP (`WALKTHROUGH.md` is the manual version)
 - [ ] **Needed only Node** — no Python was invoked
@@ -97,14 +105,22 @@ npm run probe
 Compare against this exactly:
 
 - [ ] `server` → **`mentor 1.0.0`** *(not `command-platform`)*
-- [ ] `tools (13)` → **exactly these, in this order** — the order matters, it is the order a
-      student meets them, and it is how a client's model can tell which stage they're in:
+- [ ] **20 tools across three services (8 · 3 · 9)** — you are connecting to one at a time now,
+      so check each against its own list. The grouping is the point: a model reading MCP-1's
+      eight can tell it is at the *start* of something.
 
-      browse_catalog   open_brief                    ← ROSTER  (stages ① ②)
-      check_scope      checkpoints
-      record_progress  is_it_done                    ← COACH   (stages ③ ④)
-      explain_drift    withhold_fix
-      flashcard        mentor_status                 ← MENTOR  (stages ⑤ ⑥)
+      MCP-1 mcp-roster (8):
+        sign_in  list_roles  projects_for_role  open_brief    ← stages ① ②
+        open_lesson                                            ← stage ② (Layer 2)
+        roster_status  check_scope  checkpoint_spec            ← stages ③ ④
+
+      MCP-2 sentinel (3):
+        explain_drift  withhold_fix  mentor_status             ← stage ⑤
+
+      MCP-3 mcp-profile (9):
+        open_profile  read_profile  note_role_choice
+        record_verdict  class_progress  profile_status         ← the record
+        flashcard  review_flashcard  due_cards                 ← stage ⑥
 
 - [ ] **No `self_heal`, `propose_patch`, `apply_for_scheme`, `run_organization`, `optimize_spend`, or `verify_output`.**
       If you see **3**, you are on a pre-Gap-12 build — rebuild. If you see **23**, the
@@ -466,7 +482,7 @@ npm run install:all && npm run verify
 ```
 
 - [ ] Both succeed following **only** what the README says
-- [ ] `128/128`
+- [ ] `# pass 47` from the root, and `46` / `64` from the other two apps — **157** in total
 - [ ] You never needed Python, an API key, or a network call to the model
 
 - [ ] Read the README as if you'd never seen it. Could you explain the product back in one

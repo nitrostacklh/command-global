@@ -1,10 +1,12 @@
-# [[PRODUCT NAME]] — Concept Document
+# MENTOR — Concept Document
 
-> **Track:** Education & Research
-> **Platform:** Built on COMMAND (MCP app on NitroStack). MENTOR is the sixth commander.
+> **Track:** Education & Research *(printed name not yet confirmed — see §6)*
+> **Platform:** Three NitroStack MCP apps in one monorepo. MENTOR began as the sixth
+> COMMAND commander and is now the product; the platform is the thing it was carved out of.
 > **Status:** Concept locked. See §8 for what ships vs. what's roadmap.
 >
-> Placeholders are marked `[[LIKE THIS]]` — fill or delete.
+> Placeholders were marked `[[LIKE THIS]]`. All of them are resolved as of 2026-07-26
+> except two that are somebody else's to answer, and those are marked **ASK** in place.
 
 ---
 
@@ -82,10 +84,17 @@ pricing service" is an exercise. "You own pricing; finance depends on your numbe
 right" is a job. The second one produces the emotional conditions under which people
 actually debug carefully.
 
-Each project ships with:
+Each seat ships with:
 - A role and a one-paragraph brief
-- `[[N]]` deliverables with acceptance criteria
+- **Three** acceptance criteria — the same number on every seat, deliberately: it is enough
+  to itemise done-ness and few enough that a student reads all of them
+- Between two and four owned components, plus the `given` ones they build against
 - A hidden failure the student will hit (see Layer 4)
+
+**Five seats are written and playable** across three projects: `pricing/backend`,
+`pricing/frontend`, `safety-gear/cv`, `safety-gear/platform`, `event-ingest/data`. Three of
+the five (`pricing/backend`, `safety-gear/cv`, `event-ingest/data`) run end to end with
+nothing uploaded, because a demo plan is bundled for them.
 
 ### Layer 2 — Interactive lessons ("the comic layer")
 
@@ -99,9 +108,29 @@ Two important constraints:
   This keeps the whole app testable offline with no API key — which is the property the rest
   of the platform is built on (`ARCHITECTURE.md` §13). It also means nothing fails on stage.
 - **Panels, not prose.** The same panel format is reused in Layer 4 to explain the student's
-  own bug. One rendering component, two uses.
+  own bug.
 
-`[[DECIDE: how many panels per lesson? I'd suggest 4–6.]]`
+> ✅ **BUILT (2026-07-26) — `GAPS.md` Gap 13 is closed, both halves.** `mentor.lesson/v1`,
+> served by `open_lesson` in `mcp-roster`, and rendered by the `lesson-panels` widget.
+>
+> **Four panels per lesson**, on all five seats — that answers the open question here, and
+> the answer came from building it rather than from picking a number in the suggested 4–6
+> range. The four are `setup` · `commit` · `witness` · `generalise`, and the shape is forced
+> rather than chosen: something has to frame the problem, the student has to **commit to an
+> answer before seeing anything**, one case has to separate the two answers, and something
+> has to ask for the transferable form. `commit` turned out to be the load-bearing one, and
+> it is the panel a first draft would have cut.
+>
+> **No panel states the principle**, which is the constraint everything else follows from.
+> MCP-1 has never held a concept answer, so a lesson that pasted one into a panel would put
+> one there by the back door; `scripts/embed_fixtures.mjs` fails the build if a panel
+> contains a sentence of `concept.answer`. The student derives the rule from the
+> discriminating case, and MCP-3 confirms it against their own green tests.
+>
+> **One rendering component, two uses — did not survive the split**, and that is worth
+> recording rather than quietly dropping. `causal-timeline` lives in MCP-2 and `lesson-panels`
+> in MCP-1: separate deployments, so literal component sharing is impossible. They share the
+> visual language and nothing else. That is the cost of the three-app architecture, paid here.
 
 ### Layer 3 — Lumina: design before you code
 
@@ -234,7 +263,7 @@ next project — a fix stays with the file, a concept doesn't.
 
 Say this before a judge says it to you.
 
-| | Copilot | [[PRODUCT NAME]] |
+| | Copilot | MENTOR |
 |---|---|---|
 | Sees | your code, now | your plan, your history, your code |
 | Answers | "what's wrong with this?" | "when did I go wrong?" |
@@ -288,10 +317,11 @@ in this order, and do not lead with the third.
    (`ARCHITECTURE.md` §7). One lifecycle, six skins.
 
    > ⚠️ **Be honest about the strength of claim 3, and consider not making it.** The
-   > submission deploys **13 tools, all of them MENTOR's loop**. The other four adapters ship
-   > unregistered, because one of them (`self_heal`) offers to autonomously patch the exact
-   > bug MENTOR refuses to patch (`GAPS.md` Gap 11). So the evidence a judge can *see* is a
-   > passing test suite and an adapter table on a slide — not a running system.
+   > submission deploys **20 tools across three services — 8 on MCP-1, 3 on MCP-2, 9 on
+   > MCP-3 — and all 20 are MENTOR's loop**. The other four adapters ship unregistered,
+   > because one of them (`self_heal`) offers to autonomously patch the exact bug MENTOR
+   > refuses to patch (`GAPS.md` Gap 11). So the evidence a judge can *see* is a passing test
+   > suite and an adapter table on a slide — not a running system.
    >
    > A skeptical judge is trained to discount "we built more than we are showing you," and
    > they are right to: it is the same shape as an unfalsifiable feature claim. It also
@@ -317,7 +347,10 @@ in this order, and do not lead with the third.
    > Those are different kinds of number and conflating them is the fastest way to lose a
    > research-minded judge.
 
-`[[CONFIRM which official track name to print on the slide — "Education & Research".]]`
+> **ASK — for the organizers, not for us.** Confirm the official printed track name before it
+> goes on the slide. We have been writing *"Education & Research"* throughout, and it is a
+> guess: the six tracks were never confirmed (`GAPS.md` Gap 9). This is the one placeholder in
+> this document that no amount of work in this repo can close.
 
 ---
 
@@ -325,15 +358,19 @@ in this order, and do not lead with the third.
 
 Small, real, and reportable beats large and hypothetical.
 
-- **n = `[[5]]`** classmates, split into two groups.
-- Group A uses [[PRODUCT NAME]]. Group B uses Copilot.
+- **n = 5** classmates, split into two groups. `STUDY.md` pre-commits this, along with the
+  analysis, *before* the data exists — with n=5 it is trivially easy to find a flattering
+  comparison afterwards, and a judge who suspects you did discounts the whole result.
+- Group A uses MENTOR. Group B uses Copilot.
 - Both fix bug #1 with their tool. Then both fix **bug #2, of the same class, unaided.**
 - **Measure:** time to locate the origin of bug #2, and whether they located it at all.
 - Report the number even if n is tiny and even if the result is mixed. State the sample size
   plainly. An honest small result reads as research; a confident unsupported claim reads as
   marketing.
 
-`[[RUN THIS. One number changes how the submission is read.]]`
+**Still not run — n = 0.** The protocol is written and ready (`STUDY.md`); what is missing is
+five people and two hours. One number changes how the submission is read, and this is the
+cheapest unclaimed win available in a track called *Research*. Tracked as `GAPS.md` Gap 7.
 
 ---
 
@@ -341,56 +378,99 @@ Small, real, and reportable beats large and hypothetical.
 
 This document describes the full vision. The submission is a subset, deliberately.
 
-### Blocker — do this before anything else
-- [ ] **Deploy to NitroCloud, connect `{serviceUrl}/sse` to ChatGPT** (`DEPLOY.md`).
-      Until this works there is no submission, regardless of how good the idea is.
+### Blocker — ~~do this before anything else~~ ✅ **DONE**
+- [x] **Deployed to NitroCloud.** All three services are live and verified over the wire —
+      URLs in `DEPLOY.md`. Connecting `{serviceUrl}/sse` to ChatGPT is still the open
+      question, and it is a *rules* question rather than an engineering one — see `GAPS.md`
+      Gap 1 on whether a NitroStudio AI Chat demo satisfies the submission requirement.
 
 ### Ships for the hackathon
-- [x] MENTOR as the sixth commander — **built**, `sentinel/src/modules/mentor/`, 33 tests.
-      §14's "one adapter + one module" did cost more than advertised: the engine has no
-      successful path that skips `deploy()`. Resolved by re-reading the lifecycle rather
-      than bypassing it — `deploy()` delivers the explanation, and `awaitRecovery()` now
-      asserts the student's source is byte-identical, which makes the refusal a runtime
-      invariant. Full mapping in `ARCHITECTURE.md` §7.6.
-- [x] **One** project, executed completely: the pricing / tax-discount fixture →
-      `fixtures/pricing/`. Plan, build, history and failing test all present; the
-      §3 line numbers (40 and 12) are now literally true of it.
+- [x] **MENTOR is the product, deployed as three MCP apps** — `mcp-roster` (MCP-1, 8 tools),
+      `sentinel` (MCP-2, 3 tools), `mcp-profile` (MCP-3, 9 tools). **157 tests green across
+      the three** (47 · 46 · 64), offline, no API key.
+      MENTOR began as one adapter on the COMMAND engine, and §14's "one adapter + one module"
+      did cost more than advertised: the engine has no successful path that skips `deploy()`.
+      Resolved by re-reading the lifecycle rather than bypassing it — `deploy()` delivers the
+      explanation, and `awaitRecovery()` asserts the student's source is byte-identical,
+      which makes the refusal a runtime invariant. Full mapping in `ARCHITECTURE.md` §7.6.
+- [x] **Three** projects and **five seats** — `pricing`, `safety-gear` and `event-ingest`
+      under `fixtures/`. Each has briefs, a `lumina.plan/v1` and a `mentor.build/v1` history,
+      and three of the five run the whole loop end to end with nothing uploaded.
+      **One seat is executed completely in the strongest sense**: `pricing/backend` is the
+      only one with runnable broken source and a real failing test on disk
+      (`fixtures/pricing/build/`), which is why the §3 line numbers — broke on 40, went wrong
+      on 12 — are *literally* true of it and illustrative everywhere else. Worth stating
+      plainly rather than rounding up to "three projects executed completely."
 - [x] The causal timeline widget — **built**. Plan row, build row, labelled drift arrow,
       five confidence bars each with its reason, and an *"Ask instead →"* button wired to
       `sendFollowUpMessage` so the refusal doesn't dead-end the student.
+- [x] **Layer 2, the lesson panels — built, and the widget with it.** `mentor.lesson/v1`,
+      four panels on each of the five seats, served by `open_lesson` and drawn by the
+      `lesson-panels` widget. The reveal is withheld by the *server* (the later panels are
+      absent from the first response), so the widget cannot leak it. Closes `GAPS.md` Gap 13.
 - [x] Lumina graph as the plan input — **integration cost was small**, and it's done:
       `lumina.plan/v1` + the **Plan** button. See §3 Layer 3.
 - [x] **A student can actually draw the design** — Lumina's `design` → `component` node,
       verified in-browser end to end. The fixture's plan is now a byte-identical real
       export, not a stand-in. Closes `GAPS.md` Gap 2.
-- [x] **Only MENTOR is exposed.** The tool surface went 23 → 3. The five platform
-      commanders stay in the repo, tests green, unregistered — `GAPS.md` Gap 11 for why
-      shipping `self_heal` next to `explain_drift` would have contradicted §2's pitch on
-      stage. The server now identifies itself as `mentor`, not `command-platform`.
+- [x] **Only MENTOR is exposed.** The tool surface went 23 → 3, and then to 20 across three
+      services as the loop's own bridges were built — every one of the 20 is a stage of the
+      one loop. The four other platform commanders stay in the repo, tests green,
+      unregistered — `GAPS.md` Gap 11 for why shipping `self_heal` next to `explain_drift`
+      would have contradicted §2's pitch on stage. Each service identifies itself as
+      `mentor-*`, not `command-platform`.
 - [x] The refusal: **built and enforced.** `withhold_fix` and `request_fix` exist only to
       decline; no tool on the adapter can write to the build; and `awaitRecovery` fails the
       incident if the source ever changes. Tested by trying six plausible write-tool names.
 - [ ] ≤3-min demo video *(script drafted — `DEPLOY.md` §7a; needs the deploy first)*
 
 ### Roadmap — say it on the last slide, don't build it
-- Comic-styled panels for Layer 2 *(build only if the deploy is already green)*
-- More than one project / a curriculum
-- Roles beyond the first one
+- ~~Comic-styled panels for Layer 2~~ — **built**, see above
+- ~~More than one project~~ — **three ship**; a *curriculum* is still roadmap, and §10 asks
+  who is committed to authoring the next three
+- ~~Roles beyond the first one~~ — **five seats ship**
+- Deriving the build history from `git log -p` rather than from tracked checkpoints
+  (`GAPS.md` Gap 5 — MENTOR already discounts its own confidence for this, honestly)
 - Live connectors, per-domain widgets (`ARCHITECTURE.md` §16.3)
 
-> **A note I'd keep in the doc:** the vision is the whole loop, and the demo is one project
-> through all four. One project executed completely is a stronger submission than four
+> **A note I'd keep in the doc:** the vision is the whole loop, and the demo is one seat
+> through all four layers. One seat executed completely is a stronger submission than four
 > layers half-built. Judges score what runs.
+>
+> *Written when one project shipped. It held: the loop was finished on `pricing/backend`
+> first and the other four seats were then cheap, because the artifacts had already been
+> made to carry everything the next stage needed. Worth keeping as the note that was right.*
 
 ---
 
-## 9. Naming
+## 9. Naming — **RESOLVED: the product is MENTOR** (2026-07-26)
 
 - **COMMAND / SENTINEL / AEGIS** — military-enterprise vocabulary. Correct for the platform,
   wrong for a student-facing education product.
-- **MENTOR** — the sixth commander, keeps the all-caps convention, right connotation.
-- `[[DECIDE: does the student-facing product need its own name separate from MENTOR?
-  Candidates: ...]]`
+- **MENTOR** — keeps the all-caps convention, right connotation, and it is the one word in
+  the set a student would not find intimidating.
+
+**Does the student-facing product need a name separate from MENTOR? No — and the decision was
+effectively already made by the code, which this document had simply not caught up with.**
+
+Every surface a judge or a student actually touches already says `mentor`. That is not a
+coincidence to be tidied up; it is three independent decisions that all landed the same way:
+
+| Surface | Value |
+|---|---|
+| MCP server identity (`initialize`) | `mentor` |
+| The three packages | `mentor` · `mentor-roster` · `mentor-profile` |
+| Every artifact schema | `mentor.catalog/v1` · `mentor.brief/v1` · `mentor.checkpoints/v1` · `mentor.verdict/v1` · `mentor.profile/v1` · `mentor.card/v1` · `mentor.lesson/v1` |
+| The deployed services | `mentor-roster` · `mentor-mcp` · `mentor-profile` |
+
+Inventing a second, student-facing name now would mean the thing on the slide and the thing
+in `tools/list` disagree — which is the *exact* failure `GAPS.md` Gap 15 exists to prevent,
+committed deliberately and at the level of the product's own name.
+
+**Left deliberately unchanged: the repo is still `command-global`.** Renaming it would break
+the three mirror remotes and `scripts/push-mirrors.mjs` on the day of the submission, to fix
+something no judge sees. It is the platform's name, and the platform is genuinely what this
+repo is a history of. Worth one sentence if anyone asks; not worth a rename.
 
 ---
 
@@ -403,13 +483,23 @@ This document describes the full vision. The submission is a subset, deliberatel
 - ~~`[[Lumina export format — what does the graph look like on disk?]]`~~ → **answered in
   §3 Layer 3**: `lumina.plan/v1`, and it did not exist before — Lumina only wrote compiled
   n8n / Node-RED output. Now built and tested.
-- `[[Can MENTOR trace causality on a multi-file project, or is the demo scoped to one file
-  with a git history? Recommendation: one file. A tool that confidently points at the wrong
-  line is worse than useless in education.]]` — *the fixture takes the recommendation: one
-  file (`build/pricing.js`). Its history is **authored**, not derived from git — `GAPS.md`
-  Gap 5 argues for shipping it that way and putting derivation on the roadmap.*
-- `[[Who authors project #2, and when?]]` — *out of submission scope (§8 ships one project);
-  answer it before promising a curriculum on the roadmap slide.*
+- ~~`[[Can MENTOR trace causality on a multi-file project, or is the demo scoped to one file
+  with a git history?]]`~~ → **answered: one file, and the recommendation stands.** A tool
+  that confidently points at the wrong line is worse than useless in education. **Every one
+  of the five seats scopes to a single entry file** — `build/pricing.js`, `build/checkout.js`,
+  `build/ingest.js`, `detect.py`, `capture.py` — so the recommendation held as the catalog
+  grew rather than being a property of the first fixture. The drift join is on the
+  *component*, not on the file, so multi-file would not break it; it is scoped by choice.
+  Histories for the tracked seats are `observed` rather than derived from git — `GAPS.md`
+  Gap 5 argues for shipping it that way, and MENTOR prices the difference into its own
+  confidence rather than hiding it.
+- > **ASK — a person has to own this.** *Who authors project #3, and when?* Three projects
+  > and five seats now ship (§3), so this is no longer "who writes the second one" — the
+  > question is whether anyone is committed to writing the **fourth, fifth and sixth**, which
+  > is what turns a demo into a curriculum. Do not promise a curriculum on the roadmap slide
+  > until somebody's name is against it. Each additional seat is roughly an hour: `owns`,
+  > `given`, three acceptance criteria, four lesson panels, and a concept whose answer is a
+  > principle rather than code.
 
 **New question this reorganization raised:** how does a student's `plan.lumina.json` reach
 MENTOR when MENTOR runs on NitroCloud and the file is on their laptop? Same constraint
