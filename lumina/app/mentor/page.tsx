@@ -127,8 +127,9 @@ export default function MentorPage() {
               {tab.label}
             </button>
           ))}
+          {/* /canvas, not / — the redesign took `/` for the dashboard. */}
           <a
-            href="/"
+            href="/canvas"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 transition-all hover:text-slate-300"
@@ -142,7 +143,7 @@ export default function MentorPage() {
           <main className="mx-auto max-w-[1500px]">
             <HomeScreen
               onOpenLoop={() => setScreen("loop")}
-              onOpenCanvas={() => window.open("/", "_blank", "noreferrer")}
+              onOpenCanvas={() => window.open("/canvas", "_blank", "noreferrer")}
               onResumeSeat={resumeSeat}
             />
           </main>
