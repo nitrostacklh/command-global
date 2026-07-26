@@ -27,6 +27,7 @@ import {
   Globe,
   Timer,
   GitMerge,
+  GraduationCap,
   FileOutput,
   Type,
   Accessibility,
@@ -130,6 +131,7 @@ export default function Sidebar({ backendConnected, onAddNode }: SidebarProps) {
       <nav className="px-3 space-y-1 mb-8">
         {[
           { icon: <LayoutDashboard size={16} />, label: "Dashboard", href: "/dashboard" },
+          { icon: <GraduationCap size={16} />, label: "MENTOR", href: "/mentor" },
           { icon: <GitBranch size={16} />, label: "Orchestrator", href: "/" },
           { icon: <History size={16} />, label: "Logs", href: "/logs" },
           { icon: <BookOpen size={16} />, label: "Library", href: "/library" },

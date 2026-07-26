@@ -12,6 +12,7 @@
     "test": "npm --prefix mcp-roster test && npm --prefix sentinel test && npm --prefix mcp-profile test",
     "test:sentinel": "npm --prefix sentinel test",
     "lumina:dev": "npm --prefix lumina run dev",
+    "mentor:ui": "npm --prefix lumina run dev",
     "lumina:build": "npm --prefix lumina run build",
     "lumina:backend": "npm --prefix lumina run backend",
     "lumina:full": "npm --prefix lumina run full-dev",

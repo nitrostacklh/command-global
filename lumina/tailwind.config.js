@@ -5,16 +5,44 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./c/**/*.{js,ts,jsx,tsx,mdx}",
     "./l/**/*.{js,ts,jsx,tsx,mdx}",
+    // The imported UI primitives live here. Without these two globs their
+    // classes are purged and the components render unstyled — the source PR's
+    // config is missing them, which is easy to miss because most of those
+    // classes happen to appear somewhere under `c/` as well.
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   darkMode: "class",
   theme: {
     extend: {
       colors: {
-        slate: {
-          300: "var(--slate-300)",
-          400: "var(--slate-400)",
-          500: "var(--slate-500)",
-          600: "var(--slate-600)",
+        /**
+         * Two palettes, kept side by side on purpose.
+         *
+         * `tangent-*` is what the redesigned dashboard, library and tab screens
+         * are written against (~294 usages across 15 files). `mentor-*` is the
+         * same design re-tokenised for the screens under /mentor. Dropping
+         * either one does not fail the build — Tailwind emits nothing for an
+         * unknown utility — it just silently unstyles whichever set of screens
+         * lost its tokens. So both stay until one side is migrated to the other.
+         *
+         * Stock `slate-300..600` is deliberately NOT overridden. Redefining it
+         * as theme-flipping CSS variables would restyle every existing surface:
+         * the canvas, the library and all five MENTOR stage panels lean on
+         * `text-slate-*` heavily (Canvas.tsx alone has 42 usages), and none of
+         * those files were part of either redesign.
+         */
+        mentor: {
+          primary: "var(--mentor-primary)",
+          secondary: "var(--mentor-secondary)",
+          accent: "var(--mentor-accent)",
+          bg: "var(--mentor-bg)",
+          card: "var(--mentor-card)",
+          text: "var(--mentor-text)",
+          border: "var(--mentor-border)",
+          borderBright: "var(--mentor-border-bright)",
+          error: "var(--mentor-error)",
+          success: "var(--mentor-success)",
         },
         tangent: {
           primary: "var(--primary)",
@@ -77,7 +105,10 @@ module.exports = {
         },
         glowPulse: {
           "0%, 100%": { opacity: "0.4", filter: "drop-shadow(0 0 4px #6EE7FF)" },
-          "50%": { opacity: "1", filter: "drop-shadow(0 0 16px #6EE7FF) drop-shadow(0 0 24px #8B5CF6)" },
+          "50%": {
+            opacity: "1",
+            filter: "drop-shadow(0 0 16px #6EE7FF) drop-shadow(0 0 24px #8B5CF6)",
+          },
         },
         floatSlow: {
           "0%, 100%": { transform: "translateY(0) scale(1)", opacity: "0.2" },
