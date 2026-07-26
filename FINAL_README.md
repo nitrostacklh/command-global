@@ -1,14 +1,27 @@
 # FINAL_README — MENTOR, explained in full
 
-> ⚠️ **Written before the three-way split, and not yet fully reconciled with it.**
-> This document describes MENTOR as one deployable MCP app at `sentinel/`. It is now
-> **three** — `mcp-roster/` (MCP-1: catalog, briefs, lessons), `sentinel/` (MCP-2: drift
-> and verdict), `mcp-profile/` (MCP-3: student record and flashcards) — each deployed
-> from its own mirror repo. The *ideas* below are all still accurate; some **file paths
-> and module names are not**, because the code moved. Where the two disagree, the code
-> and `GAPS.md` win. Test counts were corrected to the real ones on 2026-07-26:
-> **61 = 47 (sentinel) + 14 (mcp-roster) + 0 (mcp-profile)**. `mcp-profile` genuinely
-> has no tests — see `GAPS.md` Gap 16.
+> **Reconciled with the three-way split on 2026-07-26.** MENTOR was written here as one
+> deployable MCP app at `sentinel/`. It is now **three**, each deployed from its own mirror
+> repo:
+>
+> | | Folder | Owns | Tools | Tests |
+> |---|---|---|---|---|
+> | **MCP-1** | `mcp-roster/` | catalog, role-scoped briefs, lessons, the checkpoint spec | 8 | **46** |
+> | **MCP-2** | `sentinel/` | verification, drift, the build verdict | 6 | **72** |
+> | **MCP-3** | `mcp-profile/` | the student record, and the flashcards | 9 | **59** |
+> | | | | **23** | **177** |
+>
+> **177 tests, all green, every number watched printing on 2026-07-26.** Where a path below
+> still says `sentinel/src/modules/learn/` or `…/registrar/`, the code moved: `learn/` became
+> `mcp-roster/src/catalog/`, and `registrar/` became `mcp-profile/src/profile/`. Section 12
+> carries the current map. Where this document and the code disagree, **the code and
+> `GAPS.md` win.**
+>
+> One structural rule the split exists to enforce, and it is worth reading before anything
+> else: **MCP-3 is the only process that ever holds a flashcard answer.** MCP-1 hands out the
+> question, MCP-2's verdict carries only the concept *key*. A bug anywhere else — a tool
+> echoing its input, a log line, a widget rendering a raw artifact — cannot leak what the
+> student is meant to earn, because the string is not in that process.
 
 > **One line:** *"You didn't just write the bug. You designed it."*
 > MENTOR shows a student the exact moment their build stopped matching the plan they drew —
@@ -29,14 +42,14 @@ appears; there's a full [glossary](#15-glossary) at the end.
 3. [The problem — stated precisely](#3-the-problem--stated-precisely)
 4. [The idea, in depth](#4-the-idea-in-depth)
 5. [The learning loop — the 6 stages](#5-the-learning-loop--the-6-stages)
-6. [The five artifacts — the real contract](#6-the-five-artifacts--the-real-contract)
+6. [The seven artifacts — the real contract](#6-the-seven-artifacts--the-real-contract)
 7. [The technology stack — every layer, and why](#7-the-technology-stack--every-layer-and-why)
 8. [Under the hood #1: the engine and the DomainAdapter](#8-under-the-hood-1-the-engine-and-the-domainadapter)
 9. [Under the hood #2: the drift algorithm, traced on the real bug](#9-under-the-hood-2-the-drift-algorithm-traced-on-the-real-bug)
 10. [Under the hood #3: the two confidence systems](#10-under-the-hood-3-the-two-confidence-systems)
 11. [Under the hood #4: the flashcard gate](#11-under-the-hood-4-the-flashcard-gate)
-12. [The 23 tools and the code map](#12-the-10-tools-and-the-code-map)
-13. [The two demo projects](#13-the-two-demo-projects)
+12. [The 23 tools and the code map](#12-the-23-tools-and-the-code-map)
+13. [The three demo projects](#13-the-three-demo-projects)
 14. [Install, run, deploy](#14-install-run-deploy)
 15. [Glossary](#15-glossary)
 
@@ -221,20 +234,30 @@ concept. Until then, the answer field is *absent from the response entirely* (se
 
 ---
 
-## 6. The five artifacts — the real contract
+## 6. The seven artifacts — the real contract
 
-**The architecture is: "every arrow is a file."** No database, no shared code between the two
-halves, no RPC. Every stage hands the next a plain JSON file with a version in its name. That
-decoupling is why the Python/React canvas and the TypeScript server can be rebuilt independently
-and agree on exactly one thing.
+**The architecture is: "every arrow is a file."** No database, no shared code between the
+services, no RPC beyond passing these documents. Every stage hands the next a plain JSON file
+with a version in its name. That decoupling is why the Python/React canvas and three separately
+deployed TypeScript servers can be rebuilt independently and agree on exactly one thing.
+
+It is also what made the three-way split *possible* rather than merely tidy: the artifacts
+already carried everything the next stage needed, so cutting the monolith along those seams cost
+no new plumbing. `mentor.checkpoints/v1` is deliberately **self-sufficient** — MCP-2 is a
+different deployment and cannot call back to ask what the brief said.
 
 | Handoff | Artifact | Produced by |
 |---|---|---|
-| ① → ② | `mentor.catalog/v1` | curated menu (`fixtures/catalog.json`) |
-| ② → ③ | `mentor.brief/v1` | the role's assignment (`owns` / `given` / `not_yours`) |
+| ① → ② | `mentor.catalog/v1` | curated menu (`fixtures/catalog.json`) · MCP-1 |
+| ② → ③ | `mentor.brief/v1` | the role's assignment (`owns` / `given` / `not_yours`) · MCP-1 |
+| ② → ③ | `mentor.lesson/v1` | the four teaching panels · MCP-1 (the reveal withheld server-side) |
 | ③ → ④ | `lumina.plan/v1` | **the student**, drawing it in Lumina |
-| ④ → ⑤ | `mentor.build/v1` | **the student**, recording progress |
-| ⑤ → ⑥ | `mentor.card/v1` | MENTOR, gated on real test output |
+| ④ → ⑤ | `mentor.checkpoints/v1` | MCP-1, derived from the student's *own* plan order |
+| ⑤ → ⑥ | `mentor.verdict/v1` | MCP-2 — drift, stuck, and whether the gates passed |
+| ⑥ | `mentor.profile/v1` · `mentor.card/v1` | MCP-3, gated on real test output **and** the verdict |
+
+> `mentor.build/v1` still exists and is still what `explain_drift` compares against; it is now
+> assembled from the checkpoint log rather than being a separate hand-authored hand-off.
 
 ### `lumina.plan/v1` — "what I intended"
 
@@ -305,7 +328,7 @@ This is the only part that goes to NitroStack Cloud. It is pure TypeScript on th
 | **CLI / build / deploy** | **`@nitrostack/cli` ^1.0.15** (`nitrostack-cli dev / build / start`) | Compiles, runs a local dev server, and packs for Cloud. `npm run pack` produces the deploy zip. |
 | **Input validation** | **Zod ^3.22** | Every tool's `inputSchema` is a Zod schema. It validates and *describes* arguments at the MCP boundary (e.g. `explain_drift` accepts a plan as a JSON string *or* an object, both optional). Validating at the boundary is a project rule. |
 | **MCP app-extension** | **`@modelcontextprotocol/ext-apps`** | Supports the interactive widget surface (the causal-timeline UI the tool renders in the client). |
-| **Tests** | **Node's built-in test runner** (`node --test`), 61 tests | No Jest, no Vitest — zero extra runtime deps, runs offline. Tests run against the *compiled* `dist/**/*.test.js`. |
+| **Tests** | **Node's built-in test runner** (`node --test`), 177 tests across the three apps | No Jest, no Vitest — zero extra runtime deps, runs offline. Tests run against the *compiled* `dist/**/*.test.js`. |
 | **Config** | **dotenv** | Only for the *optional* wider repo; MENTOR itself needs no env vars. |
 | **The widget** | **React / Next.js** (in `sentinel/src/widgets/`) | The `causal-timeline` page: plan row, build row, the labelled drift arrow, five confidence bars each with its reason, and an *"Ask instead →"* button wired to `sendFollowUpMessage` so the refusal doesn't dead-end. |
 
@@ -555,26 +578,26 @@ place to keep it.)
 
 ## 12. The 23 tools and the code map
 
-The loop is **three separately deployed MCP applications**, not one server, and each one
-connects on its own URL: **8 + 6 + 9 = 23 tools**. The split is deliberate and it is the
-security boundary, not filing — MCP-3 is the only process that ever holds a flashcard
-*answer*, so a bug anywhere else cannot leak what the student is meant to earn. In MCP the
-tool list *is* the interface, so three services each telling one story means a client's
-model can tell which stage of the loop it is in from `tools/list` alone.
+A client connected to all three services sees **23 tools — 8 + 6 + 9**. They are not one bag of
+verbs: each service tells one stage of one story, and in MCP the tool list *is* the interface, so
+a model reading MCP-1's eight can tell it is at the *start* of something. That legibility is why
+the split is three deployments rather than one server with twenty-three tools.
 
-### MCP-1 · `mentor-roster` — path, role, brief, lesson (stages ①–③) · 8 tools
+### MCP-1 · `mcp-roster` — pick your seat, learn the concept, get the spec (stages ①–③) · 8 tools
 | Tool | Does |
 |---|---|
-| `sign_in` | Start or resume a student; opens their record in MCP-3. A handle, not a login, and it says so. |
-| `list_roles` | The **role** comes first, before any project — job descriptions, with how many seats are playable. |
-| `projects_for_role` | The project list, *derived from the role* rather than a static catalog filtered. |
-| `open_brief` | The assignment: what you **own**, what you're **given**, what's **not yours**, and the acceptance criteria. |
-| `open_lesson` | Layer 2 — panels the student walks. Withholds the reveal until they commit to an answer. |
-| `check_scope` | Did you design *your* job? Catches **scope** drift, before a line of code. |
-| `checkpoint_spec` | Turns your own design into the ordered gates — `mentor.checkpoints/v1`, the artifact MCP-2 verifies against. |
-| `roster_status` | What this service holds, and which peers it can actually reach. |
+| `sign_in` | Open or resume the student's record — calls MCP-3, and says so when MCP-3 is absent. Not authentication. |
+| `list_roles` | The role menu, with `playable` / `demoable` on **every row** rather than in a footnote. |
+| `projects_for_role` | The projects that actually have a job of that shape. Playable ones first. |
+| `open_brief` | The assignment: what you **own**, what you're **given**, what's **not yours**. |
+| `open_lesson` | **Layer 2.** Four authored panels, rendered by the `lesson-panels` widget. The reveal is withheld until the student commits — the later panels are *absent* from the first response. |
+| `roster_status` | "What am I / what do I need" orientation. |
+| `check_scope` | Confirm the design you drew covers your slice (catches *scope* drift). |
+| `checkpoint_spec` | Turn your own plan into `mentor.checkpoints/v1` — the spec MCP-2 verifies against. |
 
-### MCP-2 · `mentor` — verification, drift, refusal (stages ④–⑤) · 6 tools
+Prompts: `pick_a_role`, `review_my_design`.
+
+### MCP-2 · `sentinel` — verification, drift and the refusal (stages ④–⑤) · 6 tools
 | Tool | Does |
 |---|---|
 | `open_session` | Takes MCP-1's spec and the design it came from, and starts watching. |
@@ -582,82 +605,104 @@ model can tell which stage of the loop it is in from `tools/list` alone.
 | `build_verdict` | Every gate marked from what was witnessed, plus the drift — `mentor.verdict/v1`, the document MCP-3 files. |
 | `explain_drift` | **The headline.** Runs §9, renders the `causal-timeline` widget with confidence. Args optional → falls back to the bundled demo. |
 | `withhold_fix` | Explains *why* it won't write the fix — a visible tool call, not just prose. |
-| `mentor_status` | "What am I / what do I need" orientation. |
+| `mentor_status` | Orientation for the verification stage. |
 
-### MCP-3 · `mentor-profile` — the record, and the reward (stage ⑥) · 9 tools
+Prompt: `debugging_tutor`. The four other platform commanders (`ledger`, `verdict`, `relay`,
+`aegis`) are still in this package, still tested, and deliberately **unregistered** — `GAPS.md`
+Gap 11 for why shipping `self_heal` beside `explain_drift` would contradict the pitch on stage.
+
+### MCP-3 · `mcp-profile` — the record, and the reward (stages ④, ⑥) · 9 tools
 | Tool | Does |
 |---|---|
-| `open_profile` · `read_profile` | The student record: role history, projects, checkpoints, the drift and difficulty ledgers, the mastery map. |
-| `note_role_choice` · `record_verdict` | The receiving ends of MCP-1's and MCP-2's arrows. |
-| `class_progress` | Instructor only. **Refuses** a student — the refusal is the point of having roles. |
-| `profile_status` | What is owned here, and whether a record is actually being kept. |
-| `flashcard` | Issues the earned concept, gated on real test output (§11). The only process with an answer. |
-| `review_flashcard` · `due_cards` | Recall scheduling, hardest-first, counted in sittings rather than days. |
+| `open_profile` | Create or resume the student record. |
+| `read_profile` | The whole `mentor.profile/v1` — mastery, drift ledger, cards. |
+| `note_role_choice` | Records the seat they took. Idempotent — re-reading a brief is not a career change. |
+| `record_verdict` | Folds one of MCP-2's verdicts in: checkpoints, drift ledger, difficulty, and a card. |
+| `class_progress` | Instructor-only. The identity check is compiled in; there is deliberately no `query` tool. |
+| `profile_status` | Reports which storage backend it got, and whether it is durable. Never assumes. |
+| `flashcard` | **Issues the earned concept**, gated on real test output *and* MCP-2's verdict (§11). |
+| `review_flashcard` | Grades a recall and reschedules it. |
+| `due_cards` | What to review this sitting. |
 
-Plus five **prompts** — `pick_a_role` and `review_my_design` (MCP-1), `debugging_tutor`
-(MCP-2), `pick_up_where_i_left_off` and `quiz_me` (MCP-3) — canned starter messages that
-drive the loop.
+Prompts: `quiz_me`, `pick_up_where_i_left_off`.
+
+> **The one invariant that shapes all three lists.** MCP-3 is the only process that ever holds a
+> flashcard answer. `open_brief` hands out the *question*; `checkpoint_spec` and the verdict carry
+> only the concept *key*. `parseBrief` **throws** if a brief arrives carrying an answer, and
+> `scripts/embed_fixtures.mjs` fails the build if one survives into MCP-1. This is not filing —
+> it is why a bug in MCP-1 or MCP-2 cannot leak what the student is meant to earn.
 
 ### Code map
 
 ```
-mcp-roster/                     ⭐ MCP-1 — catalog, briefs, lessons, the spec · 8 tools · 14 tests
-└── src/
-    ├── roster.module.ts          sign_in, list_roles, projects_for_role, open_brief, open_lesson
-    ├── gates.module.ts           check_scope, checkpoint_spec
-    └── catalog/                  catalog.ts · brief.ts · lesson.ts · spec.ts + the embedded fixtures
-
-sentinel/                       ⭐ MCP-2 — verification, drift, refusal · 6 tools · 72 tests
-└── src/
-    ├── core/                   the engine
-    │   ├── engine.ts             the incident lifecycle (§8)
-    │   ├── adapter.ts            the DomainAdapter interface
-    │   ├── confidence.ts         the autonomy gate (§10b)
-    │   ├── coordinator.ts        cross-domain coordination
-    │   └── types.ts
-    ├── modules/
-    │   ├── verify/             THE VERIFIER
-    │   │   ├── verify.module.ts    open_session, build_event, build_verdict
-    │   │   ├── session.ts          the one thing a snapshot cannot hold: attempts over time
-    │   │   ├── verify.ts           marking each gate from what was witnessed
-    │   │   └── verdict.ts          mentor.verdict/v1, and the `given` reconciliation
-    │   ├── mentor/             MENTOR
-    │   │   ├── mentor.module.ts    explain_drift, withhold_fix, mentor_status
-    │   │   ├── mentor.adapter.ts   the engine-inverting adapter (§8)
-    │   │   └── drift.ts            the drift algorithm (§9)
-    │   └── aegis/              built, tested, UNREGISTERED
-    ├── widgets/                the causal-timeline UI (React/Next.js)
-    ├── app.module.ts           registers ONLY verify + mentor (the 6 tools)
-    └── index.ts                bootstrap (McpApplicationFactory)
-
-mcp-profile/                    ⭐ MCP-3 — the record and the cards · 9 tools · 0 tests (a real gap)
-└── src/
-    ├── profile.module.ts         open_profile, read_profile, note_role_choice, record_verdict,
-    │                             class_progress, profile_status
-    ├── cards.module.ts           flashcard, review_flashcard, due_cards
-    └── concepts/                 the ONLY place a flashcard answer exists
-
-shared/                         the bridge contracts, copied into all three by npm run sync:shared
-└── contracts.ts                 mentor.checkpoints/v1 · lumina.build_event/v1 · mentor.verdict/v1
-
-lumina/                         the design canvas — Next.js + React + ReactFlow + Electron + Python
-├── c/nodes/ComponentNode.tsx     the "component" box a student draws
-└── export_plan.py                the Plan button → lumina.plan/v1
-
-fixtures/
-├── catalog.json                  the curated menu (mentor.catalog/v1)
-├── pricing/                      demo 1 — web service (broken on purpose)
-└── safety-gear/                  demo 2 — vision system (proves generalization)
-
-reference/python/               the frozen prototype the engine was ported from
+command-global/                 ⭐ the monorepo — the only repo with history anyone authors
+│                                  (each app is also mirrored to its own repo, one-way, for
+│                                   NitroCloud, whose Connect Repository has no Root Directory)
+│
+├── mcp-roster/                 MCP-1 — 8 tools, 46 tests
+│   └── src/
+│       ├── catalog/
+│       │   ├── catalog.ts        mentor.catalog/v1 — roles → projects → seats
+│       │   ├── brief.ts          mentor.brief/v1 + checkScope (refuses a concept answer)
+│       │   ├── lesson.ts         mentor.lesson/v1 — the four panel kinds
+│       │   ├── spec.ts           mentor.checkpoints/v1, derived from the student's own plan
+│       │   └── fixtures.*.ts     GENERATED by scripts/embed_fixtures.mjs — answers stripped
+│       ├── roster.module.ts      sign_in, list_roles, projects_for_role, open_brief,
+│       │                         open_lesson (+@Widget), roster_status
+│       ├── gates.module.ts       check_scope, checkpoint_spec
+│       ├── widgets/              the lesson-panels UI (React, bundled by esbuild)
+│       └── shared/               copied from /shared by `npm run sync:shared`
+│
+├── sentinel/                   MCP-2 — 6 tools, 72 tests
+│   └── src/
+│       ├── core/                 the engine — engine.ts (§8), adapter.ts, confidence.ts (§10b)
+│       ├── modules/verify/       open_session, build_event, build_verdict
+│       │   ├── session.ts          the one thing a snapshot cannot hold: attempts over time
+│       │   ├── verify.ts           marking each gate from what was actually witnessed
+│       │   └── verdict.ts          mentor.verdict/v1, and the `given` reconciliation
+│       ├── modules/mentor/       explain_drift, withhold_fix, mentor_status
+│       │   ├── drift.ts            the drift algorithm (§9)
+│       │   └── build.ts            the artifact parser (§6)
+│       ├── modules/aegis/        built, tested, UNREGISTERED
+│       └── widgets/              the causal-timeline UI
+│
+├── mcp-profile/                MCP-3 — 9 tools, 59 tests
+│   └── src/
+│       ├── profile/
+│       │   ├── profile.ts        applyVerdict, mastery, the SM-2 review schedule
+│       │   └── store.ts          ProfileStore — memory by default, node:sqlite if available
+│       ├── cards/card.ts         the flashcard gate (§11) — readTestOutcome + issueCard
+│       ├── concepts/             ⚠️ the ONLY place an answer exists. GENERATED.
+│       ├── profile.module.ts     open_profile, read_profile, note_role_choice,
+│       │                         record_verdict, class_progress, profile_status
+│       └── cards.module.ts       flashcard, review_flashcard, due_cards
+│
+├── shared/                     copied into all three by `npm run sync:shared`
+│   ├── contracts.ts              every artifact schema + parser
+│   ├── identity.ts               resolveIdentity, canReadOthers, peerToken
+│   └── plan.ts                   lumina.plan/v1
+│
+├── lumina/                     the design canvas — Next.js + ReactFlow + Electron + Python
+│   ├── c/nodes/ComponentNode.tsx   the "component" box a student draws
+│   └── export_plan.py              the Plan button → lumina.plan/v1
+│
+├── fixtures/                   ⭐ authored here, embedded into the apps by a generator
+│   ├── catalog.json              the curated menu (mentor.catalog/v1)
+│   ├── pricing/                  web service — the only seat with runnable broken source
+│   ├── safety-gear/              vision system — proves generalization
+│   └── event-ingest/             data pipeline
+│
+├── scripts/                    embed_fixtures.mjs, push-mirrors.mjs, check_docs.mjs, probe/walk
+└── reference/python/           the frozen prototype the engine was ported from
 ```
 
 ---
 
-## 13. The two demo projects
+## 13. The three demo projects
 
-Two fully worked examples ship on purpose — one to prove the loop *runs*, one to prove it isn't
-secretly hardcoded to the first.
+Three projects and five seats ship on purpose — one to prove the loop *runs*, and the others to
+prove it isn't secretly hardcoded to the first. Three of the five seats are **demoable**: a plan
+is bundled, so they run end to end with nothing uploaded.
 
 ### `fixtures/pricing/` — web service, backend role
 Should compute `validate → discount → tax → total`; the build applies **tax before discount**, so
@@ -666,14 +711,29 @@ Origin: `pricing.js:12`, confidence **0.91** (§10).
 
 > 🟢 **One test fails on purpose.** The broken build *is* the demo — MENTOR has nothing to explain
 > if it's green. `npm run fixture:check` asserts the failure is still exactly where it should be
-> and **fails loudly if someone "fixes" it.** The project's *own* suite is a separate, passing
-> **61/61**.
+> and **fails loudly if someone "fixes" it.** The project's *own* suite is separate and passing:
+> **177 across the three apps.**
+>
+> This is also the only seat with runnable broken source on disk (`fixtures/pricing/build/`),
+> which is why the §1 line numbers — broke on 40, went wrong on 12 — are *literally* true here
+> and illustrative elsewhere.
 
 ### `fixtures/safety-gear/` — vision system, CV role
 The same loop, different shape: **three** owned components (not four), a boundary component the
 student draws but does **not** own, a different *class* of bug (acting on a condition that doesn't
 exist yet, vs. computing from a stale value), and an **`observed`** history instead of `authored`
 — which is why it scores **0.97** (§10).
+
+### `fixtures/event-ingest/` — data pipeline, data role
+A third shape again: `deduplicate → normalise → persist`, with `receive` as the boundary the
+platform owns. The concept is *deduplicate before you transform* — normalising first changes what
+"the same event" means, so two genuinely different events collapse into one. Like the other two,
+it stays invisible until one specific input shows up.
+
+### The other two seats
+`pricing/frontend` (producer contract before consumer) and `safety-gear/platform` (record before
+you notify) have briefs, lessons and concepts, but no bundled plan — the student draws their own
+first. `catalogCoverage()` reports `playableSeats: 5, demoableSeats: 3` rather than rounding up.
 
 ---
 
@@ -687,11 +747,12 @@ exist yet, vs. computing from a stale value), and an **`observed`** history inst
 ```bash
 git clone <this-repo>
 cd "AGENTIC AI"
-npm run install:all      # deps for sentinel/ and lumina/
-npm run verify           # build + 61 tests + fixture guard + doc check
+npm run install:all      # deps for all three apps + lumina/
+npm run verify           # all 177 tests, then the guards and the journey
 ```
-`npm run verify` ends with **61/61 pass** and the fixture guard's `ok` lines. It needs **only
-Node** — no Python, no network, no key.
+`npm run verify` runs every app's suite (46 · 72 · 59 = **177**), the shared-contract guard, the
+fixture guard, the twelve-turn student journey across all three servers over real MCP, and the
+doc check. It needs **only Node** — no Python, no network, no key.
 
 ### Run the server and talk to it
 ```bash
@@ -708,7 +769,7 @@ renders the timeline. Ask for the fix → `withhold_fix` declines.
 ### Command cheat sheet
 | Command | Does |
 |---|---|
-| `npm test` | Run the 61-test suite (offline). |
+| `npm test` | Run **sentinel's 47** (offline). Root `npm test` does not reach the other two apps — `GAPS.md` Gap 18. |
 | `npm run verify` | Build + tests + fixture guard + doc check. |
 | `npm run walk` | Assert the 9 turns a student takes over real MCP; non-zero on regression. |
 | `npm run probe` | Print that journey for reading. |
@@ -730,14 +791,14 @@ changes nothing. MENTOR serves no static user-supplied paths, so the advisory do
 ### State of things
 | | |
 |---|---|
-| All 23 tools across three services, all 5 artifacts, both demos | ✅ built + tested |
-| Causal-timeline widget · refusal (enforced) · flashcard gate | ✅ built |
-| 86 tests, offline, no key, no model | ✅ 14 (MCP-1) · 72 (MCP-2) · **0 (MCP-3 — a real gap)** |
-| Deployed to NitroStack Cloud | ✅ all three live · ⬜ peer URLs not yet set (`DEPLOY.md` §5c) |
+| All 23 tools, all 7 artifacts, three demos | ✅ built + tested |
+| Causal-timeline widget · lesson-panels widget · refusal (enforced) · flashcard gate | ✅ built |
+| 177 tests (46 · 72 · 59), offline, no key, no model | ✅ |
+| Deployed to NitroStack Cloud | ✅ all three live and wired (`DEPLOY.md` §5b–c) |
 | ≤3-min demo video | ⬜ (script ready) |
 | n=5 evidence study (Research points) | ⬜ protocol ready in `STUDY.md`, not yet run |
-| Layer 2 interactive lesson panels | ⬜ roadmap |
-| Product name (still `[[PRODUCT NAME]]` in places) | ⬜ |
+| Layer 2 interactive lesson panels | ✅ `lesson-panels` widget |
+| Product name — **MENTOR**, resolved 2026-07-26 (`GAPS.md` Gap 8) | ✅ |
 
 > **Honesty policy:** nothing here claims a measured learning result until the study is run. The
 > `0.91` / `0.97` scores are the tool's certainty about a *drift claim*, not proof it helps humans

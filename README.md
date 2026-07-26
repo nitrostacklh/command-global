@@ -82,7 +82,7 @@ its own.
 > fixture is green. `npm run fixture:check` asserts the failure is still exactly where it
 > should be (`pricing.test.js:40`, `80 !== 72`) and **fails loudly if someone "fixes" it.**
 >
-> The project's own test suite is **128/128 passing** — `npm test`. Those are separate: run
+> The project's own test suite is **177 passing across three apps** (46 · 72 · 59). Those are separate: run
 > `npm test` to judge the code, `npm run fixture:test` to see the student's bug.
 
 ---
@@ -110,14 +110,22 @@ summary. That tells you the state of things faster than anything else here.
 
 ```
 command-global/
-├── sentinel/                  ⭐ the deliverable — TS NitroStack MCP app, 128/128 tests
-│   ├── src/modules/learn/        ROSTER + COACH — and card.ts, whose tool MENTOR exposes
-│   └── src/modules/mentor/       MENTOR: explain_drift, withhold_fix, flashcard
+├── mcp-roster/                ⭐ MCP-1 — catalog, briefs, lessons, checkpoint spec · 8 tools, 46 tests
+│   ├── src/catalog/              the artifact logic — catalog, brief, lesson, spec
+│   └── src/widgets/              the lesson-panels UI
+├── sentinel/                  ⭐ MCP-2 — verification, drift, the refusal · 6 tools, 72 tests
+│   ├── src/modules/mentor/       explain_drift, withhold_fix, mentor_status
+│   └── src/widgets/              the causal-timeline UI
+├── mcp-profile/               ⭐ MCP-3 — the student record and the flashcards · 9 tools, 59 tests
+│   ├── src/profile/              the record, and every rule for changing it
+│   └── src/concepts/             ⚠️ the ONLY place a flashcard answer exists
+├── shared/                    copied into all three by `npm run sync:shared`
 ├── lumina/                    stage ③ — the canvas the student designs in (Next.js + FastAPI)
 ├── fixtures/
-│   ├── catalog.json             the curated menu: 3 domains, 3 projects, 5 roles
-│   ├── pricing/                 demo project 1 — web service, backend role
-│   └── safety-gear/             demo project 2 — vision, CV role (proves it generalizes)
+│   ├── catalog.json             the curated menu: 3 domains, 3 projects, 5 seats — all briefed
+│   ├── pricing/                 web service — backend + frontend seats
+│   ├── safety-gear/             vision — CV + platform seats (proves it generalizes)
+│   └── event-ingest/            data pipeline — data seat
 └── reference/python/          the original Python prototype (frozen, still useful)
 ```
 
@@ -139,7 +147,8 @@ history — the platform arrives at `1e4067a` as a consolidation of earlier work
 `b0531b6`.
 
 **Four of those five commanders are still here, still tested, and deliberately unregistered.**
-The three deployed services offer 23 tools between them and every one is MENTOR's loop. The reason for cutting them
+The three deployed servers offer 23 tools between them (8 · 6 · 9) and every one is MENTOR's
+loop. The reason for cutting the others
 is not tidiness: `self_heal` runs on the *same* pricing service and the *same*
 tax-before-discount bug as MENTOR's fixture, and its description offers to patch, prove and
 deploy the fix. Ask a model *"the pricing test is failing, help"* next to that tool and it
@@ -187,12 +196,21 @@ want the `lumina/` companion tool — the submission itself does not need Python
 git clone https://github.com/nitrostacklh/command-global.git
 cd command-global
 npm run install:all      # deps for sentinel/ and lumina/
-npm run verify           # sentinel build + 128 tests + the fixture guard
+npm run verify           # ⚠️ sentinel's 47 only — see GAPS.md Gap 18
 ```
 
-`npm run verify` is the one command that tells you the repo is healthy. It should end with
-`128/128 pass` and four `ok` lines from the fixture guard. **It needs only Node** — no Python,
-no network, no key. Verified from a clean `git clone` on a machine with nothing installed.
+`npm run verify` runs **all three apps** — 46 · 72 · 59 = **177** — then the shared-contract
+guard, the fixture guard, the twelve-turn student journey across all three servers over real
+MCP, and the doc check. **It needs only Node** — no Python, no network, no key. (It reached
+only `sentinel` until 2026-07-26; `GAPS.md` Gap 18.)
+
+Per app, if you want them separately:
+
+```bash
+(cd mcp-roster && npm test)   # 46
+(cd sentinel   && npm test)   # 72
+(cd mcp-profile && npm test)  # 59
+```
 
 `npm run verify:all` additionally re-derives the fixture's plan through Lumina's exporter and
 proves the output is byte-stable. That one shells out to **Python**, which is why it is a
@@ -226,7 +244,7 @@ the Python reference's connectors. `.env` is gitignored and no secrets are commi
 
 ```bash
 npm run sentinel:dev     # then open the sentinel/ folder in NitroStudio
-npm test                 # 128/128, fully offline — no API key, no network, no model
+npm test                 # sentinel's 47, fully offline — no API key, no network, no model
 ```
 
 Point NitroStudio at the **`sentinel/` subfolder**, not the repo root — Studio validates a
@@ -304,17 +322,17 @@ working human-approval UI.
 | ④ checkpoints → build history | ✅ built + tested — `provenance: observed`, **0.97** vs 0.91 |
 | ⑤ drift → ⑥ flashcard | ✅ built + tested — answer absent from the payload until earned |
 | **`causal-timeline` widget** | ✅ **built** — renders the drift, withholds the fix |
-| The two demo projects, all inputs | ✅ complete, verified, and guarded |
-| Whole suite | ✅ **128/128**, offline, no API key, no model |
-| Docs agree with the code | ✅ guarded — `npm run check:docs` reads the live tool list |
-| Student work survives the chat | ✅ REGISTRAR — identity + storage, **no `save` verb added** — Gap 16 |
+| Three demo projects, five seats, all inputs | ✅ complete, verified, and guarded |
+| Whole suite | ✅ **177** (46 · 72 · 59), offline, no API key, no model |
+| Docs agree with the code | ⚠️ `npm run check:docs` reads only **sentinel's** tool list, so post-split it measures one of three services — Gap 18 |
+| Student work survives the chat | ✅ REGISTRAR, now MCP-3 — identity + storage, **no `save` verb added** — Gap 19 |
 | Durable storage on the deployed service | ⬜ NitroCloud is Node 20; `node:sqlite` needs 22.5, so live progress is per-restart **and says so** |
-| Auth exercised against a real token | ⬜ implemented + tested, no issuer configured yet — Gap 16 |
+| Auth exercised against a real token | ⬜ implemented + tested, no issuer configured yet — Gap 19 |
 | **Deployed to NitroCloud** | ✅ **LIVE and verified** — 16/16 over the wire, `npm run verify:live` |
 | Can a student really draw this in Lumina? | ✅ **yes** — real `component` node, verified in-browser end to end |
-| Layer 2 · the lesson panels | ⬜ roadmap — the one stage of the loop still missing |
+| Layer 2 · the lesson panels | ✅ **built** — `mentor.lesson/v1`, four panels × five seats, plus the `lesson-panels` widget — Gap 13 |
 | Evidence study (n=5) | ⬜ **not run** — protocol ready in [`STUDY.md`](STUDY.md), Gap 7 |
-| Product name | ❓ still `[[PRODUCT NAME]]` — Gap 8 |
+| Product name | ✅ **MENTOR** — resolved, Gap 8 |
 
 **It is live**, deployed by GitHub auto-deploy from the `nitrostacklh/mentor-mcp` mirror —
 `sentinel/` at a repo root, because NitroCloud's Connect Repository dialog has no root-directory
@@ -328,9 +346,9 @@ Two things worth settling while that runs:
 
 - **Gap 7** — the n=5 evidence study. Two hours with five classmates, and it is the cheapest
   unclaimed points in a track called *Research*. Report the number even if it's mixed.
-- **Gap 8** — the product is still called `[[PRODUCT NAME]]`. The two surfaces a judge's
-  client shows are fixed (server and package are both `mentor` now), but the name in the
-  concept doc's own title isn't.
+- **Gap 9 and Gap 17** — the only two open items nothing in this repo can close: confirm the
+  official printed track name with the organizers, and get a name against "who authors the next
+  three projects" before promising a curriculum on the roadmap slide.
 
 Closed since the last pass: **the bridges between the stages**, which were the real
 gap — four of the five handoffs did not exist in code, and the fifth was

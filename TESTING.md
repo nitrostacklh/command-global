@@ -57,11 +57,22 @@ npm run install:all
 npm run verify
 ```
 
-- [ ] Ends with `# pass 109` and `# fail 0`
-- [ ] Then five `ok` lines from the fixture guard, ending
-      `ok  fixtures.learn.ts matches fixtures/*.json`
-- [ ] Then `ALL CHECKS PASSED` from `npm run walk` — the nine-turn student journey
-      asserted over real MCP (`WALKTHROUGH.md` is the manual version)
+- [ ] Runs **all three apps** and ends each with `# fail 0`:
+
+      mcp-roster    # pass 46
+      sentinel      # pass 72
+      mcp-profile   # pass 59
+
+      Total across the three: **177**. (It reached only `sentinel` until 2026-07-26 —
+      `GAPS.md` Gap 18.)
+- [ ] Then `shared contracts are identical in every app` — the copies of `shared/` in all
+      three apps and `studio/` have not been hand-edited
+- [ ] Then the `ok` lines from the fixture guard, and
+      `Embedded fixtures match fixtures/, and no answer leaked into MCP-1`
+- [ ] Then `ALL CHECKS PASSED` from `npm run walk` — the twelve-turn student journey asserted
+      across **all three servers** over real MCP (`WALKTHROUGH.md` is the manual version)
+- [ ] Then `ok  docs agree with the code (mentor-roster 8 · mentor 6 · mentor-profile 9 · 23
+      across the fleet)`
 - [ ] **Needed only Node** — no Python was invoked
 
 ```bash
@@ -97,7 +108,12 @@ npm run probe
 Compare against this exactly:
 
 MENTOR is **three** deployed MCP applications, so there are three surfaces to check, not one.
-`node scripts/tools-of.mjs <app>` prints any of them in about two seconds.
+`node scripts/tools-of.mjs <app>` prints any of them in about two seconds; `npm run probe`
+walks all three at once.
+
+- [ ] **23 tools across three services (8 · 6 · 9)** — you connect to one at a time, so check
+      each against its own list. The grouping is the point: a model reading MCP-1's eight can
+      tell it is at the *start* of something.
 
 - [ ] `mcp-roster` → **`mentor-roster 1.0.0`**, `tools (8)`:
 
@@ -480,7 +496,7 @@ npm run install:all && npm run verify
 ```
 
 - [ ] Both succeed following **only** what the README says
-- [ ] `128/128`
+- [ ] `# pass 46`, `# pass 72`, `# pass 59` — the root `npm test` runs all three — **177** in total
 - [ ] You never needed Python, an API key, or a network call to the model
 
 - [ ] Read the README as if you'd never seen it. Could you explain the product back in one

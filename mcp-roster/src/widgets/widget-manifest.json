@@ -1,0 +1,103 @@
+{
+  "version": "1.0.0",
+  "widgets": [
+    {
+      "uri": "/lesson-panels",
+      "name": "Lesson Panels",
+      "description": "MENTOR's Layer 2: the concept taught as authored panels the student walks, rather than documentation they skim. Deterministic — every string is authored in a brief under fixtures/, never generated. The reveal is withheld by the server, not hidden by this panel: the first response carries only setup and commit, and the choice buttons call open_lesson again so the witness case arrives as a fresh tool result. Both example payloads below are verbatim output of open_lesson on pricing/backend.",
+      "examples": [
+        {
+          "name": "Part 1 — awaiting a commitment (the gate)",
+          "description": "Setup and commit only. The witness and generalise panels are absent from this payload entirely, which is what makes them impossible to reveal early.",
+          "data": {
+            "step": "lesson · part 1 of 2",
+            "schema": "mentor.lesson/v1",
+            "project": "pricing",
+            "role": "backend",
+            "title": "Two lines, and nothing says which runs first",
+            "panels": [
+              {
+                "id": "setup",
+                "kind": "setup",
+                "title": "The decision hiding inside two lines of arithmetic",
+                "body": "A cart total needs two things done to it: a percentage discount comes off, and tax goes on. Each is one line. Neither line mentions the other, and the code compiles either way — so the order is a decision you are making, not one the language is making for you.",
+                "figure": {
+                  "kind": "unordered",
+                  "items": ["take the discount off", "add the tax on"]
+                }
+              },
+              {
+                "id": "commit",
+                "kind": "commit",
+                "title": "Choose, and then read on",
+                "body": "Pick the order you would write. Say it out loud, or write it down. The next panel only teaches you anything if you have committed to an answer before you see it.",
+                "figure": null,
+                "choices": [
+                  { "id": "discount_first", "label": "Discount first — tax whatever is left" },
+                  { "id": "tax_first", "label": "Tax first — then take the discount off" }
+                ]
+              }
+            ],
+            "awaiting": {
+              "panel": "commit",
+              "choices": [
+                { "id": "discount_first", "label": "Discount first — tax whatever is left" },
+                { "id": "tax_first", "label": "Tax first — then take the discount off" }
+              ],
+              "why": "The next panel separates these two answers. It only teaches the student something if they have already picked one."
+            },
+            "withheld": "2 panel(s), until a choice is made",
+            "next": "Ask the student which they would write. Then call open_lesson again with chose set to their answer."
+          }
+        },
+        {
+          "name": "Part 2 — the discriminating case, after committing to tax_first",
+          "description": "The cart with no discount code returns $120.00 either way; the 40%-off cart returns $72.00 and $80.00. The agreeing row is why the bug ships. No panel states the principle, and the concept answer is still not in this service.",
+          "data": {
+            "step": "lesson · part 2 of 2",
+            "schema": "mentor.lesson/v1",
+            "project": "pricing",
+            "role": "backend",
+            "title": "Two lines, and nothing says which runs first",
+            "you_chose": { "id": "tax_first", "label": "Tax first — then take the discount off" },
+            "panels": [
+              {
+                "id": "witness",
+                "kind": "witness",
+                "title": "The cart that tells you nothing, and the cart that tells you everything",
+                "body": "Two carts. Both orders. Four numbers.",
+                "figure": null,
+                "cases": [
+                  {
+                    "input": "$100 of goods · no discount code · 20% tax",
+                    "results": { "discount_first": "$120.00", "tax_first": "$120.00" },
+                    "outcome": "agree"
+                  },
+                  {
+                    "input": "$100 of goods · 40%-off code · 20% tax",
+                    "results": { "discount_first": "$72.00", "tax_first": "$80.00" },
+                    "outcome": "diverge"
+                  }
+                ],
+                "note": "The first cart cannot tell the two orders apart — and most carts are the first cart. Whichever order you chose, it passed. That is the property worth noticing here, more than the $8."
+              },
+              {
+                "id": "generalise",
+                "kind": "generalise",
+                "title": "Where have you seen this shape before?",
+                "body": "Strip the money out of it. You have just watched one step change the number a later step is a percentage of, and watched that difference stay invisible until one specific input showed up.",
+                "figure": null,
+                "prompt": "Before you open the flashcard: name two other calculations you have written where one step reduces the base another step is a percentage of. The card will tell you whether you found the general shape or two more examples of the same one."
+              }
+            ],
+            "concept_you_are_here_to_learn": {
+              "key": "order-of-operations-in-money-math",
+              "answer": "not held by this service — the panels above are built so the student can derive it, and MCP-3 confirms it once their own tests are green"
+            },
+            "next": "Do not state the principle for them. Ask them to say it in their own words first, then have them draw their slice in Lumina and call check_scope with the exported plan."
+          }
+        }
+      ]
+    }
+  ]
+}
