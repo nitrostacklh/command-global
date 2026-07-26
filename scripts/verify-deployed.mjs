@@ -342,9 +342,15 @@ try {
         check(verdict.verdict?.provenance === 'observed', 'provenance observed — the evidence was seen, not remembered');
         check(verdict.fix_withheld === true, 'the verdict withholds the fix too');
         check(!JSON.stringify(verdict).includes(ANSWER), 'and carries no answer across the bridge to MCP-3');
+        // Checked against the spec rather than against a key written down here. The
+        // concept key is a fixture detail the code owns; copying it into this file
+        // would make the script assert its own copy — the exact drift Gap 15 is about.
+        const specKey = derived.spec?.concept?.key;
+        const verdictConcept = verdict.verdict?.concept ?? {};
         check(
-          verdict.verdict?.concept?.key === 'discount-before-tax' && !('answer' in (verdict.verdict?.concept ?? {})),
-          'the verdict carries the concept KEY only — the artifact has no answer field at all',
+          !!specKey && verdictConcept.key === specKey && !('answer' in verdictConcept),
+          'the verdict carries MCP-1\'s concept KEY and no answer field at all',
+          `${verdictConcept.key} · fields ${Object.keys(verdictConcept).join()}`,
         );
       }
     }
