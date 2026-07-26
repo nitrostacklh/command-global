@@ -10,7 +10,7 @@
 ## The one-paragraph summary
 
 **MENTOR is built** (Gap 3) **and so are both its widgets** (Gaps 4 and 13). **177 tests green
-across three apps — sentinel 47 · mcp-roster 46 · mcp-profile 64**, every number watched
+across three apps — mcp-roster 46 · sentinel 72 · mcp-profile 59**, every number watched
 printing on 2026-07-26. Verified end-to-end over real MCP: `explain_drift` returns the exact
 claim the concept doc promises — origin `pricing.js:12`, error surfaced at
 `pricing.test.js:40`, confidence 0.91 computed rather than hardcoded — and the causal-timeline
@@ -48,10 +48,10 @@ and 17). The deploy is done, the product is named, and Layer 2 has both a tool a
 | # | Gap | Severity | Who unblocks it |
 |---|---|---|---|
 | 7 | Evidence study (n=5) not run — **protocol ready** in `STUDY.md` | 🟠 **do this next** · free points, Research track | ~2h with classmates |
-| 16 | The three-MCP split left `main` broken — sentinel did not compile; 58 tests deleted | 🟡 **build fixed, tests ported**; one hole left, see below | MCP-2's `verify/` is still unwired |
+| 16 | ~~The three-MCP split left `main` broken~~ | ✅ **closed** — build fixed, 58 tests ported, `verify/` wired | done |
 | 9 | Six official tracks never confirmed | 🟡 submission hygiene | **organizers** |
 | 17 | Who authors the next three projects? | 🟡 blocks the curriculum slide, not the demo | **a person has to volunteer** |
-| 18 | Root `npm test` and `check:docs` only see one of three apps | 🟡 the guards under-report | Stream A (`scripts/`, `package.json`) |
+| 18 | ~~Root `npm test` and `check:docs` only see one of three apps~~ | ✅ **fixed** — every gate now spans all three | done |
 | 10 | Lumina hygiene (uncommitted work, no CI) | 🟢 low | ~1h |
 | 1 | ~~Deploy to NitroCloud~~ | ✅ **done** — three services live, verified over the wire | done |
 | 8 | ~~Open `[[placeholders]]` incl. product name~~ | ✅ **resolved** — the product is **MENTOR** | done |
@@ -63,8 +63,8 @@ and 17). The deploy is done, the product is named, and Layer 2 has both a tool a
 | 6 | ~~Plan can't reach a deployed MENTOR~~ | ✅ **resolved** — tool argument | done |
 | 3 | ~~MENTOR doesn't exist~~ | ✅ **built** | done |
 | 4 | ~~`causal-timeline` widget~~ | ✅ **built** | done |
-| 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 → 3, now 20 across three services, all one story | done |
-| 15 | ~~Docs asserted counts the code owns, and drifted~~ | ✅ **fixed** — `npm run check:docs` (but see Gap 18) | done |
+| 11 | ~~Tool surface contradicted the thesis~~ | ✅ **fixed** — 23 → 3, now 23 across three services, all one story | done |
+| 15 | ~~Docs asserted counts the code owns, and drifted~~ | ✅ **fixed** — `npm run check:docs`, now fleet-aware | done |
 | 19 | ~~Student work did not survive the conversation~~ | ✅ **fixed** — REGISTRAR, now MCP-3. *(Was a second Gap 16; renumbered.)* | done |
 
 *Reordered 2026-07-26 (seventh time): after the deploy landed, after the 58 tests were ported,
@@ -78,7 +78,7 @@ that would change how the submission is read, and it needs people rather than co
 
 ---
 
-## Gap 16 — 🟡 The three-MCP split left `main` broken — build fixed, 58 tests ported, one hole left
+## Gap 16 — ~~The three-MCP split left `main` broken~~ ✅ **CLOSED** (2026-07-26) — build fixed, 58 tests ported, `verify/` wired
 
 **Found 2026-07-26, by running the suite rather than reading about it.** PR #1
 (`three-mcp-architecture`, merge `aab534d`) moved `learn/` and `registrar/` out of `sentinel/`
@@ -86,11 +86,11 @@ into the two new apps and left the imports behind. Consequences, all verified:
 
 | | State on `aab534d` | Now |
 |---|---|---|
-| `sentinel` build | ❌ 5 × TS2307 — `npx tsc` fails, so **0 tests ran** | ✅ compiles, **47/47** |
+| `sentinel` build | ❌ 5 × TS2307 — `npx tsc` fails, so **0 tests ran** | ✅ compiles, **72/72** |
 | `sentinel` tool surface | declared a `flashcard` tool whose code had moved to MCP-3 | ✅ removed |
 | `mcp-roster` tests | **0** | ✅ **46/46** |
-| `mcp-profile` tests | **0** — on a service serving live public traffic | ✅ **64/64** |
-| `npm run fixture:check` | ❌ red | ⚠️ passes, but skips its own sync check — see below |
+| `mcp-profile` tests | **0** — on a service serving live public traffic | ✅ **59/59** |
+| `npm run fixture:check` | ❌ red | ✅ green, and its sync check actually runs — see below |
 
 **The 58 tests are ported.** `learn.test.ts` (42) and `registrar.test.ts` (16) were recovered
 from `e15810a` and split along the new deployment boundaries — six files, and the counts above
@@ -108,14 +108,19 @@ about the *original* tests rather than about the new code:
   plan exists for *this* seat. A consequence worth knowing: one project cannot have two
   demoable seats.
 
-**Still open, and it is a real coverage hole:** `sentinel/src/modules/verify/` —
-`verifyCheckpoints`, `findStuck`, `buildFromEvents`, which are **MCP-2's actual job** — has no
-`@Module`, no tools and no tests, and nothing imports it. Thirteen of the original 58 cases
-tested exactly that behaviour (`recordProgress`, `buildFromProgress`, `judgeDone`,
-`passedCheckpoints`, and two on `findDrift`) and **could not be ported**, because those
-functions no longer exist in either app the porting stream owned. They are recorded at the foot
-of `mcp-roster/src/catalog/spec.test.ts` rather than replaced with tests of something adjacent.
-Wiring `verify/` up is MCP-2's work and it is the largest single thing still missing.
+**The coverage hole is closed.** `sentinel/src/modules/verify/` — `verifyCheckpoints`,
+`findStuck`, `buildFromEvents`, which are **MCP-2's actual job** — had no `@Module`, no tools,
+no tests and no importer. It now has `verify.module.ts` and three tools, and the names were not
+a design choice: `mcp-roster/src/gates.module.ts` already called `open_session` and told the
+student to stream `build_event`, and `mcp-profile/src/cards/card.ts` already told them to call
+`build_verdict`. Three dangling references in a distributed system, now resolved.
+
+25 tests came with it, covering the cases where a naive verifier would be *authoritatively
+wrong*: a red whole-suite run must accuse no criterion by name, a green-then-red suite must
+take its gates back, and a `given` boundary component must never be reported as outstanding
+work. Thirteen of the original 58 cases (`recordProgress`, `buildFromProgress`, `judgeDone`,
+`passedCheckpoints`, and two on `findDrift`) still could not be ported — those functions exist
+nowhere now — and remain recorded at the foot of `mcp-roster/src/catalog/spec.test.ts`.
 
 **Fixed here:** the build. `sentinel/src/app.module.ts` no longer imports three modules that
 do not exist in the package, and `mentor.module.ts` no longer carries the pre-split
@@ -123,19 +128,20 @@ do not exist in the package, and `mentor.module.ts` no longer carries the pre-sp
 card answer, so a `flashcard` tool living in MCP-2 contradicts the invariant rather than
 merely duplicating a verb. `mcp-profile/src/cards.module.ts` already has the real one.
 
-**Still someone else's call — both are in `scripts/` and `package.json`, which the porting
-stream does not own:**
+**Both of the `scripts/` items are also fixed** (Stream A owns that boundary):
 
-1. **`scripts/embed_learn_fixtures.mjs` is orphaned** — it writes
-   `sentinel/src/modules/learn/fixtures.learn.ts`, a path deleted in the split, and it is
-   still wired into `npm run fixture:check`. It was superseded by `embed_fixtures.mjs`, which
-   writes all three apps. `fixture:check` now *exits 0*, which is worse than red: it prints
-   `fixtures.learn.ts is missing` and `skipped embedded-fixture sync check`, so the gate that
-   exists to catch embedded copies drifting from disk is **silently not running**. Removing it
-   from the script is probably right, but that is the project's verify gate and not a call to
-   make silently.
-2. **The root guards only ever look at `sentinel`** — promoted to its own gap, **Gap 18**,
-   because it is not a consequence of the split so much as something the split made wrong.
+1. **`scripts/embed_learn_fixtures.mjs` was orphaned** — it wrote
+   `sentinel/src/modules/learn/fixtures.learn.ts`, a path deleted in the split, and was still
+   wired into `npm run fixture:check`. It had no remaining job: every document it embedded is
+   covered by `embed_fixtures.mjs`, which writes all three apps *and* strips the concept answer
+   out of MCP-1's copy. Removed; `fixture:check` and `fixture:embed` repointed. A second
+   silently-dead guard turned up in the same file — `check_fixture.mjs`'s embedded-copy check
+   looked for `dist/modules/mentor/fixtures.js` (renamed `fixtures.demo.js` in the split) and
+   was written to *skip* when absent, so it had been printing `skipped — dist not built yet` on
+   a fully built tree. Removed rather than repaired: `embed_fixtures.mjs --check` regenerates
+   all five modules and fails on a byte, which is strictly stronger.
+2. **The root guards only ever looked at `sentinel`** — promoted to its own gap, **Gap 18**,
+   and fixed there.
 
 ---
 
@@ -210,7 +216,7 @@ The team's constraint is **no paid ChatGPT plan**. That turns out to cost almost
 per-student cost.* Schools cannot buy Copilot seats for every student, and that argument
 lands with an education judge while reinforcing the §5 incentive moat.
 
-> **Verified (2026-07-25, pre-split — sentinel alone is 47/47 today):** `sentinel/` builds and passes 128/128 from its new path, and
+> **Verified (2026-07-25, pre-split — sentinel alone is 72/72 today):** `sentinel/` builds and passes 128/128 from its new path, and
 > `npx tsx src/index.ts` — Studio's actual launch command — serves `initialize` +
 > `tools/list` over stdio with every tool registered. Also fixed along the way: **`tsx`
 > was not a declared dependency**, so Studio's launch relied on `npx` fetching it and
@@ -1017,5 +1023,5 @@ safe would be worse still.
 > locally, so the SQLite branch really executes rather than skipping). The store API changed
 > shape in the move — `ProgressStore` keyed `(student, project, role)` became `ProfileStore`
 > keyed `student`, holding one whole `mentor.profile/v1` — so these are ports, not restorations.
-> `mcp-profile` is **64/64**.
+> `mcp-profile` is **59/59**.
 
