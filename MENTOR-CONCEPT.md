@@ -386,8 +386,9 @@ This document describes the full vision. The submission is a subset, deliberatel
 
 ### Ships for the hackathon
 - [x] **MENTOR is the product, deployed as three MCP apps** — `mcp-roster` (MCP-1, 8 tools),
-      `sentinel` (MCP-2, 6 tools), `mcp-profile` (MCP-3, 9 tools). **177 tests green across
-      the three** (46 · 72 · 59), offline, no API key.
+      `sentinel` (MCP-2, 6 tools), `mcp-profile` (MCP-3, 9 tools). **182 tests green across
+      the three** (46 · 72 · 64), offline, no API key — 177 on Node 20, where five SQLite
+      store-contract cases skip rather than fail.
       MENTOR began as one adapter on the COMMAND engine, and §14's "one adapter + one module"
       did cost more than advertised: the engine has no successful path that skips `deploy()`.
       Resolved by re-reading the lifecycle rather than bypassing it — `deploy()` delivers the
